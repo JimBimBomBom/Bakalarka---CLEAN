@@ -1,5 +1,10 @@
 1.
 
+Studium genetickych algoritmov + zaznamenavanie zdrojov, studium najlepsich game enginov na simulaciu + vizualizaciu
+
+
+2.
+
 Implementacia C++ negrafickej simulacie, znovupouzitelne v UE5
 Implementacia C# negrafickej simulacie, znovupouzitelne v Unity
 Implementacia Rust negrafickej simulacie, znovupouzitelne v Bevy
