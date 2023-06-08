@@ -1,0 +1,12 @@
+1.
+
+Implementacia C++ negrafickej simulacie, znovupouzitelne v UE5
+Implementacia C# negrafickej simulacie, znovupouzitelne v Unity
+Implementacia Rust negrafickej simulacie, znovupouzitelne v Bevy
+
+2.
+
+graficka vyzualizacia v game engine
+
+3.
+
