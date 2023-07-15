@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7xuvd76tsgjj"]
+
+[ext_resource type="Texture2D" uid="uid://qj4uix87ds84" path="res://Sprites/assets/bush_1.png" id="1_0wgdj"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_n4tgw"]
+radius = 10.0499
+
+[node name="Node2D" type="Node2D"]
+top_level = true
+position = Vector2(0, -61)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, 45)
+texture = ExtResource("1_0wgdj")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(-1, 6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(1, 46)
+shape = SubResource("CircleShape2D_n4tgw")
