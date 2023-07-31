@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://csp36bjlhq71v"]
+
+[ext_resource type="Script" path="res://SCRIPTS/World_Generation/TileMap.gd" id="1_tp8ha"]
+
+[node name="TileMap" type="TileMap"]
+format = 2
+script = ExtResource("1_tp8ha")

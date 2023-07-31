@@ -11,10 +11,10 @@ config_version=5
 [application]
 
 config/name="Simulation"
-run/main_scene="res://SCENES/Simulation.tscn"
+run/main_scene="res://SCENES/world_scene.tscn"
 config/features=PackedStringArray("4.0", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-World="*res://SCRIPTS/Global/World_Generation.gd"
+World="*res://SCRIPTS/Global/World_Variables.gd"

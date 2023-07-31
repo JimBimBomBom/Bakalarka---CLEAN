@@ -1,0 +1,4 @@
+Use an L-system to generate instructions for how a creature should move or behave.
+
+One of the greatest challenges in ecosystem simulations is achieving a nice balance. You will likely find that most of your attempts result in either mass overpopulation (followed by mass extinction) or simply mass extinction straight away. What techniques can you employ to achieve balance? Consider using the genetic algorithm itself to evolve optimal parameters for an ecosystem.
+

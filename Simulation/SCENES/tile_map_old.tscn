@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://b0eyyrvd07imb"]
+
+[ext_resource type="Script" path="res://SCRIPTS/World_Generation/world.gd" id="1_dv14c"]
+[ext_resource type="PackedScene" uid="uid://56rtxp41p3f1" path="res://SCENES/tile_map.tscn" id="2_eynqj"]
+[ext_resource type="PackedScene" uid="uid://c5bntawwc6m5x" path="res://SCENES/player.tscn" id="3_xje81"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_dv14c")
+
+[node name="TileMap" parent="." instance=ExtResource("2_eynqj")]
+
+[node name="CharacterBody2D" parent="." instance=ExtResource("3_xje81")]
+position = Vector2(-34, 12)
+collision_layer = 0
+collision_mask = 0

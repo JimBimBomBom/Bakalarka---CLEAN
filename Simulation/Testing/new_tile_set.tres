@@ -1,0 +1,28 @@
+[gd_resource type="TileSet" load_steps=6 format=3 uid="uid://bs2j7w8865xdm"]
+
+[ext_resource type="Texture2D" uid="uid://bdru7260pxqto" path="res://Testing/land_tile.png" id="1_pbn0g"]
+[ext_resource type="Texture2D" uid="uid://cwg3xe6w371r0" path="res://Testing/water_tile.png" id="2_h1qvv"]
+
+[sub_resource type="GDScript" id="GDScript_u73qe"]
+script/source = "extends TileMap
+
+class_name Tile_Map_Properties
+
+var max_food : float
+"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4cfag"]
+texture = ExtResource("1_pbn0g")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_8rp3x"]
+texture = ExtResource("2_h1qvv")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+sources/1 = SubResource("TileSetAtlasSource_4cfag")
+sources/2 = SubResource("TileSetAtlasSource_8rp3x")
+script = SubResource("GDScript_u73qe")

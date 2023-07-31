@@ -1,0 +1,8 @@
+Citacie:
+
+https://www.nature.com/articles/s41467-019-13169-3#Sec2
+
+[Sims 94] -  Using a modified genetic algorithm, Karl Sims simultaneously evolved brains and bodies for
+artificial creatures for various styles of locomotion and for goal seeking
+
+[Cliff 96] -  coevolved pursuit and evasion behaviors for predator and prey agents
