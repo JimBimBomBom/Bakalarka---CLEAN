@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://csp36bjlhq71v"]
+[gd_scene load_steps=2 format=3 uid="uid://bc67572ame7r5"]
 
 [ext_resource type="Script" path="res://SCRIPTS/World_Generation/TileMap.gd" id="1_tp8ha"]
 

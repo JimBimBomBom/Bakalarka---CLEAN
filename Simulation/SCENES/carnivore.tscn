@@ -7,7 +7,6 @@ radius = 4.0
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 top_level = true
-scale = Vector2(4, 4)
 collision_layer = 2
 collision_mask = 2
 script = ExtResource("1_1ku3w")
@@ -18,3 +17,7 @@ position = Vector2(0, -4)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)
 shape = SubResource("CircleShape2D_2ynyb")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true

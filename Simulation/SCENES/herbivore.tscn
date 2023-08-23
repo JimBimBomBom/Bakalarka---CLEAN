@@ -17,3 +17,7 @@ position = Vector2(0, -4)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -4)
 shape = SubResource("CircleShape2D_2ynyb")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true

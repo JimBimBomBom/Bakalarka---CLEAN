@@ -1,4 +1,102 @@
 Use an L-system to generate instructions for how a creature should move or behave.
 
-One of the greatest challenges in ecosystem simulations is achieving a nice balance. You will likely find that most of your attempts result in either mass overpopulation (followed by mass extinction) or simply mass extinction straight away. What techniques can you employ to achieve balance? Consider using the genetic algorithm itself to evolve optimal parameters for an ecosystem.
+One of the greatest challenges in ecosystem simulations is achieving a nice balance. You will likely find that most of your attempts result in either mass 
+overpopulation (followed by mass extinction) or simply mass extinction straight away. What techniques can you employ to achieve balance? Consider using the 
+genetic algorithm itself to evolve optimal parameters for an ecosystem.
 
+NOT IMPLEMENTED:
+1. Life is about balance between energy, food and hydration. So all animals need to balance these values accordingly.
+Animals feel free to use their energy during the day, to allow themselves to search for food/hydration, or
+evade predators. An animal will prioritize satisfying its most lacking value, meaning that whenever an animal goes hungry it will 
+search for food untill its hunger value goes above a certain threshold. This behaviour will be interrupted only by predators, or
+the fact that in search of satisfying a value, the other value went below a critical threshold, thereby putting the animal in danger 
+if it doesn't change course immediatly. 
+
+2. During the day the animals try to fulfill their "quotas" for food/hydration, in search of which they will deplete their energy.
+Energy is gained during the night when (currently) all animals will be resting, or it can be gained after an animal fills its values, 
+after which it starts resting (during the day resting will provide less of an increase in the animals' energy).
+
+3a. After depleting ones' energy storage, the animal goes into a DRAINED state, where it slowly regains energy, but is vulnerable 
+to any and all predators. After a certain threshold of energy is attained in this state, the animal is free to do as it likes once again.
+
+3b. After depleting ones' food/hydration, the animal dies, leaving its corpse for a very short ammount of time with a large penalty for 
+the ammount of food that can be gained from the corpse by predators.
+
+4. Animals can see every animal in their line of sight. Predators will try to sneak up as close to their prey as they can before they are noticed.
+Animals will send signals to a set radius around them based on a percentage chance (to make noise), and all animals within this radius will then 
+notice said animal.
+
+4a. Therefore a predators movement can be characterised as sneak/stalk untill noticed
+
+5. To breed is to survive and evolve, and since wolfs of this world are not pack animals, they need to have a way to search and find mates.
+One part of this process is the extent of their wandering that would increase their chances to meet another wolf. Another would be how much
+importance does the wolf put on actively trying to find a mate. In sparsely populated areas this might need to go up, if the wolfs want even 
+a chance of meeting up.
+For herbivores (pack animals) it will be of much less import, since they preffer to be in herds. They will therefore want for a means of picking 
+the suitable male, within their congregation. This could be simply represented as "dominance" - or named as any one specific example of it - that 
+could be represented by a variable that includes a price to pay(energy or some such).
+
+6. Animals hold memories about water sources that they visited, places where they encountered an abundance of food in the past, or places where they
+encountered danger (in terms of predators). These memories can be used to augment an animals "wander" mechanic, so as to not just blicnly search within their 
+vicinity whenever they grow thirsty/hungry. If an animal is seeking to satisfy an urge will first look localy, and if no adequate solution is found will 
+turn to its' memories for better guidance. Memories can be inherited, inheritance of these memories should also be guided by a variable within the animals' 
+genome.. also memories can be gained from other animals under certain(as of now unknown) factors. 
+6a. Memories have an additional value ascribed to them, namely stress_factor -> which influences the animals behaviour in many ways.. such as:
+	1. Animals with low stress function better, but are slower to react to the world around them
+	2. When stress is high animals will tend to air on the side of caution, and when an unknown source of sound (for example) is introduced, will respond by
+	going straight into their flight_mode (instead of their low stress freeze_mode meant for assesing the source -> look in direction to ascertain whether its'
+	a predator or a peaceful "friend")
+	
+7. Map modifications:
+	1. Introducing different habitats to allow for more diversification in an animals traits. (example is camouflage, where an animal might be well attributed
+	to survive in a forest environment -> lower chance of being spotted, compared to an open field environment)
+	2. Different sources of nutrients -> maybe use the trees and bushes that already populate the world, or maybe just different biomes with different tiles have
+	differing resources -> wheat, grass, idk
+	3?. Map partitions -> partition the world into areas (maybe just chunks).. the use would be around establishing animal territories -> a predator will patrol its 
+	territory and not stray too far out, if not driven by necessity.... could also be implemented with direct coordinates and a radius or something to avoid this.
+
+
+IMPORTANT:
+Focus: 
+	1. Animals at initialization seen as archetypal carnivores/herbivores, with the focus being on them adapting to climates and each other, in so 
+	doing creating geneticaly distinct "species" -> seen as Herbivore+num as the animals diverge, to Herbivore.num+num to follow
+	This could then be used to "study" adaptations as they happened in a changing world/climate, which could provide easy graphs and some "optimal"
+	qualities that can be observed throughout the data.
+	2. 
+	
+MAP GENERATION STEPS:
+	1. Temperature-based Tile Placement
+	This step defines the primary biome type of each tile, serving as a backdrop for the additional features that will be added in the following steps.
+	As you've mentioned, tiles will be categorized based on a temperature range (e.g., Tundra, Taiga, Temperate, Tropical, Desert).
+
+	2. Lake Generation
+	Lakes could be generated based on a few principles:
+
+	Low Points: They naturally form in depressions or low points. If you had altitude in your generation, this would be straightforward:
+	where altitude is below a certain threshold, and within certain temperature ranges, you create a lake.
+
+	Cluster Generation: Without altitude, you can still generate clusters of water tiles to represent lakes. One way to do this is to randomly select a "seed" point on the map 
+	and then grow a cluster around this point by adding adjacent water tiles. The size and shape of the lake can be determined by randomly deciding how many tiles to add, and in which direction to expand.
+
+	3. Vegetation via Moisture Levels
+	After setting the primary tile type and adding lakes, you layer vegetation based on the moisture level:
+
+	DRY: Scatter shrubs and bushes sporadically. This could also include cacti in desert areas.
+
+	MODERATE: A mix of trees and shrubbery. In forests, trees would dominate, whereas in grassland or savannah-like biomes, trees would be more sparse.
+
+	MOIST: Lush vegetation with various tree types, including special trees, regular trees, and occasional underbrush or bushes. Depending on your game's needs, you could also 
+	introduce other elements like vines, moss-covered rocks, or other unique vegetation elements for these very wet areas.
+
+	Additional Considerations:
+
+	Lake Proximity and Moisture: Areas surrounding lakes could have elevated moisture levels, meaning they're more likely to have lush vegetation even if the larger biome is typically dry.
+
+	Transitional Areas: Consider creating transitional tiles or methods to blend between two very different biomes. This would prevent stark contrasts between, for example, a desert and a jungle.
+
+	Noise & Randomness: Make use of noise functions or randomness to ensure that vegetation isn't uniformly distributed. This can make your world feel more organic and less grid-like.
+
+	Visual Indicators for Lakes: If lakes are being generated in colder areas (like Tundra), they could be represented as frozen or having patches of ice. In tropical or warm regions, lakes could 
+	have distinct features like lily pads or specific water plants.
+	
+IMPLEMENTED IDEAS:

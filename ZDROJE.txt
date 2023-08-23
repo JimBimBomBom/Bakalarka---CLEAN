@@ -1,8 +1,44 @@
-Citacie:
+TODO:
 
-https://www.nature.com/articles/s41467-019-13169-3#Sec2
+1. General Animal Behavior & Ecology:
 
-[Sims 94] -  Using a modified genetic algorithm, Karl Sims simultaneously evolved brains and bodies for
-artificial creatures for various styles of locomotion and for goal seeking
+The Study of Animal Behaviour by Geoff Box. This offers an introduction to animal behavior.
 
-[Cliff 96] -  coevolved pursuit and evasion behaviors for predator and prey agents
+Essential Animal Behavior by Graham Scott.
+
+Ecology: Concepts and Applications by Manuel C. Molles Jr.
+
+
+2. Territorial Behavior:
+
+The Economics of Territorial Behavior in Birds by M. L. Rosenzweig. This paper tackles territorial behavior from an evolutionary and economic standpoint.
+
+On Territorial Behavior and Other Factors Influencing Habitat Distribution in Birds by Robert MacArthur.
+
+
+3. Agent-Based Modeling (ABM) in Ecology:
+
+Agent-Based and Individual-Based Modeling: A Practical Introduction by Steven F. Railsback and Volker Grimm. This is a guide to the concepts and practical application of ABM in ecology.
+
+Growing Artificial Societies: Social Science from the Bottom Up by Joshua M. Epstein and Robert Axtell. Though more focused on human societies, many principles are applicable to animal simulations.
+
+
+4. Computer Simulations in Biology:
+
+Simulation for the Social Scientist by Nigel Gilbert and Klaus Troitzsch. Again, while more human-focused, the modeling concepts are widely applicable.
+
+Artificial Life: An Overview edited by Christopher Langton. This book delves into simulating life in a computer context, offering insights that might be valuable for your project.
+
+
+5. Game Design for Nature Simulations:
+
+The Nature of Code by Daniel Shiffman. While not a traditional biology book, Shiffman's guide on simulating natural systems using code (specifically in Processing) is invaluable for those looking to bring biological principles to a digital medium.
+
+Behavioral Mathematics for Game AI by Dave Mark. This provides insights into the algorithms and mathematics behind game AI, which can be adapted for simulating animal behaviors.
+
+
+6. Complex Systems & Network Theory:
+
+Complexity: A Guided Tour by Melanie Mitchell.
+
+Linked: The New Science of Networks by Albert-László Barabási. This book explores the theory behind networks, which might be beneficial if you're considering simulating relationships or interactions within your ecosystem.

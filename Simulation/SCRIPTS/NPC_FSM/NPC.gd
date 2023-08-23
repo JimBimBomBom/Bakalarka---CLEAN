@@ -30,16 +30,26 @@ func construct_npc(curr_pos_ : Vector2, max_velocity_ : float, max_steering_forc
 	wander_radius = wander_radius_
 	wander_offset = wander_offset_
 
-func move_new(force):
-	curr_velocity += force * max_steering_force
-	# curr_velocity.limit_length(max_velocity)
+func get_tile_on_curr_pos() -> Vector2:
+	var result : Vector2i = curr_pos/World.tile_size
+	return Vector2(result.x, result.y)
+
+func move_calc(force : Vector2) -> void:
+	acceleration += force
+
+func do_move(delta : float) -> void:
+	# var terrain_difficulty = World.Map.tiles[get_tile_on_curr_pos()].movement_difficulty
+	curr_velocity += acceleration.normalized() * max_steering_force * delta * 10#* terrain_difficulty
 	rotation = curr_velocity.angle() + PI/2
 	if curr_velocity.length() > max_velocity:
 		curr_velocity = curr_velocity.normalized()*max_velocity
-	curr_pos += curr_velocity
+	curr_pos += curr_velocity * delta * 40
+
+func reset_acceleration():
+	acceleration *= 0
 
 func wander() -> Vector2:
-	theta += randf_range(-0.05, 0.05)
+	theta += randf_range(-0.35, 0.35)
 	var x = cos(theta) * wander_radius + (curr_pos.x + curr_velocity.normalized().x * wander_offset)
 	var y = sin(theta) * wander_radius + (curr_pos.y + curr_velocity.normalized().y * wander_offset)
 
@@ -49,6 +59,13 @@ func wander() -> Vector2:
 func seek(target : Vector2) -> Vector2:
 	var force = curr_pos.direction_to(target) * max_velocity
 	return (force - curr_velocity).normalized()
+
+func smooth_seek(target : Vector2) -> Vector2:
+	var force = seek(target)
+	var dist = curr_pos.distance_to(target)
+	if dist < 100:
+		force *= dist/100
+	return force
 
 func flee(target : Vector2) -> Vector2:
 	return seek(target) * -1

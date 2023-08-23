@@ -1,0 +1,6 @@
+My thesis:
+Type of GA: Classical GA, imagined by Holland
+Encoding Scheme: Value Encoding
+Selection Technique: "Propagation of the survivors"
+Crossover Operator: Uniform Crossover
+Mutation Operator: Displacement Mutation

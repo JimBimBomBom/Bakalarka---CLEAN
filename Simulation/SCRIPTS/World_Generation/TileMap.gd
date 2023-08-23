@@ -52,12 +52,23 @@ func between(val, start, end):
 		return true
 	return false
 
+func construct_tile(tile : World.Tile_Properties, tile_index_ : Vector2i, tile_type_ : World.Tile_Type,
+					curr_food_ : float, max_food_ : float, food_gain_ : float,
+					movement_difficulty_ : float):
+	tile.index = tile_index_
+	tile.type = tile_type_
+	tile.curr_food = curr_food_
+	tile.max_food = max_food_
+	tile.food_gain = food_gain_
+	tile.movement_difficulty = movement_difficulty_
+
 func set_cell_properties(pos : Vector2, type : World.Tile_Type,
 						max : float, curr : float, gain : float,
 						movement_difficulty : float):
-	var result = World.Tile_Properties.new()
-	result.construct_tile(pos, type, curr, max, gain, movement_difficulty)
-	tiles[pos] = result
+	var tile = World.Tile_Properties.new()
+	# result.construct_tile(pos, type, curr, max, gain, movement_difficulty)
+	construct_tile(tile, pos, type, curr, max, gain, movement_difficulty)
+	tiles[pos] = tile
 
 func set_current_cell(pos : Vector2, alt, temp, moist):
 	var sprite_coords = Vector2i(0, 0)
@@ -72,14 +83,90 @@ func set_current_cell(pos : Vector2, alt, temp, moist):
 		max = 0
 		curr = 0
 		gain = 0
-		movement_difficulty = 0.7
+		movement_difficulty = 2
 	else:
 		sprite_coords = Vector2i(0, 0)
 		type = World.Tile_Type.PLAIN
 		max = moist * temp * 15
 		curr = randf_range(0, max)
 		gain = moist * 3
-		movement_difficulty = 0
+		movement_difficulty = 1
 	
 	set_cell(0, pos, 0, sprite_coords)
 	set_cell_properties(pos, type, max, curr, gain, movement_difficulty)
+
+enum TEMPERATURE_TYPE {#selects the tile_set
+	TUNDRA = 0,
+	TAIGA = 1,
+	TEMPERATE_LAND = 2,
+	TROPICAL_LAND = 3,
+	DESERT = 4,
+}
+enum MOISTURE_TYPE {#drives vegetation placement
+	DRY,
+	MODERATE,
+	MOIST,
+}
+
+func get_type_from_temp(temp):
+	# Step 1: Classify based on temperature
+	var temp_type : TEMPERATURE_TYPE
+	if temp < 0.1:
+		temp_type = TEMPERATURE_TYPE.TUNDRA
+	elif temp < 0.3:
+		temp_type = TEMPERATURE_TYPE.TAIGA
+	elif temp < 0.5:
+		temp_type = TEMPERATURE_TYPE.TEMPERATE_LAND
+	elif temp < 0.7:
+		temp_type = TEMPERATURE_TYPE.TROPICAL_LAND
+	else:
+		temp_type = TEMPERATURE_TYPE.DESERT
+	return temp_type
+
+func get_type_from_moist(moist, temp_type : TEMPERATURE_TYPE):
+	var moist_type : MOISTURE_TYPE
+	match temp_type:
+		TEMPERATURE_TYPE.TUNDRA:
+			if moist < 0.4:
+				moist_type = MOISTURE_TYPE.DRY
+			elif moist < 0.7:
+				moist_type = MOISTURE_TYPE.MODERATE
+			else:
+				moist_type = MOISTURE_TYPE.MOIST
+		TEMPERATURE_TYPE.TAIGA:
+			if moist < 0.3:
+				moist_type = MOISTURE_TYPE.DRY
+			elif moist < 0.7:
+				moist_type = MOISTURE_TYPE.MODERATE
+			else:
+				moist_type = MOISTURE_TYPE.MOIST
+		TEMPERATURE_TYPE.TEMPERATE_LAND:
+			if moist < 0.2:
+				moist_type = MOISTURE_TYPE.DRY
+			elif moist < 0.7:
+				moist_type = MOISTURE_TYPE.MODERATE
+			else:
+				moist_type = MOISTURE_TYPE.MOIST
+		TEMPERATURE_TYPE.TROPICAL_LAND:
+			if moist < 0.3:
+				moist_type = MOISTURE_TYPE.DRY
+			elif moist < 0.6:
+				moist_type = MOISTURE_TYPE.MODERATE
+			else:
+				moist_type = MOISTURE_TYPE.MOIST
+		TEMPERATURE_TYPE.DESERT:
+			if moist < 0.6:
+				moist_type = MOISTURE_TYPE.DRY
+			elif moist < 0.9:
+				moist_type = MOISTURE_TYPE.MODERATE
+			else:
+				moist_type = MOISTURE_TYPE.MOIST
+
+func set_current_cell_new(pos, temp, moist):
+	var temperature_type = get_type_from_temp(temp)
+	var moisture_type = get_type_from_moist(moist)
+
+	# Set the actual tile or representation for the biome
+	set_cell(0, pos, temperature_type, Vector2i(0, 0))
+	set_cell_properties(pos, type, max, curr, gain)#, movement_difficulty)
+	# set_tile_at_position(pos, temperature_type, moisture_type)

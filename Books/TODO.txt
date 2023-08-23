@@ -1,0 +1,27 @@
+Books:
+a. "Introduction to Evolutionary Computing" by A.E. Eiben and J.E. Smith
+b. "Essentials of Metaheuristics" by Sean Luke
+c. "Genetic Algorithms in Search, Optimization, and Machine Learning" by David E. Goldberg
+d. "Evolutionary Computation: Toward a New Philosophy of Machine Intelligence" by David B. Fogel
+e. "Neuroevolution of Augmenting Topologies (NEAT)" by Kenneth O. Stanley and Risto Miikkulainen (This book focuses specifically on NEAT, a popular neuroevolution algorithm)
+
+
+Research Papers (Selected, by Topic):
+a. Genetic Algorithms:
+	"Adaptation in Natural and Artificial Systems" by John H. Holland (This paper introduced the concept of genetic algorithms)
+	"A Fast Elitist Non-Dominated Sorting Genetic Algorithm for Multi-Objective Optimization" by Kalyanmoy Deb et al.
+	"Evolutionary Algorithms for Multi-Criterion Optimization in Engineering Design" by Carlos M. Fonseca and Peter J. Fleming
+
+b. Evolutionary Computation:
+	"Genetic Programming: On the Programming of Computers by Means of Natural Selection" by John R. Koza
+	"Differential Evolution – A Simple and Efficient Heuristic for Global Optimization over Continuous Spaces" by Rainer Storn and Kenneth Price
+
+c. Neuroevolution:
+	"Evolving Neural Networks through Augmenting Topologies" by Kenneth O. Stanley and Risto Miikkulainen (NEAT paper)
+	"Large-Scale Evolution of Image Classifiers" by Esteban Real et al. (This paper introduced the concept of Efficient Neural Architecture Search using evolutionary techniques)
+
+
+Journals and Conferences:
+IEEE Transactions on Evolutionary Computation
+Genetic Programming and Evolvable Machines
+The Genetic and Evolutionary Computation Conference (GECCO) Proceedings

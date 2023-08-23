@@ -24,8 +24,8 @@ var animal_group : String = "Animals"
 var cadaver_group : String = "Cadavers"
 var vegetation_group : String = "Vegetation"
 
-var width = 20
-var height = 20
+var width = 50
+var height = 50
 
 var tile_size : Vector2 = Vector2(32, 32)
 var tile_size_i : Vector2i = Vector2i(tile_size.x, tile_size.y)
@@ -52,5 +52,13 @@ enum Vegetation_Type {
 enum Tile_Type {
 	WATER,
 	PLAIN,
+	BARREN_PLAIN,
 	MOUNTAIN,
 }
+
+func get_tile_pos(tile : Tile_Properties) -> Vector2:
+	return Vector2(tile.index.x, tile.index.y)*tile_size + tile_size/2
+
+func change_tile_type(tile : Tile_Properties, new_type : Tile_Type):
+	tile.type = new_type
+

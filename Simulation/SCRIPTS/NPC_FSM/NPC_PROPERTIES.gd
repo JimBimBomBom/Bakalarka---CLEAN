@@ -2,9 +2,9 @@ extends Npc_Class
 
 class_name Npc_Properties_Class
 
-var vore_type : World.Vore_Type
 #var senses : Senses_Class
 # var behaviour : Behaviour_Class 
+var vore_type : World.Vore_Type
 var curr_health : int
 var max_health : int
 var attack_damage : int
@@ -16,9 +16,11 @@ var corpse_max_timer : float
 
 var curr_hunger : float
 var max_hunger : float
+var curr_hunger_norm : float
 var seek_nutrition_threshold : float
 var curr_hydration : float
 var max_hydration : float
+var curr_hydration_norm : float
 var seek_hydration_threshold : float
 
 var separation_radius : int
@@ -36,12 +38,13 @@ var day_vision_acuity : float
 
 #Hearing
 var hearing_range : float
-var hearing_in_sleep_range : float
+var max_hearing_range : float
+var hearing_while_consuming : float
 
 var sense_range : float
 
 func construct_properties(type, mass_, max_health_, attack_damage_, attack_range_, max_energy_level_, max_hunger_, max_hydration_,
-						sight_range_, field_of_view_half_, night_vision_acuity_, day_vision_acuity_, hearing_range_, hearing_in_sleep_range_,
+						sight_range_, field_of_view_half_, night_vision_acuity_, day_vision_acuity_, hearing_range_, hearing_while_consuming_,
 						separation_mult_, separation_radius_, cohesion_mult_, cohesion_radius_, alignment_mult_, alignment_radius_):
 	vore_type = type
 	max_health = max_health_
@@ -55,20 +58,21 @@ func construct_properties(type, mass_, max_health_, attack_damage_, attack_range
 
 	max_hunger = max_hunger_
 	curr_hunger = randf_range(0, max_hunger/2)
-	seek_nutrition_threshold = 0.6 #hardset for now
+	seek_nutrition_threshold = 0.7 #hardset for now
 	max_hydration = max_hydration_
 	curr_hydration = randf_range(max_hydration/2, max_hydration)
-	seek_hydration_threshold = 0.6 #hardset for now
+	seek_hydration_threshold = 0.7 #hardset for now
 
 	sight_range = sight_range_
 	field_of_view_half = field_of_view_half_
 	night_vision_acuity = night_vision_acuity_
 	day_vision_acuity = day_vision_acuity_
 
-	hearing_range = hearing_range_
-	hearing_in_sleep_range = hearing_in_sleep_range_
+	max_hearing_range = hearing_range_
+	hearing_range = max_hearing_range
+	hearing_while_consuming = hearing_while_consuming_
 
-	sense_range = 100 #hardset for now
+	sense_range = 200 #hardset for now
 
 	separation_mult = separation_mult_
 	separation_radius = separation_radius_
@@ -93,7 +97,7 @@ func properties_generator(type):
 			var day_vision_acuity = 1
 
 			var hearing_range = randf_range(100, 200)
-			var hearing_in_sleep_range = randf_range(10, 60)
+			var hearing_while_consuming = randf_range(0.1, 1)
 			
 			var separation_mult = 1.5
 			var separation_radius = randi_range(25, 50)
@@ -103,7 +107,7 @@ func properties_generator(type):
 			var alignment_radius = randi_range(50, 120)
 			
 			construct_properties(type, mass, max_health, attack_damage, attack_range, max_energy_level, max_hunger, max_hydration,
-										sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_in_sleep_range,
+										sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_while_consuming,
 										separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius)
 		World.Vore_Type.CARNIVORE:
 			var mass = randi_range(50, 250)
@@ -119,7 +123,7 @@ func properties_generator(type):
 			var day_vision_acuity = 1
 
 			var hearing_range = randf_range(500, 750)
-			var hearing_in_sleep_range = randf_range(10, 60)
+			var hearing_while_consuming = randf_range(0.1, 1)
 
 			var separation_mult = 1
 			var separation_radius = randi_range(70, 95)
@@ -129,5 +133,5 @@ func properties_generator(type):
 			var alignment_radius = randi_range(50, 120)
 
 			construct_properties(type, mass, max_health, attack_damage, attack_range, max_energy_level, max_hunger, max_hydration,
-										sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_in_sleep_range,
+										sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_while_consuming,
 										separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius)
