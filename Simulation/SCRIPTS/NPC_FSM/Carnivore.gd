@@ -136,9 +136,9 @@ func process_animal(delta : float):
 	reset_acceleration() #every "move" is isolated
 	carnivore_fsm(delta)
 
-func _ready():
-	var timer = get_node("Timer") #?? mb add timeout for actions as a animal variable? could be interesting
-	timer.timeout.connect(_on_timer_timeout)
+# func _ready():
+	# var carnivore_script = load(World.carnivore_script)
+	# $CharacterBody2D.set_script(carnivore_script)
 
 func _on_timer_timeout():
 	var delta = 0.1

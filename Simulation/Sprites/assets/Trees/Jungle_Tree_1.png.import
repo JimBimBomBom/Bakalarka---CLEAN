@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://qj4uix87ds84"
-path="res://.godot/imported/bush_1.png-95c509c549dfa0c25f59c5969609a67a.ctex"
+uid="uid://c261gyya6msvl"
+path="res://.godot/imported/Jungle_Tree_1.png-bd104ecfd41a8c520cd0ac054202b18d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/assets/bush_1.png"
-dest_files=["res://.godot/imported/bush_1.png-95c509c549dfa0c25f59c5969609a67a.ctex"]
+source_file="res://Sprites/assets/Trees/Jungle_Tree_1.png"
+dest_files=["res://.godot/imported/Jungle_Tree_1.png-bd104ecfd41a8c520cd0ac054202b18d.ctex"]
 
 [params]
 

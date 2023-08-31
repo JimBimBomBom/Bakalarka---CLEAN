@@ -55,6 +55,12 @@ genome.. also memories can be gained from other animals under certain(as of now 
 	3?. Map partitions -> partition the world into areas (maybe just chunks).. the use would be around establishing animal territories -> a predator will patrol its 
 	territory and not stray too far out, if not driven by necessity.... could also be implemented with direct coordinates and a radius or something to avoid this.
 
+8. There are many attributes that are balanced with increased energy consumption for the animal. Example is max_velocity where the faster an animal is moving at
+the moment, the faster it depletes its' energy values. How much value is placed on move quickly will be determined by the animals' needs.
+The interesting idea with this is a World_Variable approach, where we can set these energy consumption rules for the whole world, and we can then detect what attributes
+are favored depending on their energy price. So we could have one world where your curr_velocity consumes curr_velocity squared of energy, or one where it only consumes 
+curr_velocity. There are many such attributes, and they can be studied directly or be generated at random upon initialization of the world to produce a unique world 
+for our animals.
 
 IMPORTANT:
 Focus: 

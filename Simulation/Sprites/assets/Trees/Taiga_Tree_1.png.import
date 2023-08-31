@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://by5iys5g6sgwk"
-path="res://.godot/imported/depleted_land_tile.png-fee33d9f72f84bc6f36fcb11d2277432.ctex"
+uid="uid://bcegw82i6o277"
+path="res://.godot/imported/Taiga_Tree_1.png-60a432a902fed217c9a03b3c81bc343d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/depleted_land_tile.png"
-dest_files=["res://.godot/imported/depleted_land_tile.png-fee33d9f72f84bc6f36fcb11d2277432.ctex"]
+source_file="res://Sprites/assets/Trees/Taiga_Tree_1.png"
+dest_files=["res://.godot/imported/Taiga_Tree_1.png-60a432a902fed217c9a03b3c81bc343d.ctex"]
 
 [params]
 

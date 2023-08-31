@@ -5,11 +5,14 @@ radius = 10.0499
 
 [node name="Node2D" type="Node2D"]
 top_level = true
+light_mask = 2
+visibility_layer = 2
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(0, -10)
+light_mask = 2
+visibility_layer = 2
 shape = SubResource("CircleShape2D_n4tgw")

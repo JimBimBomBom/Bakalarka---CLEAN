@@ -21,12 +21,12 @@ var animal_type : Animal_Types
 var corpse_timer : float = 0
 var detected_animals : Array[Animal]
 
-func construct_animal(pos_ : Vector2, type : World.Vore_Type):
+func construct_animal(pos_ : Vector2i, type : World.Vore_Type):
 	var max_velocity_ = randf_range(0.5, 0.8)
 	if type == World.Vore_Type.CARNIVORE:
 		max_velocity = 3
 	var max_steering_force_ = randf_range(0.1, 0.3)
-	var curr_pos_ = pos_ * World.tile_size
+	var curr_pos_ = Vector2(pos_.x, pos_.y) * World.tile_size
 	var wander_radius_ = 30#randf_range(30, 60)
 	var wander_offset_ = 100
 
@@ -78,17 +78,17 @@ func can_hear(pos) -> bool:
 	return false
 
 func get_animals_from_sight() -> Array[Animal]:
-	var animals = get_tree().get_nodes_in_group(World.animal_group)
+	# var animals = get_tree().get_nodes_in_group(World.animal_group)
 	var result : Array[Animal]
-	for animal in animals:
+	for animal in detected_animals:
 		if can_see(animal.curr_pos) and curr_pos != animal.curr_pos:
 			result.append(animal)
 	return result
 
 func get_animals_from_hearing() -> Array[Animal]:
-	var animals = get_tree().get_nodes_in_group(World.animal_group)
+	# var animals = get_tree().get_nodes_in_group(World.animal_group)
 	var result : Array[Animal]
-	for animal in animals:
+	for animal in detected_animals:
 		if can_hear(animal.curr_pos) and curr_pos != animal.curr_pos:
 			result.append(animal)
 	return result
@@ -175,17 +175,12 @@ func rest(delta : float):
 func drink_at_tile(tile : World.Tile_Properties, delta : float):
 	curr_hydration += delta * (1/hearing_while_consuming)
 
-func change_tile_sprite_to_depleted(index : Vector2i):
-	World.Map.set_cell(0, index, 1, Vector2i(0, 0))
-# func change_tile_sprite_replenished(index : Vector2i):
-# 	World.Map.set_cell(0, index, 0, Vector2i(0, 0))
-
 func eat_at_tile(tile : World.Tile_Properties, delta : float):
 	var food_gain = delta * (1/hearing_while_consuming)
 	if tile.curr_food < food_gain:
 		curr_hunger += tile.curr_food
 		tile.curr_food = 0
-		change_tile_sprite_to_depleted(tile.index)
+		World.Map.set_tile_to_depleted_DEBUG(tile.index)
 	else:
 		tile.curr_food -= food_gain
 		curr_hunger += food_gain
@@ -212,7 +207,7 @@ func get_tiles_from_senses() -> Array[World.Tile_Properties]:
 		for y in range(-tiles_in_direction, tiles_in_direction):
 			var x_pos = curr_tile_pos.x + x*World.tile_size_i.x 
 			var y_pos = curr_tile_pos.y + y*World.tile_size_i.y 
-			var tile_index = Vector2(curr_tile_ind + Vector2i(x, y))
+			var tile_index = curr_tile_ind + Vector2i(x, y)
 			if within_bounds(tile_index) and curr_pos.distance_to(Vector2(x_pos, y_pos)) < sense_range:
 				result.append(World.Map.tiles[tile_index])
 	return result
@@ -249,9 +244,8 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 			result = tmp
 	return result
 
-func _ready():
-	connect("body_entered", self, "_on_Area2D_animal_entered")
-	connect("body_exited", self, "_on_Area2D_animal_exited")
+func _on_timer_timeout():
+	pass # this func gets defined in instances of Carnivore/Herbivore
 
 func _on_Area2D_animal_entered(body):
 	if body is Animal:
@@ -259,6 +253,15 @@ func _on_Area2D_animal_entered(body):
 
 func _on_Area2D_animal_exited(body):
 	if body is Animal:
-		if detected_animals.has(body):
-			detected_animals.remove(detected_animals.find(body))
+		detected_animals.erase(body)
 
+func _ready():
+	var timer = get_node("Timer") #?? mb add timeout for actions as a animal variable? could be interesting
+	timer.timeout.connect(_on_timer_timeout)
+	
+	var animal_detector = get_node("Area_Detection")
+	animal_detector.body_entered.connect(_on_Area2D_animal_entered)
+	animal_detector.body_exited.connect(_on_Area2D_animal_exited)
+
+	var detection_radius = get_node("Area_Detection").get_node("Detection_Radius")
+	detection_radius.shape.radius = max_hearing_range #hardset for now

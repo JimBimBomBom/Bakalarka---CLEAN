@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b781cga76ecvb"
-path="res://.godot/imported/tree_2.png-ac658dc2d7bc6460998b619a90746a07.ctex"
+uid="uid://inone0yn2pm2"
+path="res://.godot/imported/Taiga_Tree.png-b8da23381f0d29792faa4293adda2a91.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/assets/tree_2.png"
-dest_files=["res://.godot/imported/tree_2.png-ac658dc2d7bc6460998b619a90746a07.ctex"]
+source_file="res://Sprites/assets/Trees/Taiga_Tree.png"
+dest_files=["res://.godot/imported/Taiga_Tree.png-b8da23381f0d29792faa4293adda2a91.ctex"]
 
 [params]
 

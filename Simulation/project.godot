@@ -18,3 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 World="*res://SCRIPTS/Global/World_Variables.gd"
+
+[layer_names]
+
+2d_render/layer_1="Animal_Layer"
+2d_render/layer_2="Vegetation_Layer"

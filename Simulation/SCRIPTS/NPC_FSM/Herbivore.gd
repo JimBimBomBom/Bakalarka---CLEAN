@@ -88,12 +88,8 @@ func herbivore_hydrate(hydration_in_range : Array[World.Tile_Properties], delta 
 		Consumption_State.SCANNING:
 			hearing_range = max_hearing_range
 
-func _ready():
-	var timer = get_node("Timer")
-	timer.timeout.connect(_on_timer_timeout)
-
 func _on_timer_timeout():
-	var delta = 0.1
+	var delta = 0.1 # once I give animals the chance to influence their delta with a gene -> replace only here
 	if animal_state != Animal_Base_States.DEAD:
 		process_animal(delta)
 	else:
@@ -102,10 +98,6 @@ func _on_timer_timeout():
 func _physics_process(delta : float):
 	do_move(delta)
 	position = curr_pos
-	# if animal_state != Animal_Base_States.DEAD:
-	# 	process_animal(delta)
-	# else:
-	# 	process_cadaver(delta)
 
 func get_seek_dir(target : Animal) -> Vector2:
 	return curr_pos.direction_to(target.curr_pos).normalized()

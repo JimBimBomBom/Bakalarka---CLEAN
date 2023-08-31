@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cndd26o3dvtbk"
-path="res://.godot/imported/tree_1.png-8476792ff7a612961c99d825accc2db3.ctex"
+uid="uid://by5iys5g6sgwk"
+path="res://.godot/imported/depleted_land_tile.png-5feac72d9e1e5e75a16738442cfc81f2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/assets/tree_1.png"
-dest_files=["res://.godot/imported/tree_1.png-8476792ff7a612961c99d825accc2db3.ctex"]
+source_file="res://Sprites/Biomes/depleted_land_tile.png"
+dest_files=["res://.godot/imported/depleted_land_tile.png-5feac72d9e1e5e75a16738442cfc81f2.ctex"]
 
 [params]
 
