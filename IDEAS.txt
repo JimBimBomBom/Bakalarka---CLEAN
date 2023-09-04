@@ -62,6 +62,15 @@ are favored depending on their energy price. So we could have one world where yo
 curr_velocity. There are many such attributes, and they can be studied directly or be generated at random upon initialization of the world to produce a unique world 
 for our animals.
 
+9. The pure day hypothesis:
+Logic: I am interested in the evolution of species that ultimately stem from the base of Carnivore/Herbivore binary that initializes the world. Adding a night cycle would
+add unnecessary complexity to this goal, and so the focus would instead be a never ending play.
+Implementation: Animals consume energy with their actions where the ammount that is consumed per action is dependant on many variables e.g. for movement this would be the animals' 
+mass + curr_velocity. An animal though consumes energy even when idle(like maintaining body temperature etc.), so the goal is to find a way to maintain ones' energy levels,
+while ensuring one does not get eaten. This approach would by neccesity sacrifice some complexity e.g. nocturnal animals.
+Note: Animals gain energy by converting their "stored" resources such as food/hydration, a proccess that takes time, meaning animals will be less likely to do "dangerous"(stressful) 
+actions while low on energy(something that could be overcome by neccesity e.g. lack of stored resources).
+
 IMPORTANT:
 Focus: 
 	1. Animals at initialization seen as archetypal carnivores/herbivores, with the focus being on them adapting to climates and each other, in so 

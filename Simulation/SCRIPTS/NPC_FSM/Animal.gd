@@ -21,19 +21,19 @@ var animal_type : Animal_Types
 var corpse_timer : float = 0
 var detected_animals : Array[Animal]
 
+func spawn_animal(pos_, type, parent_1, parent_2):
+	set_basic_properties(pos_, parent_1, parent_2)
+	set_animal_properties(type, parent_1, parent_2)
+
 func construct_animal(pos_ : Vector2i, type : World.Vore_Type):
 	var max_velocity_ = randf_range(0.5, 0.8)
-	if type == World.Vore_Type.CARNIVORE:
-		max_velocity = 3
 	var max_steering_force_ = randf_range(0.1, 0.3)
 	var curr_pos_ = Vector2(pos_.x, pos_.y) * World.tile_size
 	var wander_radius_ = 30#randf_range(30, 60)
 	var wander_offset_ = 100
 
-	construct_npc(curr_pos_, max_velocity_, max_steering_force_, wander_radius_, wander_offset_)
+	set_npc(curr_pos_, max_velocity_, max_steering_force_, wander_radius_, wander_offset_)
 	properties_generator(type)
-
-	corpse_timer = 0
 
 func set_base_state(dangerous_animals : Array[Animal]):
 	if curr_hunger <= 0 or curr_hydration <= 0 or curr_health <= 0:
@@ -243,6 +243,10 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 		if curr_pos.distance_to(World.get_tile_pos(tmp)) < curr_pos.distance_to(World.get_tile_pos(result)):
 			result = tmp
 	return result
+
+# func reproduce(partner : Animal):
+
+
 
 func _on_timer_timeout():
 	pass # this func gets defined in instances of Carnivore/Herbivore

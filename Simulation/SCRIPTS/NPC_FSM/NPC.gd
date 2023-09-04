@@ -22,8 +22,15 @@ func _init():
 	x_dir_noise.seed = randi()
 	y_dir_noise.seed = randi()
 
-func construct_npc(curr_pos_ : Vector2, max_velocity_ : float, max_steering_force_ : float,
-					wander_radius_ : float, wander_offset_ : float) :
+func set_basic_properties(pos, parent_1, parent_2):
+	curr_pos = pos
+	max_velocity = World.extract_gene(parent_1.max_velocity, parent_2.max_velocity)
+	max_steering_force = World.extract_gene(parent_1.max_steering_force, parent_2.max_steering_force)
+	wander_radius = World.extract_gene(parent_1.wander_radius, parent_2.wander_radius)
+	wander_offset = World.extract_gene(parent_1.wander_offset, parent_2.wander_offset)
+
+func set_npc(curr_pos_ : Vector2, max_velocity_ : float, max_steering_force_ : float,
+					wander_radius_ : float, wander_offset_ : float):
 	curr_pos = curr_pos_
 	max_velocity = max_velocity_
 	max_steering_force = max_steering_force_

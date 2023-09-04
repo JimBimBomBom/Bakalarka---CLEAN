@@ -18,13 +18,9 @@ var day_type : Day_Type
 var hour : float
 var hours_in_day : float
 
-#Animals
+#Groups
 var animal_group : String = "Animals"
 var cadaver_group : String = "Cadavers"
-#Map
-# var depleted_tiles : String = "Depleted"
-# var food_tiles : String = "Food_Tiles"
-# var hydration_tiles : String = "Hydration_Tiles"
 var vegetation_group : String = "Vegetation"
 
 #Scripts
@@ -67,6 +63,10 @@ enum Temperature_Type {#selects the tile_set
 	TEMPERATE_LAND = 2,
 	TROPICAL_LAND = 3,
 	DESERT = 4,
+}
+enum Gender {
+	MALE,
+	FEMALE,
 }
 
 func get_tile_pos(tile : Tile_Properties) -> Vector2:

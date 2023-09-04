@@ -109,43 +109,65 @@ func place_tree(pos, type) -> void:
 func initialize_npcs():
 	var width = World.width
 	var height = World.height
-	place_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	place_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
+	construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
+	construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
 			var pos = Vector2(x, y)
 			var prob = randf_range(0, 1)
 			if between(prob, 0.95, 0.956):
-				place_npc(pos, World.Vore_Type.HERBIVORE)
+				construct_npc(pos, World.Vore_Type.HERBIVORE)
 			elif between(prob, 0.956, 0.958):
-				place_npc(pos, World.Vore_Type.CARNIVORE)
+				construct_npc(pos, World.Vore_Type.CARNIVORE)
 			
-func place_npc(pos, type):
+func construct_npc(pos, type):
 	var scene = load("res://SCENES/animal.tscn")
 	var inst = scene.instantiate()
 	match type:
 		World.Vore_Type.HERBIVORE:
-			# scene = load("res://SCENES/herbivore.tscn")
-			# inst = scene.instantiate()
 			var herbivore_script = load(World.herbivore_script)
-			#var node = get_node("CharacterBody2D")
-			#node.set_script(herbivore_script)
 			inst.set_script(herbivore_script)
 			inst.construct_herbivore(pos)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
 		World.Vore_Type.CARNIVORE:
-			# scene = load("res://SCENES/carnivore.tscn")
-			# inst = scene.instantiate()
 			var carnivore_script = load(World.carnivore_script)
-			#var node = get_node("CharacterBody2D")
-			#node.set_script(carnivore_script)
 			inst.set_script(carnivore_script)
 			inst.construct_carnivore(pos)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
-
-	
 	inst.add_to_group(World.animal_group)
 	add_child(inst)
+
+#End of initialization
+
+func create_offspring(pos, type, parent_1, parent_2):
+	var scene = load("res://SCENES/animal.tscn")
+	var inst = scene.instantiate()
+	match type:
+		World.Vore_Type.HERBIVORE:
+			var herbivore_script = load(World.herbivore_script)
+			inst.set_script(herbivore_script)
+			inst.spawn_animal(pos, type, parent_1, parent_2)
+			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
+		World.Vore_Type.CARNIVORE:
+			var carnivore_script = load(World.carnivore_script)
+			inst.set_script(carnivore_script)
+			inst.spawn_animal(pos, type, parent_1, parent_2)
+			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
+	inst.add_to_group(World.animal_group)
+	add_child(inst)
+
+func extract_gene(parent_1, parent_2):
+	var mutation_prob = World.mutation_prob#global as of now
+	var from_parent = randi_range(0, 1)#0 -> parent_1 || 1 -> parent_2
+	var mut = randf_range(0, 1)
+	var result
+	if from_parent:
+		result = parent_2
+	else:
+		result = parent_1
+	if mut < mutation_prob:
+		result += max(0, randf_range(-0.05, 0.05)*result)#if mutation occurs it can influence a gene by up to 5%.. also cant be a negative value
+	return result
 
 func between(val, start, end):
 	if start <= val and val <= end:
