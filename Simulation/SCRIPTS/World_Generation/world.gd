@@ -37,8 +37,8 @@ func _do_time() -> void:
 func generate_vegetation():
 	var width = World.width
 	var height = World.height
-	for x in range(-width, width):
-		for y in range(-height, height):
+	for x in range(-width, width + 1):
+		for y in range(-height, height + 1):
 			var pos = Vector2i(x, y)
 			var alt = World.altitude[pos]
 			var moist = World.moisture[pos]
@@ -111,8 +111,8 @@ func initialize_npcs():
 	var height = World.height
 	place_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
 	place_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
-	for x in range(-width, width):
-		for y in range(-height, height):
+	for x in range(-width, width + 1):
+		for y in range(-height, height + 1):
 			var pos = Vector2(x, y)
 			var prob = randf_range(0, 1)
 			if between(prob, 0.95, 0.956):
