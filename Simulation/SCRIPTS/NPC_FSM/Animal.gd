@@ -19,7 +19,9 @@ enum Animal_Types {
 var animal_state : Animal_Base_States = Animal_Base_States.INIT
 var animal_type : Animal_Types 
 var corpse_timer : float = 0
-var detected_animals : Array[Animal]
+var detected_animals : Array[Animal] # right now every animal is detected
+# could add animals_in_range to mean all animals within our Detection_Radius
+# + detected_animals for animals that we are aware of being in our radius
 
 func spawn_animal(pos_, type, parent_1, parent_2):
 	set_basic_properties(pos_, parent_1, parent_2)
@@ -35,17 +37,17 @@ func construct_animal(pos_ : Vector2i, type : World.Vore_Type):
 	set_npc(curr_pos_, max_velocity_, max_steering_force_, wander_radius_, wander_offset_)
 	properties_generator(type)
 
+func kill_animal():
+	animal_state = Animal_Base_States.DEAD
+	remove_from_group(World.animal_group) 
+	add_to_group(World.cadaver_group)
+	stop_animal()
+
 func set_base_state(dangerous_animals : Array[Animal]):
 	if curr_hunger <= 0 or curr_hydration <= 0 or curr_health <= 0:
-		animal_state = Animal_Base_States.DEAD
-		remove_from_group(World.animal_group) 
-		add_to_group(World.cadaver_group)
-		acceleration *= 0
-		curr_velocity *= 0
+		kill_animal()
 	elif not dangerous_animals.is_empty():
 		animal_state = Animal_Base_States.FLEEING
-	# elif World.day_type == World.Day_Type.NIGHT: # TODO just replace NIGHT with an animal variable to get nocturnal animals
-	# 	animal_state = Animal_Base_States.SLEEPING
 	elif curr_hunger_norm < seek_nutrition_threshold and curr_hunger_norm < curr_hydration_norm:
 		animal_state = Animal_Base_States.HUNGRY
 	elif curr_hydration_norm < seek_hydration_threshold and curr_hydration_norm <= curr_hunger_norm:
@@ -81,23 +83,22 @@ func get_animals_from_sight() -> Array[Animal]:
 	# var animals = get_tree().get_nodes_in_group(World.animal_group)
 	var result : Array[Animal]
 	for animal in detected_animals:
-		if can_see(animal.curr_pos) and curr_pos != animal.curr_pos:
+		if can_see(animal.curr_pos):
 			result.append(animal)
 	return result
 
-func get_animals_from_hearing() -> Array[Animal]:
-	# var animals = get_tree().get_nodes_in_group(World.animal_group)
-	var result : Array[Animal]
-	for animal in detected_animals:
-		if can_hear(animal.curr_pos) and curr_pos != animal.curr_pos:
-			result.append(animal)
-	return result
+# func get_animals_from_hearing() -> Array[Animal]:
+# 	# var animals = get_tree().get_nodes_in_group(World.animal_group)
+# 	var result : Array[Animal]
+# 	for animal in detected_animals:
+# 		if can_hear(animal.curr_pos) and curr_pos != animal.curr_pos:
+# 			result.append(animal)
+# 	return result
 
 func get_cadavers_from_smell() -> Array[Animal]:
-	var animals = get_tree().get_nodes_in_group(World.cadaver_group)
 	var result : Array[Animal]
-	for animal in animals:
-		if can_hear(animal.curr_pos):#can hear.... TODO
+	for animal in detected_animals:
+		if animal.is_in_group(World.cadaver_group):#can hear.... TODO
 			result.append(animal)
 	return result
 
@@ -106,16 +107,25 @@ func filter_animals_by_danger(animals_in_range : Array[Animal]) -> Array[Animal]
 	for animal in animals_in_range:
 		if vore_type == World.Vore_Type.HERBIVORE and animal.vore_type == World.Vore_Type.CARNIVORE:
 			dangerous_animals.append(animal)
-		# elif vore_type == World.Vore_Type.CARNIVORE and animal.vore_type == World.Vore_Type.CARNIVORE:
-		# 	dangerous_animals.append(animal)
 	return dangerous_animals
 
-func filter_animals_by_type(animals_in_range : Array[Animal], type : Animal_Types):
+func filter_animals_by_type(animals_in_sight : Array[Animal], type : Animal_Types):
 	var animals_of_type : Array[Animal]
-	for animal in animals_in_range:
+	for animal in animals_in_sight:
 		if type == animal.animal_type:
 			animals_of_type.append(animal)
 	return animals_of_type
+
+func find_closest_mate(animals_of_same_type : Array[Animal]) -> Animal:
+	var result : Animal = animals_of_same_type[0]
+	var closest_animal : float = curr_pos.distance_to(animals_of_same_type[0].curr_pos)
+	for animal in animals_of_same_type:
+		if animal.gender == World.Gender.FEMALE:
+			var dist = curr_pos.distance_to(animal.curr_pos)
+			if dist < closest_animal:
+				result = animal
+				closest_animal = dist
+	return result
 
 func get_flee_dir(animals : Array[Animal]) -> Vector2:
 	var force : Vector2 = Vector2(0, 0)
@@ -146,31 +156,25 @@ func get_flock_dir(animals: Array[Animal]) -> Vector2:
 	var alignment_force : Vector2 = Vector2(0, 0)
 	for animal in animals:
 		var dist = abs(curr_pos.distance_to(animal.curr_pos))
-		if dist > 0 and dist < separation_radius:
+		if dist < separation_radius:
 			separation_force -= get_separation_force(animal)
-		if dist > 0 and dist < cohesion_radius:
+		if dist < cohesion_radius:
 			cohesion_force += get_cohesion_force(animal)
-		if dist > 0 and dist < alignment_radius:
+		if dist < alignment_radius:
 			alignment_force += get_alignment_force(animal)
 	force = (separation_force.normalized() * separation_mult) + (cohesion_force.normalized() * cohesion_mult) + (alignment_force.normalized() * alignment_mult)
 	return force.normalized()
 
 func get_roam_dir(animals: Array[Animal]) -> Vector2:
 	var force : Vector2 = wander()
-	if animals.is_empty():
-		pass
-	else:
+	if not animals.is_empty():
 		force += get_flock_dir(animals)
 	return force
 		
-func fight(defender : Animal) -> void:
+func fight(defender : Animal) -> void: # mb have a combat log -> combat instance with participants(many herbivores fighting off a carnivore etc.)
 	defender.curr_health -= attack_damage
 	if curr_pos.distance_to(defender.curr_pos) < defender.attack_range and randf_range(0, 1) < 0.2:
 		curr_health -= defender.attack_damage
-
-func rest(delta : float):
-	if curr_energy_level < max_energy_level:
-		curr_energy_level += delta
 
 func drink_at_tile(tile : World.Tile_Properties, delta : float):
 	curr_hydration += delta * (1/hearing_while_consuming)
@@ -244,15 +248,12 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 			result = tmp
 	return result
 
-# func reproduce(partner : Animal):
-
-
-
+#Node component functions:
 func _on_timer_timeout():
 	pass # this func gets defined in instances of Carnivore/Herbivore
 
 func _on_Area2D_animal_entered(body):
-	if body is Animal:
+	if body is Animal and body.curr_pos != curr_pos:
 		detected_animals.append(body)
 
 func _on_Area2D_animal_exited(body):

@@ -12,21 +12,12 @@ search for food untill its hunger value goes above a certain threshold. This beh
 the fact that in search of satisfying a value, the other value went below a critical threshold, thereby putting the animal in danger 
 if it doesn't change course immediatly. 
 
-2. During the day the animals try to fulfill their "quotas" for food/hydration, in search of which they will deplete their energy.
-Energy is gained during the night when (currently) all animals will be resting, or it can be gained after an animal fills its values, 
-after which it starts resting (during the day resting will provide less of an increase in the animals' energy).
-
-3a. After depleting ones' energy storage, the animal goes into a DRAINED state, where it slowly regains energy, but is vulnerable 
-to any and all predators. After a certain threshold of energy is attained in this state, the animal is free to do as it likes once again.
-
 3b. After depleting ones' food/hydration, the animal dies, leaving its corpse for a very short ammount of time with a large penalty for 
 the ammount of food that can be gained from the corpse by predators.
 
 4. Animals can see every animal in their line of sight. Predators will try to sneak up as close to their prey as they can before they are noticed.
 Animals will send signals to a set radius around them based on a percentage chance (to make noise), and all animals within this radius will then 
-notice said animal.
-
-4a. Therefore a predators movement can be characterised as sneak/stalk untill noticed
+notice said animal. Therefore a predators movement can be characterised as sneak/stalk untill noticed
 
 5. To breed is to survive and evolve, and since wolfs of this world are not pack animals, they need to have a way to search and find mates.
 One part of this process is the extent of their wandering that would increase their chances to meet another wolf. Another would be how much
@@ -35,6 +26,7 @@ a chance of meeting up.
 For herbivores (pack animals) it will be of much less import, since they preffer to be in herds. They will therefore want for a means of picking 
 the suitable male, within their congregation. This could be simply represented as "dominance" - or named as any one specific example of it - that 
 could be represented by a variable that includes a price to pay(energy or some such).
+Addend: Animals can be more or less herd loving, no stereotyping here. Also, not sure about how to pick partners atm, so for now they are the closest possibility.
 
 6. Animals hold memories about water sources that they visited, places where they encountered an abundance of food in the past, or places where they
 encountered danger (in terms of predators). These memories can be used to augment an animals "wander" mechanic, so as to not just blicnly search within their 
@@ -56,7 +48,7 @@ genome.. also memories can be gained from other animals under certain(as of now 
 	territory and not stray too far out, if not driven by necessity.... could also be implemented with direct coordinates and a radius or something to avoid this.
 
 8. There are many attributes that are balanced with increased energy consumption for the animal. Example is max_velocity where the faster an animal is moving at
-the moment, the faster it depletes its' energy values. How much value is placed on move quickly will be determined by the animals' needs.
+the moment, the faster it depletes its' energy values. How much value is placed on moving quickly will be determined by the animals' needs.
 The interesting idea with this is a World_Variable approach, where we can set these energy consumption rules for the whole world, and we can then detect what attributes
 are favored depending on their energy price. So we could have one world where your curr_velocity consumes curr_velocity squared of energy, or one where it only consumes 
 curr_velocity. There are many such attributes, and they can be studied directly or be generated at random upon initialization of the world to produce a unique world 
@@ -70,6 +62,7 @@ mass + curr_velocity. An animal though consumes energy even when idle(like maint
 while ensuring one does not get eaten. This approach would by neccesity sacrifice some complexity e.g. nocturnal animals.
 Note: Animals gain energy by converting their "stored" resources such as food/hydration, a proccess that takes time, meaning animals will be less likely to do "dangerous"(stressful) 
 actions while low on energy(something that could be overcome by neccesity e.g. lack of stored resources).
+
 
 IMPORTANT:
 Focus: 
@@ -114,4 +107,14 @@ MAP GENERATION STEPS:
 	Visual Indicators for Lakes: If lakes are being generated in colder areas (like Tundra), they could be represented as frozen or having patches of ice. In tropical or warm regions, lakes could 
 	have distinct features like lily pads or specific water plants.
 	
+	
+ABANDONED IDEAS:
+2. During the day the animals try to fulfill their "quotas" for food/hydration, in search of which they will deplete their energy.
+Energy is gained during the night when (currently) all animals will be resting, or it can be gained after an animal fills its values, 
+after which it starts resting (during the day resting will provide less of an increase in the animals' energy).
+
+3a. After depleting ones' energy storage, the animal goes into a DRAINED state, where it slowly regains energy, but is vulnerable 
+to any and all predators. After a certain threshold of energy is attained in this state, the animal is free to do as it likes once again.
+
+
 IMPLEMENTED IDEAS:

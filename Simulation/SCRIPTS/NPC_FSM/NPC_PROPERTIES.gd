@@ -47,7 +47,10 @@ var sense_range : float
 
 #Sexual
 var gender : World.Gender
-var pregnancy_period : float
+var pregnancy_period : float = 3
+var is_pregnant : bool = false
+var pregnancy_penalty : float = 0.8
+var reproduced_recently : bool
 # TODO make pregnancy affect the animals behaviour/locomotion/energy_consumption
 
 func set_properties(type, mass_, max_health_, attack_damage_, attack_range_, max_energy_level_, max_hunger_, max_hydration_,

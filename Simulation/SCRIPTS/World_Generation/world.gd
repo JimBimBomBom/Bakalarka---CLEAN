@@ -2,7 +2,7 @@ extends Node2D
 
 func _init():
 	World.day = 0
-	World.day_type = World.Day_Type.DAY
+	# World.day_type = World.Day_Type.DAY
 	World.hour = 0
 	World.hours_in_day = 60
 
@@ -30,9 +30,7 @@ func _do_time() -> void:
 		if World.day % 7 == 0:
 			do_vegetation() #TODO maybe send signal to vegetation instead
 		World.hour = 0
-		World.day_type = World.Day_Type.DAY
-	if World.hour > World.hours_in_day/2:
-		World.day_type = World.Day_Type.NIGHT 
+		# World.day_type = World.Day_Type.DAY # obsolete
 
 func generate_vegetation():
 	var width = World.width
@@ -110,6 +108,8 @@ func initialize_npcs():
 	var width = World.width
 	var height = World.height
 	construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
+	construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
+	return
 	construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
@@ -138,6 +138,7 @@ func construct_npc(pos, type):
 	add_child(inst)
 
 #End of initialization
+
 
 func create_offspring(pos, type, parent_1, parent_2):
 	var scene = load("res://SCENES/animal.tscn")
@@ -168,7 +169,7 @@ func extract_gene(parent_1, parent_2):
 	if mut < mutation_prob:
 		result += max(0, randf_range(-0.05, 0.05)*result)#if mutation occurs it can influence a gene by up to 5%.. also cant be a negative value
 	return result
-
+	
 func between(val, start, end):
 	if start <= val and val <= end:
 		return true

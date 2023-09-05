@@ -6,7 +6,8 @@ var consumption_state : Consumption_State = Consumption_State.SEEKING
 
 func herbivore_fsm(delta : float):
 	var animals_in_sight : Array[Animal] = get_animals_from_sight()
-	var animals_in_hearing_range : Array[Animal] = get_animals_from_hearing()
+	# var animals_in_hearing_range : Array[Animal] = get_animals_from_hearing()
+	var animals_in_hearing_range = detected_animals
 	var dangerous_animals : Array[Animal] = filter_animals_by_danger(animals_in_hearing_range) # TODO add a specific list of dangerous animals to specific animals
 	var animals_of_same_type : Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
 	set_base_state(dangerous_animals)
@@ -15,9 +16,6 @@ func herbivore_fsm(delta : float):
 		Animal_Base_States.FLEEING:
 			var force = get_flee_dir(dangerous_animals)
 			move_calc(force)
-		Animal_Base_States.SLEEPING:
-			# curr_velocity = Vector2(0, 0)
-			rest(delta)
 		Animal_Base_States.HUNGRY:
 			var food_in_range : Array[World.Tile_Properties] = food_in_range()
 			if not food_in_range.is_empty(): #GRAZING ?
@@ -27,18 +25,10 @@ func herbivore_fsm(delta : float):
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
-				# var tile = select_hydration_tile(hydration_in_range)
-				# var target = World.get_tile_pos(tile)
-				# move_new(seek(target))
-				# if curr_pos.distance_to(target) < 10:#
-				# 	drink_at_tile(tile, delta)
 				herbivore_hydrate(hydration_in_range, delta)
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
-		# Animal_Base_States.DRAINED: #TODO
-		# 	rest(delta)
 		Animal_Base_States.SATED:
-			# rest(delta)
 			move_calc(get_roam_dir(animals_of_same_type))
 
 func process_animal(delta : float):

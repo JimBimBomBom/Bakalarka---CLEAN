@@ -34,6 +34,7 @@ var tile_size : Vector2 = Vector2(32, 32)
 var tile_size_i : Vector2i = Vector2i(tile_size.x, tile_size.y)
 
 var corpse_max_timer : float
+var mutation_prob = 0.01
 
 const Tile_Properties = preload("res://SCRIPTS/World_Generation/Tile_Properties.gd")
 
@@ -71,4 +72,6 @@ enum Gender {
 
 func get_tile_pos(tile : Tile_Properties) -> Vector2:
 	return Vector2(tile.index.x, tile.index.y)*tile_size + tile_size/2
+
+
 
