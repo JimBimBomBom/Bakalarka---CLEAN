@@ -16,6 +16,8 @@ enum Animal_Types {
 	DEER,
 }
 
+signal birth_request(pos, type, parent_1, parent_2)
+
 var animal_state : Animal_Base_States = Animal_Base_States.INIT
 var animal_type : Animal_Types 
 var corpse_timer : float = 0
@@ -248,6 +250,26 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 			result = tmp
 	return result
 
+func select_potential_mates() -> Array[Animal]:
+	var result : Array[Animal]
+	for animal in detected_animals:
+		if animal.gender == World.Gender.FEMALE and not animal.is_pregnant:
+			result.append(animal)
+	return result
+
+func reproduce_with_animal(animal):
+	reproduced_recently = true
+	animal.become_pregnant(self)
+
+func become_pregnant(partner):
+	is_pregnant = true
+	sexual_partner = partner
+	get_node("pregnancy_timer").start()
+
+func _on_pregnancy_timer_timeout():
+	is_pregnant = false
+	emit_signal("birth_request", self, sexual_partner)
+
 #Node component functions:
 func _on_timer_timeout():
 	pass # this func gets defined in instances of Carnivore/Herbivore
@@ -263,6 +285,14 @@ func _on_Area2D_animal_exited(body):
 func _ready():
 	var timer = get_node("Timer") #?? mb add timeout for actions as a animal variable? could be interesting
 	timer.timeout.connect(_on_timer_timeout)
+
+	if gender == World.Gender.FEMALE:
+		var pregnancy_timer = Timer.new()
+		pregnancy_timer.set_name("pregnancy_timer")
+		pregnancy_timer.set_wait_time(pregnancy_period)
+		pregnancy_timer.set_one_shot(true)
+		pregnancy_timer.timeout.connect(_on_pregnancy_timer_timeout)
+		add_child(pregnancy_timer)
 	
 	var animal_detector = get_node("Area_Detection")
 	animal_detector.body_entered.connect(_on_Area2D_animal_entered)

@@ -50,12 +50,14 @@ var gender : World.Gender
 var pregnancy_period : float = 3
 var is_pregnant : bool = false
 var pregnancy_penalty : float = 0.8
-var reproduced_recently : bool
+var reproduced_recently : bool = false
+var sexual_partner : Animal
 # TODO make pregnancy affect the animals behaviour/locomotion/energy_consumption
 
 func set_properties(type, mass_, max_health_, attack_damage_, attack_range_, max_energy_level_, max_hunger_, max_hydration_,
 						sight_range_, field_of_view_half_, night_vision_acuity_, day_vision_acuity_, hearing_range_, hearing_while_consuming_,
-						separation_mult_, separation_radius_, cohesion_mult_, cohesion_radius_, alignment_mult_, alignment_radius_):
+						separation_mult_, separation_radius_, cohesion_mult_, cohesion_radius_, alignment_mult_, alignment_radius_,
+						gender_):
 	vore_type = type
 	max_health = max_health_
 	curr_health = max_health
@@ -91,6 +93,8 @@ func set_properties(type, mass_, max_health_, attack_damage_, attack_range_, max
 	alignment_mult = alignment_mult_
 	alignment_radius = alignment_radius_
 
+	gender = gender_
+
 func properties_generator(type):
 	match type:
 		World.Vore_Type.HERBIVORE:
@@ -115,10 +119,15 @@ func properties_generator(type):
 			var cohesion_radius = randi_range(50, 120)
 			var alignment_mult = randf_range(0.4, 1)
 			var alignment_radius = randi_range(50, 120)
-			
+
+			var gender_f = randi_range(0, 1)
+			var gender = World.Gender.FEMALE
+			if gender_f:
+				gender = World.Gender.MALE
 			set_properties(type, mass, max_health, attack_damage, attack_range, max_energy_level, max_hunger, max_hydration,
 										sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_while_consuming,
-										separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius)
+										separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius,
+										gender)
 		World.Vore_Type.CARNIVORE:
 			var mass = randi_range(50, 250)
 			var max_health = mass
@@ -142,9 +151,14 @@ func properties_generator(type):
 			var alignment_mult = randf_range(0, 0.4)
 			var alignment_radius = randi_range(50, 120)
 
+			var gender_f = randi_range(0, 1)
+			var gender = World.Gender.FEMALE
+			if gender_f:
+				gender = World.Gender.MALE
 			set_properties(type, mass, max_health, attack_damage, attack_range, max_energy_level, max_hunger, max_hydration,
 										sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_while_consuming,
-										separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius)
+										separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius,
+										gender)
 
 
 
@@ -172,6 +186,8 @@ func set_animal_properties(type, parent_1, parent_2):
 	var alignment_mult = World.extract_gene(parent_1.alignment_mult, parent_2.alignment_mult)
 	var alignment_radius = World.extract_gene(parent_1.alignment_radius, parent_2.alignment_radius)
 
+	var gender = World.extract_gene(parent_1.gender, parent_2.gender)
 	set_properties(type, mass, max_health, attack_damage, attack_range, max_energy_level, max_hunger, max_hydration,
 								sight_range, field_of_view_half, night_vision_acuity, day_vision_acuity, hearing_range, hearing_while_consuming,
-								separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius)
+								separation_mult, separation_radius, cohesion_mult, cohesion_radius, alignment_mult, alignment_radius,
+								gender)

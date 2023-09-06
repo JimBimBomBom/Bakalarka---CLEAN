@@ -140,7 +140,7 @@ func construct_npc(pos, type):
 #End of initialization
 
 
-func create_offspring(pos, type, parent_1, parent_2):
+func _on_animal_birth_request(pos, type, parent_1, parent_2):
 	var scene = load("res://SCENES/animal.tscn")
 	var inst = scene.instantiate()
 	match type:
@@ -155,20 +155,11 @@ func create_offspring(pos, type, parent_1, parent_2):
 			inst.spawn_animal(pos, type, parent_1, parent_2)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 	inst.add_to_group(World.animal_group)
+
+	inst.connect("birth_request", self, "_on_animal_birth_request")
+
 	add_child(inst)
 
-func extract_gene(parent_1, parent_2):
-	var mutation_prob = World.mutation_prob#global as of now
-	var from_parent = randi_range(0, 1)#0 -> parent_1 || 1 -> parent_2
-	var mut = randf_range(0, 1)
-	var result
-	if from_parent:
-		result = parent_2
-	else:
-		result = parent_1
-	if mut < mutation_prob:
-		result += max(0, randf_range(-0.05, 0.05)*result)#if mutation occurs it can influence a gene by up to 5%.. also cant be a negative value
-	return result
 	
 func between(val, start, end):
 	if start <= val and val <= end:

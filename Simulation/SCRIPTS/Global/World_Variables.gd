@@ -70,6 +70,19 @@ enum Gender {
 	FEMALE,
 }
 
+func extract_gene(parent_1, parent_2):
+	var mutation_prob = World.mutation_prob#global as of now
+	var from_parent = randi_range(0, 1)#0 -> parent_1 || 1 -> parent_2
+	var mut = randf_range(0, 1)
+	var result
+	if from_parent:
+		result = parent_2
+	else:
+		result = parent_1
+	if mut < mutation_prob:
+		result += max(0, randf_range(-0.05, 0.05)*result)#if mutation occurs it can influence a gene by up to 5%.. also cant be a negative value
+	return result
+
 func get_tile_pos(tile : Tile_Properties) -> Vector2:
 	return Vector2(tile.index.x, tile.index.y)*tile_size + tile_size/2
 
