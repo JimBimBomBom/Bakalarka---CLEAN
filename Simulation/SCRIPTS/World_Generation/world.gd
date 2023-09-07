@@ -135,6 +135,7 @@ func construct_npc(pos, type):
 			inst.construct_carnivore(pos)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 	inst.add_to_group(World.animal_group)
+	inst.birth_request.connect(_on_animal_birth_request)
 	add_child(inst)
 
 #End of initialization
@@ -155,9 +156,7 @@ func _on_animal_birth_request(pos, type, parent_1, parent_2):
 			inst.spawn_animal(pos, type, parent_1, parent_2)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 	inst.add_to_group(World.animal_group)
-
-	inst.connect("birth_request", self, "_on_animal_birth_request")
-
+	inst.birth_request.connect(_on_animal_birth_request)
 	add_child(inst)
 
 	

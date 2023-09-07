@@ -76,10 +76,10 @@ func can_see(pos) -> bool:
 		return true
 	return false
 
-func can_hear(pos) -> bool:
-	if abs(curr_pos.distance_to(pos)) < hearing_range:
-		return true
-	return false
+# func can_hear(pos) -> bool:
+# 	if abs(curr_pos.distance_to(pos)) < hearing_range:
+# 		return true
+# 	return false
 
 func get_animals_from_sight() -> Array[Animal]:
 	# var animals = get_tree().get_nodes_in_group(World.animal_group)
@@ -268,7 +268,9 @@ func become_pregnant(partner):
 
 func _on_pregnancy_timer_timeout():
 	is_pregnant = false
-	emit_signal("birth_request", self, sexual_partner)
+	#emit_signal("birth_request", self, sexual_partner)
+	birth_request.emit(curr_pos, vore_type, self, sexual_partner)
+	sexual_partner = null
 
 #Node component functions:
 func _on_timer_timeout():

@@ -17,6 +17,10 @@ func herbivore_fsm(delta : float):
 			var force = get_flee_dir(dangerous_animals)
 			move_calc(force)
 		Animal_Base_States.HUNGRY:
+			if gender == World.Gender.MALE and not reproduced_recently:
+				var potential_mates = select_potential_mates()
+				if not potential_mates.is_empty():
+					reproduce_with_animal(potential_mates[0])
 			var food_in_range : Array[World.Tile_Properties] = food_in_range()
 			if not food_in_range.is_empty(): #GRAZING ?
 				herbivore_eat(food_in_range, delta)
@@ -29,6 +33,7 @@ func herbivore_fsm(delta : float):
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
 		Animal_Base_States.SATED:
+			
 			move_calc(get_roam_dir(animals_of_same_type))
 
 func process_animal(delta : float):
