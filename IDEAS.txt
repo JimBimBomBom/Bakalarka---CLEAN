@@ -12,8 +12,11 @@ search for food untill its hunger value goes above a certain threshold. This beh
 the fact that in search of satisfying a value, the other value went below a critical threshold, thereby putting the animal in danger 
 if it doesn't change course immediatly. 
 
-3b. After depleting ones' food/hydration, the animal dies, leaving its corpse for a very short ammount of time with a large penalty for 
-the ammount of food that can be gained from the corpse by predators.
+2. Refactor of animal genes:
+Class Genes will include all the genes that can be passed on to their descendants, leaving some animal traits such as age, ..., as animal variables.
+Gene additions: 
+-Genes should be made to influence the behaviour of animals in varying ways
+-
 
 4. Animals can see every animal in their line of sight. Predators will try to sneak up as close to their prey as they can before they are noticed.
 Animals will send signals to a set radius around them based on a percentage chance (to make noise), and all animals within this radius will then 
@@ -118,3 +121,5 @@ to any and all predators. After a certain threshold of energy is attained in thi
 
 
 IMPLEMENTED IDEAS:
+3b. After depleting ones' food/hydration, the animal dies, leaving its corpse for a very short ammount of time with a large penalty for 
+the ammount of food that can be gained from the corpse by predators.

@@ -268,7 +268,6 @@ func become_pregnant(partner):
 
 func _on_pregnancy_timer_timeout():
 	is_pregnant = false
-	#emit_signal("birth_request", self, sexual_partner)
 	birth_request.emit(curr_pos, vore_type, self, sexual_partner)
 	sexual_partner = null
 

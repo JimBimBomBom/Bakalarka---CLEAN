@@ -3,6 +3,7 @@ extends Animal
 class_name Herbivore
 
 var consumption_state : Consumption_State = Consumption_State.SEEKING
+var detected_crops : Array[Food_Crop] = Array()
 
 func herbivore_fsm(delta : float):
 	var animals_in_sight : Array[Animal] = get_animals_from_sight()
@@ -94,6 +95,18 @@ func _physics_process(delta : float):
 	do_move(delta)
 	position = curr_pos
 
+func _on_Area2D_animal_entered(body):
+	if body is Animal and body.curr_pos != curr_pos:
+		detected_animals.append(body)
+	elif body is Food_Crop:
+		detected_crops.append(body)
+
+func _on_Area2D_animal_exited(body):
+	if body is Animal:
+		detected_animals.erase(body)
+	elif body is Food_Crop:
+		detected_crops.erase(body)
+	
 func get_seek_dir(target : Animal) -> Vector2:
 	return curr_pos.direction_to(target.curr_pos).normalized()
 

@@ -12,7 +12,8 @@ func _ready():
 
 	add_child(World.Player)
 	
-	generate_vegetation()
+	place_food_crops()
+	# generate_vegetation()
 	initialize_npcs()
 
 	var timer = get_node("Timer") 
@@ -28,9 +29,33 @@ func _do_time() -> void:
 	if World.hour >= World.hours_in_day:
 		World.day += 1
 		if World.day % 7 == 0:
-			do_vegetation() #TODO maybe send signal to vegetation instead
+			pass
+			# do_vegetation() #TODO maybe send signal to vegetation instead
 		World.hour = 0
-		# World.day_type = World.Day_Type.DAY # obsolete
+		# World.day_type = World.Day_Type.DAY # obsolete atm
+
+func place_food_crop(pos, food_yield : float):
+	var scene = load("res://SCENES/FoodCrop.tscn")
+	var inst = scene.instantiate()
+	inst.yield_value = food_yield
+	inst.position = Vector2(pos.x, pos.y)*World.tile_size
+	add_child(inst)
+
+func place_food_crops():
+	var width = World.width
+	var height = World.height
+	for x in range(-width, width + 1):
+		for y in range(-height, height + 1):
+			var pos = Vector2i(x, y)
+			var alt = World.altitude[pos]
+			var moist = World.moisture[pos]
+			var temp = World.temperature[pos]
+
+			var rand = randf_range(0, 1)
+			var yield_prob = temp*moist
+			if yield_prob > rand:
+				place_food_crop(pos, yield_prob)
+
 
 func generate_vegetation():
 	var width = World.width
@@ -41,7 +66,6 @@ func generate_vegetation():
 			var alt = World.altitude[pos]
 			var moist = World.moisture[pos]
 			var temp = World.temperature[pos]
-			
 
 			if between(moist, 0.6, 0.8) and between(temp, 0.4, 0.8):
 				place_tree(pos, World.Vegetation_Type.TREE_1)
@@ -60,17 +84,6 @@ func place_tree(pos, type) -> void:
 	var inst = scene.instantiate()
 	var tile = World.Map.tiles[pos]
 	match tile.biome:
-		#World.Temperature_Type.TUNDRA:
-			#match type:	
-				#pass	
-				# World.Vegetation_Type.TREE_1:
-				# 	inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Temperate_Tree_1.png")
-				# World.Vegetation_Type.TREE_2:
-				# 	inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Temperate_Tree_2.png")
-				# World.Vegetation_Type.BUSH_1:
-				# 	inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
-				# World.Vegetation_Type.BUSH_2:
-				# 	inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
 		World.Temperature_Type.TAIGA:
 			match type:		
 				World.Vegetation_Type.TREE_1:
@@ -91,14 +104,6 @@ func place_tree(pos, type) -> void:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
 				World.Vegetation_Type.BUSH_2:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
-		World.Temperature_Type.DESERT:
-			match type:		
-				World.Vegetation_Type.TREE_1:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Cactus_1.png")
-				World.Vegetation_Type.BUSH_1:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Jungle_Bush_1.png")
-				World.Vegetation_Type.BUSH_2:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Jungle_Bush_1.png")
 	
 	inst.position = Vector2(pos.x, pos.y)*World.tile_size
 	inst.add_to_group(World.vegetation_group)
@@ -107,10 +112,10 @@ func place_tree(pos, type) -> void:
 func initialize_npcs():
 	var width = World.width
 	var height = World.height
-	construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
-	return
-	construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
+	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
+	# construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
+	# return
+	# construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
 			var pos = Vector2(x, y)

@@ -22,6 +22,8 @@ var hours_in_day : float
 var animal_group : String = "Animals"
 var cadaver_group : String = "Cadavers"
 var vegetation_group : String = "Vegetation"
+var food_crop_group : String = "Food_Crop"
+var food_regrow_group : String = "Food_Regrow"
 
 #Scripts
 var carnivore_script : String = "res://SCRIPTS/NPC_FSM/Carnivore.gd"

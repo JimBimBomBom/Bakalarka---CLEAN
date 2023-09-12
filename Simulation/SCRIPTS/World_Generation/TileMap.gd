@@ -45,16 +45,12 @@ func set_tiles(width, height):
 
 func get_type_from_temp(temp):
 	var temp_type : World.Temperature_Type
-	if temp < 0.1:
-		temp_type = World.Temperature_Type.TUNDRA
-	elif temp < 0.3:
+	if temp < 0.3:
 		temp_type = World.Temperature_Type.TAIGA
-	elif temp < 0.5:
-		temp_type = World.Temperature_Type.TEMPERATE_LAND
 	elif temp < 0.7:
-		temp_type = World.Temperature_Type.TROPICAL_LAND
+		temp_type = World.Temperature_Type.TEMPERATE_LAND
 	else:
-		temp_type = World.Temperature_Type.DESERT
+		temp_type = World.Temperature_Type.TROPICAL_LAND
 	return temp_type
 
 func set_tile_properties(tile : World.Tile_Properties, curr_food_ : float, max_food_ : float, 

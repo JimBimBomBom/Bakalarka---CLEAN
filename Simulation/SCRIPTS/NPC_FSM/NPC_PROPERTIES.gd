@@ -32,18 +32,17 @@ var alignment_radius : int
 var alignment_mult : float
 
 #Senses
+var sense_range : float
 #Sight
 var sight_range : float
 var field_of_view_half : float
 var night_vision_acuity : float # DECIDE -> if it wasn't prefferable to only look at the day.. as in no night
 var day_vision_acuity : float
-
 #Hearing
 var hearing_range : float
 var max_hearing_range : float
 var hearing_while_consuming : float
 
-var sense_range : float
 
 #Sexual
 var gender : World.Gender
