@@ -107,23 +107,23 @@ func get_stalk_dir(target : Animal) -> Vector2:
 func select_target(animals_in_range : Array[Animal], cadavers_in_range : Array[Animal]) -> Animal:
 	var result : Animal
 	if not cadavers_in_range.is_empty():
-		var best_cadaver : Animal
-		var curr_best_distance : float = 1.79769e300
+		var best_cadaver : Animal = cadavers_in_range[0]
+		var curr_best_distance : float = curr_pos.distance_to(best_cadaver.curr_pos)
 		for cadaver in cadavers_in_range:
 			var dist_to_target = curr_pos.distance_to(cadaver.curr_pos) 
-			if dist_to_target < hearing_range:
+			if dist_to_target < curr_best_distance:
 				curr_best_distance = dist_to_target
 				best_cadaver = cadaver
 		result = best_cadaver
 	else:
-		var best_target : Animal
-		var curr_best_distance : float = 1.79769e300
+		var best_animal : Animal = animals_in_range[0]
+		var curr_best_distance : float = curr_pos.distance_to(best_animal.curr_pos)
 		for animal in animals_in_range:
 			var dist_to_target = curr_pos.distance_to(animal.curr_pos) 
 			if dist_to_target < curr_best_distance:
 				curr_best_distance = dist_to_target
-				best_target = animal
-		result = best_target
+				best_animal = animal
+		result = best_animal
 
 	return result
 

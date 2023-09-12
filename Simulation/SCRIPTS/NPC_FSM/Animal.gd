@@ -21,7 +21,7 @@ signal birth_request(pos, type, parent_1, parent_2)
 var animal_state : Animal_Base_States = Animal_Base_States.INIT
 var animal_type : Animal_Types 
 var corpse_timer : float = 0
-var detected_animals : Array[Animal] # right now every animal is detected
+var detected_animals : Array[Animal] = [] # right now every animal is detected
 # could add animals_in_range to mean all animals within our Detection_Radius
 # + detected_animals for animals that we are aware of being in our radius
 
@@ -76,11 +76,6 @@ func can_see(pos) -> bool:
 		return true
 	return false
 
-# func can_hear(pos) -> bool:
-# 	if abs(curr_pos.distance_to(pos)) < hearing_range:
-# 		return true
-# 	return false
-
 func get_animals_from_sight() -> Array[Animal]:
 	# var animals = get_tree().get_nodes_in_group(World.animal_group)
 	var result : Array[Animal]
@@ -88,14 +83,6 @@ func get_animals_from_sight() -> Array[Animal]:
 		if can_see(animal.curr_pos):
 			result.append(animal)
 	return result
-
-# func get_animals_from_hearing() -> Array[Animal]:
-# 	# var animals = get_tree().get_nodes_in_group(World.animal_group)
-# 	var result : Array[Animal]
-# 	for animal in detected_animals:
-# 		if can_hear(animal.curr_pos) and curr_pos != animal.curr_pos:
-# 			result.append(animal)
-# 	return result
 
 func get_cadavers_from_smell() -> Array[Animal]:
 	var result : Array[Animal]
@@ -218,28 +205,12 @@ func get_tiles_from_senses() -> Array[World.Tile_Properties]:
 				result.append(World.Map.tiles[tile_index])
 	return result
 
-func food_in_range() -> Array[World.Tile_Properties]:
-	var result : Array[World.Tile_Properties]
-	var tiles = get_tiles_from_senses()
-	for tile in tiles:
-		if tile.type == World.Tile_Type.PLAIN and tile.curr_food > 0: 
-			result.append(tile)
-	return result
-
 func hydration_in_range() -> Array[World.Tile_Properties]:
 	var result : Array[World.Tile_Properties]
 	var tiles = get_tiles_from_senses()
 	for tile in tiles:
 		if tile.type == World.Tile_Type.WATER: 
 			result.append(tile)
-	return result
-
-func select_food_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Properties:
-	var result : World.Tile_Properties = tiles[0] # tiles is not empty if we are in this function
-	for tile in tiles:
-		var tmp : World.Tile_Properties = tile
-		if curr_pos.distance_to(World.get_tile_pos(tmp)) < curr_pos.distance_to(World.get_tile_pos(result)):
-			result = tmp
 	return result
 
 func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Properties:

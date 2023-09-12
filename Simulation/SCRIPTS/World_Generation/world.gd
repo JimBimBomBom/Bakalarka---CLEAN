@@ -51,7 +51,7 @@ func place_food_crops():
 			var moist = World.moisture[pos]
 			var temp = World.temperature[pos]
 
-			var rand = randf_range(0, 1)
+			var rand = randf_range(0, 1.5)
 			var yield_prob = temp*moist
 			if yield_prob > rand:
 				place_food_crop(pos, yield_prob)
@@ -113,8 +113,8 @@ func initialize_npcs():
 	var width = World.width
 	var height = World.height
 	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	# construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
-	# return
+	#construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
+	#return
 	# construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):

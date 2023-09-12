@@ -3,11 +3,10 @@ extends Animal
 class_name Herbivore
 
 var consumption_state : Consumption_State = Consumption_State.SEEKING
-var detected_crops : Array[Food_Crop] = Array()
+var detected_crops : Array[Food_Crop] = []
 
 func herbivore_fsm(delta : float):
 	var animals_in_sight : Array[Animal] = get_animals_from_sight()
-	# var animals_in_hearing_range : Array[Animal] = get_animals_from_hearing()
 	var animals_in_hearing_range = detected_animals
 	var dangerous_animals : Array[Animal] = filter_animals_by_danger(animals_in_hearing_range) # TODO add a specific list of dangerous animals to specific animals
 	var animals_of_same_type : Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
@@ -18,15 +17,19 @@ func herbivore_fsm(delta : float):
 			var force = get_flee_dir(dangerous_animals)
 			move_calc(force)
 		Animal_Base_States.HUNGRY:
-			if gender == World.Gender.MALE and not reproduced_recently:
-				var potential_mates = select_potential_mates()
-				if not potential_mates.is_empty():
-					reproduce_with_animal(potential_mates[0])
-			var food_in_range : Array[World.Tile_Properties] = food_in_range()
-			if not food_in_range.is_empty(): #GRAZING ?
-				herbivore_eat(food_in_range, delta)
+			if not detected_crops.is_empty():
+				var crop_valid = get_closest_crop()
+				var crop = crop_valid[0]
+				if crop_valid[1]:
+					herbivore_eat(crop, delta)
+				else:
+					move_calc(get_roam_dir(animals_of_same_type))
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
+			# if not detected_crops.is_empty(): #GRAZING ?
+			# 	herbivore_eat(delta)
+			# else:
+			# 	move_calc(get_roam_dir(animals_of_same_type))
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
@@ -34,8 +37,11 @@ func herbivore_fsm(delta : float):
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
 		Animal_Base_States.SATED:
-			
 			move_calc(get_roam_dir(animals_of_same_type))
+			# if gender == World.Gender.MALE and not reproduced_recently:
+			# 	var potential_mates = select_potential_mates()
+			# 	if not potential_mates.is_empty():
+			# 		reproduce_with_animal(potential_mates[0])
 
 func process_animal(delta : float):
 	update_animal_norms()
@@ -47,23 +53,38 @@ enum Consumption_State {
 	SEEKING,
 	SCANNING,
 }
-func herbivore_eat(food_in_range : Array[World.Tile_Properties], delta : float):
-	var tile = select_food_tile(food_in_range)
+func herbivore_eat(crop, delta : float):
 	match consumption_state:
 		Consumption_State.SEEKING:
-			var target = World.get_tile_pos(tile)
-			move_calc(smooth_seek(target))
-			if curr_pos.distance_to(target) < 10:
-				hearing_range = max_hearing_range*hearing_while_consuming
+			move_calc(smooth_seek(crop.position))
+			if curr_pos.distance_to(crop.position) < 10:
 				consumption_state = Consumption_State.CONSUMING
 		Consumption_State.CONSUMING:
-			curr_velocity *= 0
-			eat_at_tile(tile, delta)
-			if tile.curr_food == 0:
-				consumption_state = Consumption_State.SEEKING
-				hearing_range = max_hearing_range
+			stop_animal()
+			hearing_range = max_hearing_range*hearing_while_consuming
+			eat_crop(crop)
+			consumption_state = Consumption_State.SCANNING
 		Consumption_State.SCANNING:
 			hearing_range = max_hearing_range
+			consumption_state = Consumption_State.SEEKING
+
+func get_closest_crop():
+	var closest : Food_Crop
+	var closest_dist = 1.79769e308
+	var edible_crop_was_found = false
+	for crop in detected_crops:
+		if crop.is_eaten:
+			continue
+		edible_crop_was_found = true
+		var crop_dist = curr_pos.distance_to(crop.position)
+		if crop_dist < closest_dist:
+			closest_dist = crop_dist
+			closest = crop
+	return [closest, edible_crop_was_found]
+
+func eat_crop(crop):
+	curr_hunger += crop.yield_value
+	crop.be_eaten()
 
 func herbivore_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
 	var tile = select_hydration_tile(hydration_in_range)

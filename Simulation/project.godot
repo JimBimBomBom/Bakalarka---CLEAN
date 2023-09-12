@@ -23,3 +23,6 @@ World="*res://SCRIPTS/Global/World_Variables.gd"
 
 2d_render/layer_1="Animal_Layer"
 2d_render/layer_2="Vegetation_Layer"
+2d_render/layer_3="FoodCrop_Layer"
+2d_physics/layer_1="Animal_Layer"
+2d_physics/layer_3="FoodCrop_Layer"
