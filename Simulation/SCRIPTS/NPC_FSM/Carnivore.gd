@@ -15,12 +15,10 @@ func carnivore_fsm(delta : float):
 		Animal_Base_States.FLEEING:
 			var force = get_flee_dir(dangerous_animals)
 			move_calc(force)
-		Animal_Base_States.SLEEPING:
-			curr_velocity = Vector2(0, 0)
 		Animal_Base_States.HUNGRY:
 			var animals_in_range : Array[Animal] 
-			if curr_hunger_norm < 0.2: #animals_in_hearing_range#filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
-				animals_in_range = animals_in_hearing_range
+			if curr_hunger_norm < 0.1: #animals_in_hearing_range#filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
+				animals_in_range = animals_in_hearing_range # chase closest animal -> even predators
 			else:
 				animals_in_range = filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
 
@@ -32,7 +30,7 @@ func carnivore_fsm(delta : float):
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
-				carnivore_hydrate(hydration_in_range, delta)
+				animal_hydrate(hydration_in_range, delta)
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
 		Animal_Base_States.SATED:
@@ -66,30 +64,14 @@ func carnivore_eat(food_in_range : Array[Animal], cadavers_in_range : Array[Anim
 			if not eat_animal(target, delta):
 				consumption_state = Consumption_State.SEEKING
 
-func carnivore_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
-	var tile = select_hydration_tile(hydration_in_range)
-	match consumption_state:
-		Consumption_State.SEEKING:
-			hearing_range = max_hearing_range
-			var target = World.get_tile_pos(tile)
-			move_calc(smooth_seek(target))
-			if curr_pos.distance_to(target) < 10:
-				hearing_range = max_hearing_range*hearing_while_consuming
-				consumption_state = Consumption_State.CONSUMING
-		Consumption_State.CONSUMING:
-			curr_velocity *= 0
-			drink_at_tile(tile, delta) #TODO reason for animal to change into scanning, can be a timer
-			if curr_hydration_norm >= seek_hydration_threshold: #TODO so shit, mb handle using signals?
-				consumption_state = Consumption_State.SEEKING
-				hearing_range = max_hearing_range
-
 func eat_animal(target : Animal, delta : float) -> bool:
 	if curr_pos.distance_to(target.curr_pos) >= 10 and target.animal_state != Animal_Base_States.DEAD:
 		return false
 	var food_gain = delta * 5 #TODO
 	if target.mass <= food_gain:
 		curr_hunger += target.mass
-		target.mass = 0
+		#target.mass = 0 # mb we should tell target to free_cadaver()
+		target.free_cadaver()
 	else:
 		curr_hunger += food_gain
 		target.mass -= food_gain
@@ -127,6 +109,23 @@ func select_target(animals_in_range : Array[Animal], cadavers_in_range : Array[A
 
 	return result
 
+func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
+	var tile = select_hydration_tile(hydration_in_range)
+	match consumption_state:
+		Consumption_State.SEEKING:
+			hearing_range = max_hearing_range
+			var target = World.get_tile_pos(tile)
+			move_calc(smooth_seek(target))
+			if curr_pos.distance_to(target) < 10:
+				# hearing_range = max_hearing_range*hearing_while_consuming
+				consumption_state = Consumption_State.CONSUMING
+		Consumption_State.CONSUMING:
+			stop_animal()
+			drink_at_tile(tile, delta) #TODO reason for animal to change into scanning, can be a timer
+			if curr_hydration_norm >= seek_hydration_threshold: #TODO so shit, mb handle using signals?
+				consumption_state = Consumption_State.SEEKING
+				# hearing_range = max_hearing_range
+
 func construct_carnivore(pos):
 	construct_animal(pos, World.Vore_Type.CARNIVORE)
 	animal_type = Animal_Types.WOLF
@@ -136,16 +135,12 @@ func process_animal(delta : float):
 	reset_acceleration() #every "move" is isolated
 	carnivore_fsm(delta)
 
-# func _ready():
-	# var carnivore_script = load(World.carnivore_script)
-	# $CharacterBody2D.set_script(carnivore_script)
-
 func _on_timer_timeout():
 	var delta = 0.1
 	if animal_state != Animal_Base_States.DEAD:
 		process_animal(delta)
 	else:
-		process_cadaver(delta)
+		free_cadaver()
 
 func _physics_process(delta : float):
 	do_move(delta)

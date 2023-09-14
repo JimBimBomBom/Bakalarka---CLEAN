@@ -19,39 +19,34 @@ func herbivore_fsm(delta : float):
 		Animal_Base_States.HUNGRY:
 			if not detected_crops.is_empty():
 				var crop_valid = get_closest_crop()
-				var crop = crop_valid[0]
 				if crop_valid[1]:
-					herbivore_eat(crop, delta)
+					herbivore_eat(crop_valid[0], delta)
 				else:
 					move_calc(get_roam_dir(animals_of_same_type))
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
-			# if not detected_crops.is_empty(): #GRAZING ?
-			# 	herbivore_eat(delta)
-			# else:
-			# 	move_calc(get_roam_dir(animals_of_same_type))
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
-				herbivore_hydrate(hydration_in_range, delta)
+				animal_hydrate(hydration_in_range, delta)
 			else:
 				move_calc(get_roam_dir(animals_of_same_type))
 		Animal_Base_States.SATED:
-			move_calc(get_roam_dir(animals_of_same_type))
 			# if gender == World.Gender.MALE and not reproduced_recently:
 			# 	var potential_mates = select_potential_mates()
 			# 	if not potential_mates.is_empty():
-			# 		reproduce_with_animal(potential_mates[0])
+			# 		reproduce_with_animal(potential_mates[0]) # so far the only heuristic is viscinity
+			move_calc(get_roam_dir(animals_of_same_type))
 
 func process_animal(delta : float):
 	update_animal_norms()
 	reset_acceleration() #every "move" is isolated
-	herbivore_fsm(delta) # ADD hydration in range
+	herbivore_fsm(delta)
 
 enum Consumption_State {
 	CONSUMING,
 	SEEKING,
-	SCANNING,
+	# SCANNING,
 }
 func herbivore_eat(crop, delta : float):
 	match consumption_state:
@@ -61,12 +56,29 @@ func herbivore_eat(crop, delta : float):
 				consumption_state = Consumption_State.CONSUMING
 		Consumption_State.CONSUMING:
 			stop_animal()
-			hearing_range = max_hearing_range*hearing_while_consuming
+			# hearing_range = max_hearing_range*hearing_while_consuming
 			eat_crop(crop)
-			consumption_state = Consumption_State.SCANNING
-		Consumption_State.SCANNING:
-			hearing_range = max_hearing_range
 			consumption_state = Consumption_State.SEEKING
+		# Consumption_State.SCANNING:
+			# hearing_range = max_hearing_range
+			# consumption_state = Consumption_State.SEEKING
+
+func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
+	var tile = select_hydration_tile(hydration_in_range)
+	match consumption_state:
+		Consumption_State.SEEKING:
+			hearing_range = max_hearing_range
+			var target = World.get_tile_pos(tile)
+			move_calc(smooth_seek(target))
+			if curr_pos.distance_to(target) < 10:
+				# hearing_range = max_hearing_range*hearing_while_consuming
+				consumption_state = Consumption_State.CONSUMING
+		Consumption_State.CONSUMING:
+			stop_animal()
+			drink_at_tile(tile, delta) #TODO reason for animal to change into scanning, can be a timer
+			if curr_hydration_norm >= seek_hydration_threshold: #TODO so shit, mb handle using signals?
+				consumption_state = Consumption_State.SEEKING
+				# hearing_range = max_hearing_range
 
 func get_closest_crop():
 	var closest : Food_Crop
@@ -83,34 +95,15 @@ func get_closest_crop():
 	return [closest, edible_crop_was_found]
 
 func eat_crop(crop):
-	curr_hunger += crop.yield_value
+	curr_hunger += crop.yield_value * 10 #temporary 10
 	crop.be_eaten()
-
-func herbivore_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
-	var tile = select_hydration_tile(hydration_in_range)
-	match consumption_state:
-		Consumption_State.SEEKING:
-			hearing_range = max_hearing_range
-			var target = World.get_tile_pos(tile)
-			move_calc(smooth_seek(target))
-			if curr_pos.distance_to(target) < 10:
-				hearing_range = max_hearing_range*hearing_while_consuming
-				consumption_state = Consumption_State.CONSUMING
-		Consumption_State.CONSUMING:
-			curr_velocity *= 0
-			drink_at_tile(tile, delta) #TODO reason for animal to change into scanning, can be a timer
-			if curr_hydration_norm >= seek_hydration_threshold: #TODO so shit, mb handle using signals?
-				consumption_state = Consumption_State.SEEKING
-				hearing_range = max_hearing_range
-		Consumption_State.SCANNING:
-			hearing_range = max_hearing_range
 
 func _on_timer_timeout():
 	var delta = 0.1 # once I give animals the chance to influence their delta with a gene -> replace only here
 	if animal_state != Animal_Base_States.DEAD:
 		process_animal(delta)
 	else:
-		process_cadaver(delta)
+		free_cadaver()
 
 func _physics_process(delta : float):
 	do_move(delta)

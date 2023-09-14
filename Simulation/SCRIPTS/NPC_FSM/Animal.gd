@@ -11,6 +11,11 @@ enum Animal_Base_States {
 	FLEEING,
 	SLEEPING,
 }
+enum Age_Group { # add timer to change age in change_age_time -> if Age_Group == Old .. die
+	Young,
+	Adult,
+	Old,
+}
 enum Animal_Types {
 	WOLF,
 	DEER,
@@ -19,8 +24,8 @@ enum Animal_Types {
 signal birth_request(pos, type, parent_1, parent_2)
 
 var animal_state : Animal_Base_States = Animal_Base_States.INIT
+
 var animal_type : Animal_Types 
-var corpse_timer : float = 0
 var detected_animals : Array[Animal] = [] # right now every animal is detected
 # could add animals_in_range to mean all animals within our Detection_Radius
 # + detected_animals for animals that we are aware of being in our radius
@@ -41,9 +46,13 @@ func construct_animal(pos_ : Vector2i, type : World.Vore_Type):
 
 func kill_animal():
 	animal_state = Animal_Base_States.DEAD
+	stop_animal()
 	remove_from_group(World.animal_group) 
 	add_to_group(World.cadaver_group)
-	stop_animal()
+	# var timer = get_node("Timer")
+	$Timer.wait_time = corpse_timer
+	$Timer.stop()
+	$Timer.start()
 
 func set_base_state(dangerous_animals : Array[Animal]):
 	if curr_hunger <= 0 or curr_hydration <= 0 or curr_health <= 0:
@@ -61,11 +70,9 @@ func stop_animal():
 	curr_velocity *= 0
 	acceleration *= 0
 
-func process_cadaver(delta : float):
-	corpse_timer += delta
-	if corpse_timer >= corpse_max_timer or mass == 0:
-		remove_from_group(World.cadaver_group)
-		self.queue_free()
+func free_cadaver():
+	remove_from_group(World.cadaver_group)
+	self.queue_free()
 
 func update_animal_norms():
 	curr_hunger_norm = curr_hunger/max_hunger
@@ -165,19 +172,6 @@ func fight(defender : Animal) -> void: # mb have a combat log -> combat instance
 	if curr_pos.distance_to(defender.curr_pos) < defender.attack_range and randf_range(0, 1) < 0.2:
 		curr_health -= defender.attack_damage
 
-func drink_at_tile(tile : World.Tile_Properties, delta : float):
-	curr_hydration += delta * (1/hearing_while_consuming)
-
-func eat_at_tile(tile : World.Tile_Properties, delta : float):
-	var food_gain = delta * (1/hearing_while_consuming)
-	if tile.curr_food < food_gain:
-		curr_hunger += tile.curr_food
-		tile.curr_food = 0
-		World.Map.set_tile_to_depleted_DEBUG(tile.index)
-	else:
-		tile.curr_food -= food_gain
-		curr_hunger += food_gain
-
 func within_bounds(tile_index : Vector2) -> bool:
 	if tile_index.x > -World.width and tile_index.x < World.width and tile_index.y > -World.height and tile_index.y < World.height:
 		return true
@@ -220,6 +214,19 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 		if curr_pos.distance_to(World.get_tile_pos(tmp)) < curr_pos.distance_to(World.get_tile_pos(result)):
 			result = tmp
 	return result
+
+func drink_at_tile(tile : World.Tile_Properties, delta : float):
+	curr_hydration += delta * (1/hearing_while_consuming)
+
+func eat_at_tile(tile : World.Tile_Properties, delta : float):
+	var food_gain = delta * (1/hearing_while_consuming)
+	if tile.curr_food < food_gain:
+		curr_hunger += tile.curr_food
+		tile.curr_food = 0
+		World.Map.set_tile_to_depleted_DEBUG(tile.index)
+	else:
+		tile.curr_food -= food_gain
+		curr_hunger += food_gain
 
 func select_potential_mates() -> Array[Animal]:
 	var result : Array[Animal]

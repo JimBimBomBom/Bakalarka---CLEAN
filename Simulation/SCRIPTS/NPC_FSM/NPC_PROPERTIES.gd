@@ -13,7 +13,8 @@ var attack_range : int
 var curr_energy_level : float
 var max_energy_level : float
 var mass : int
-var corpse_max_timer : float
+var corpse_timer : float
+var change_age_time : float
 #Resources
 var curr_hunger : float
 var max_hunger : float
@@ -65,7 +66,8 @@ func set_properties(type, mass_, max_health_, attack_damage_, attack_range_, max
 	max_energy_level = max_energy_level_
 	curr_energy_level = max_energy_level
 	mass = mass_
-	corpse_max_timer = 10 #hardset for now
+	corpse_timer = 20 #hardset for now
+	change_age_time = 20 #hardset for now
 
 	max_hunger = max_hunger_
 	curr_hunger = randf_range(0, max_hunger/2)
