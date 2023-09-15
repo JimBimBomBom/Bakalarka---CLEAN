@@ -32,12 +32,6 @@ func _do_time() -> void:
 		World.hour = 0
 		# World.day_type = World.Day_Type.DAY # obsolete atm
 
-
-
-
-
-
-
 func generate_vegetation():
 	var width = World.width
 	var height = World.height

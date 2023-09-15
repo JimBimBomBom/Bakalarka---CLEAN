@@ -78,8 +78,8 @@ func flee(target : Vector2) -> Vector2:
 	return seek(target) * -1
 
 func pursue(target : Animal) -> Vector2:
-	var magnitude = curr_pos.distance_to(target.curr_pos) / 20
-	var force = curr_pos.direction_to(target.curr_pos + (target.curr_velocity * magnitude))
+	var look_ahead_magnitude = curr_pos.distance_to(target.curr_pos) / 20
+	var force = curr_pos.direction_to(target.curr_pos + (target.curr_velocity * look_ahead_magnitude))
 	return (force - curr_velocity).normalized()
 
 func evade(target : Animal) -> Vector2:

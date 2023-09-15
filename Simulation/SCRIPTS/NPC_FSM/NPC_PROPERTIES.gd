@@ -146,7 +146,7 @@ func properties_generator(type):
 			var hearing_while_consuming = randf_range(0.1, 1)
 
 			var separation_mult = 1
-			var separation_radius = randi_range(70, 95)
+			var separation_radius = randi_range(140, 195)
 			var cohesion_mult = randf_range(0.1, 0.3)
 			var cohesion_radius = randi_range(50, 120)
 			var alignment_mult = randf_range(0, 0.4)

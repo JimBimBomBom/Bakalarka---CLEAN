@@ -71,11 +71,13 @@ func create_tile_properties(pos : Vector2i, temp, moist, tile_biome, tile_type):
 	set_tile_properties(tile, curr, max, gain, tile_biome, tile_type, pos)
 	tiles[pos] = tile
 
-func set_current_cell(pos, alt, temp, moist): #altitude is ingnored atm
+func set_current_cell(pos, alt, temp, moist):
 	var temperature_type = get_type_from_temp(temp)
-	set_cell(0, pos, temperature_type, Vector2i(0, 0)) 	# temp_type defines the ID of our Tile_Set,
-														# where the basic tile is always (0, 0)
-	create_tile_properties(pos, temp, moist, temperature_type, World.Tile_Type.PLAIN)
-
-func set_tile_to_depleted_DEBUG(index : Vector2i):
-	set_cell(0, index, 6, Vector2i(0, 0))
+	if alt < 0.2 and moist > 0.9:
+		set_cell(0, pos, 0, Vector2i(2, 2)) 	# temp_type defines the ID of our Tile_Set,
+		create_tile_properties(pos, 0, 0, temperature_type, World.Tile_Type.WATER)
+	else:
+		# var temperature_type = get_type_from_temp(temp)
+		set_cell(0, pos, temperature_type, Vector2i(0, 0)) 	# temp_type defines the ID of our Tile_Set,
+															# where the basic tile is always (0, 0)
+		create_tile_properties(pos, temp, moist, temperature_type, World.Tile_Type.PLAIN)
