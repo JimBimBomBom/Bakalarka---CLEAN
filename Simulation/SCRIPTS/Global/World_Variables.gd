@@ -18,6 +18,8 @@ var day_type : Day_Type
 var hour : float
 var hours_in_day : float
 
+var regrow_period : int = 7 # food regrows after x days
+
 #Groups
 var animal_group : String = "Animals"
 var cadaver_group : String = "Cadavers"

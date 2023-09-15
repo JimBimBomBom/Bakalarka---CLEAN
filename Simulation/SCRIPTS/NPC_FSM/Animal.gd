@@ -244,12 +244,12 @@ func become_pregnant(partner):
 	sexual_partner = partner
 	get_node("pregnancy_timer").start()
 
+#Node component functions:
 func _on_pregnancy_timer_timeout():
 	is_pregnant = false
 	birth_request.emit(curr_pos, vore_type, self, sexual_partner)
 	sexual_partner = null
 
-#Node component functions:
 func _on_timer_timeout():
 	pass # this func gets defined in instances of Carnivore/Herbivore
 

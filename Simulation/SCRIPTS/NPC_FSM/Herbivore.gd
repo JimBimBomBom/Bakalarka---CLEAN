@@ -46,7 +46,6 @@ func process_animal(delta : float):
 enum Consumption_State {
 	CONSUMING,
 	SEEKING,
-	# SCANNING,
 }
 func herbivore_eat(crop, delta : float):
 	match consumption_state:
@@ -59,9 +58,6 @@ func herbivore_eat(crop, delta : float):
 			# hearing_range = max_hearing_range*hearing_while_consuming
 			eat_crop(crop)
 			consumption_state = Consumption_State.SEEKING
-		# Consumption_State.SCANNING:
-			# hearing_range = max_hearing_range
-			# consumption_state = Consumption_State.SEEKING
 
 func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
 	var tile = select_hydration_tile(hydration_in_range)
