@@ -16,9 +16,18 @@ var fast_noise = FastNoiseLite.new()
 var day : int
 var day_type : Day_Type
 var hour : float
-var hours_in_day : float
 
+#World settings:
+var hours_in_day : float = 20
 var regrow_period : int = 7 # food regrows after x days
+var velocity_start_point = 0.3
+var resource_start_point = 0.3
+var change_age_period_mult = 10 # how many days for an "average" animal to age
+var corpse_timer = 50
+var seek_hydration_threshold = 0.2
+var seek_nutrition_threshold = 0.2
+var animal_acceleration_mult = 10
+var animal_velocity_mult = 40
 
 #Groups
 var animal_group : String = "Animals"
@@ -31,8 +40,8 @@ var food_regrow_group : String = "Food_Regrow"
 var carnivore_script : String = "res://SCRIPTS/NPC_FSM/Carnivore.gd"
 var herbivore_script : String = "res://SCRIPTS/NPC_FSM/Herbivore.gd"
 
-var width = 150
-var height = 150
+var width = 50
+var height = 50
 
 var tile_size : Vector2 = Vector2(32, 32)
 var tile_size_i : Vector2i = Vector2i(tile_size.x, tile_size.y)
@@ -73,8 +82,13 @@ enum Gender {
 	MALE,
 	FEMALE,
 }
+enum Age_Group {
+	JUVENILE,
+	ADULT,
+	OLD,
+}
 
-func extract_gene(parent_1, parent_2):
+func extract_gene(parent_1 : float, parent_2 : float) -> float: # only for float genes -> need new func for other types
 	var mutation_prob = World.mutation_prob#global as of now
 	var from_parent = randi_range(0, 1)#0 -> parent_1 || 1 -> parent_2
 	var mut = randf_range(0, 1)
@@ -84,7 +98,8 @@ func extract_gene(parent_1, parent_2):
 	else:
 		result = parent_1
 	if mut < mutation_prob:
-		result += max(0, randf_range(-0.05, 0.05)*result)#if mutation occurs it can influence a gene by up to 5%.. also cant be a negative value
+		var mut_val = randf_range(-0.05, 0.05)*result#if mutation occurs it can influence a gene by up to 5%.. also cant be a negative value
+		result = min(1, max(0, result + mut_val))
 	return result
 
 func get_tile_pos(tile : Tile_Properties) -> Vector2:

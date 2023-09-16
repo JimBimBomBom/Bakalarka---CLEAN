@@ -56,7 +56,7 @@ func reset_acceleration():
 	acceleration *= 0
 
 func wander() -> Vector2:
-	theta += randf_range(-0.35, 0.35)
+	theta += randf_range(-0.25, 0.25)
 	var x = cos(theta) * wander_radius + (curr_pos.x + curr_velocity.normalized().x * wander_offset)
 	var y = sin(theta) * wander_radius + (curr_pos.y + curr_velocity.normalized().y * wander_offset)
 

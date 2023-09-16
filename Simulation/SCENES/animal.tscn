@@ -9,7 +9,7 @@ radius = 4.0
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 top_level = true
-collision_mask = 0
+motion_mode = 1
 script = ExtResource("1_6qram")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]

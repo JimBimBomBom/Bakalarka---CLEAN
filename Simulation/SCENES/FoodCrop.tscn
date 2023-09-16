@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://ck7fo7lcheprq"]
+[gd_scene load_steps=3 format=3 uid="uid://ck7fo7lcheprq"]
 
 [ext_resource type="Script" path="res://SCRIPTS/World_Generation/FoodCrop.gd" id="1_cuw5k"]
-[ext_resource type="Texture2D" uid="uid://b07lqeldwqu3w" path="res://Sprites/assets/FoodCrops/Wheat_grown.png" id="2_uy3u7"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_jawt7"]
 
@@ -11,7 +10,6 @@ collision_mask = 0
 script = ExtResource("1_cuw5k")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_uy3u7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_jawt7")

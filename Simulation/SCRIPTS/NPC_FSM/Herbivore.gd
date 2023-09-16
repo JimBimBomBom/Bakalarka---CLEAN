@@ -8,7 +8,7 @@ var detected_crops : Array[Food_Crop] = []
 func herbivore_fsm(delta : float):
 	var animals_in_sight : Array[Animal] = get_animals_from_sight()
 	var animals_in_hearing_range = detected_animals
-	var dangerous_animals : Array[Animal] = filter_animals_by_danger(animals_in_hearing_range) # TODO add a specific list of dangerous animals to specific animals
+	var dangerous_animals : Array[Animal] = filter_animals_by_danger()
 	var animals_of_same_type : Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
 	set_base_state(dangerous_animals)
 

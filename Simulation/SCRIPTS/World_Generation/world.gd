@@ -4,7 +4,6 @@ func _init():
 	World.day = 0
 	# World.day_type = World.Day_Type.DAY
 	World.hour = 0
-	World.hours_in_day = 20
 
 func _ready():
 	add_child(World.Map)
@@ -152,12 +151,12 @@ func _on_animal_birth_request(pos, type, parent_1, parent_2):
 		World.Vore_Type.HERBIVORE:
 			var herbivore_script = load(World.herbivore_script)
 			inst.set_script(herbivore_script)
-			inst.spawn_animal(pos, type, parent_1, parent_2)
+			inst.spawn_animal(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
 		World.Vore_Type.CARNIVORE:
 			var carnivore_script = load(World.carnivore_script)
 			inst.set_script(carnivore_script)
-			inst.spawn_animal(pos, type, parent_1, parent_2)
+			inst.spawn_animal(pos, parent_1, parent_2)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 	inst.add_to_group(World.animal_group)
 	inst.birth_request.connect(_on_animal_birth_request)

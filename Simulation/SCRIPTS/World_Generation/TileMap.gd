@@ -53,23 +53,18 @@ func get_type_from_temp(temp):
 		temp_type = World.Temperature_Type.TROPICAL_LAND
 	return temp_type
 
-func set_tile_properties(tile : World.Tile_Properties, curr_food_ : float, max_food_ : float, 
-						 food_gain_ : float, tile_biome : World.Temperature_Type, tile_type : World.Tile_Type, 
-						 pos : Vector2i):
-	tile.curr_food = curr_food_
-	tile.max_food = max_food_
-	tile.food_gain = food_gain_
-	tile.biome = tile_biome
-	tile.type = tile_type
-	tile.index = pos
+# func set_tile_properties(tile : World.Tile_Properties, tile_biome : World.Temperature_Type,
+# 						 tile_type : World.Tile_Type):
+# 	tile.biome = tile_biome
+# 	tile.type = tile_type
 
 func create_tile_properties(pos : Vector2i, temp, moist, tile_biome, tile_type):
 	var tile = World.Tile_Properties.new() 
-	var max = moist * temp * 5
-	var gain = temp * 3
-	var curr = randf_range(0, gain)
-	set_tile_properties(tile, curr, max, gain, tile_biome, tile_type, pos)
+	tile.biome = tile_biome
+	tile.type = tile_type
+	tile.index = pos
 	tiles[pos] = tile
+	# set_tile_properties(tile, tile_biome, tile_type)
 
 func set_current_cell(pos, alt, temp, moist):
 	var temperature_type = get_type_from_temp(temp)
@@ -77,7 +72,5 @@ func set_current_cell(pos, alt, temp, moist):
 		set_cell(0, pos, 0, Vector2i(2, 2)) 	# temp_type defines the ID of our Tile_Set,
 		create_tile_properties(pos, 0, 0, temperature_type, World.Tile_Type.WATER)
 	else:
-		# var temperature_type = get_type_from_temp(temp)
 		set_cell(0, pos, temperature_type, Vector2i(0, 0)) 	# temp_type defines the ID of our Tile_Set,
-															# where the basic tile is always (0, 0)
 		create_tile_properties(pos, temp, moist, temperature_type, World.Tile_Type.PLAIN)
