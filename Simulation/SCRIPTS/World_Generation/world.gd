@@ -110,10 +110,10 @@ func place_vegetation(pos, type, food_yield) -> void:
 func initialize_npcs():
 	var width = World.width
 	var height = World.height
-	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	#construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
-	#return
-	# construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
+	construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
+	construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
+	construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
+	return
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
 			var pos = Vector2(x, y)

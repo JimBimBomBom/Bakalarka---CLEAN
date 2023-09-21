@@ -20,14 +20,14 @@ signal birth_request(pos, type, parent_1, parent_2)
 
 var animal_state : Animal_Base_States = Animal_Base_States.INIT
 
-var genes : Animal_Genes
+var genes : Animal_Genes = Animal_Genes.new()
 var animal_type : Animal_Types 
 var detected_animals : Array[Animal] = [] # right now every animal is detected
 # could add animals_in_range to mean all animals within our Detection_Radius
 # + detected_animals for animals that we are aware of being in our radius
 
 func spawn_animal(pos, type, parent_1, parent_2):
-	genes.pass_down_genes(parent_1.genes, parent_2.genes)
+	genes = genes.pass_down_genes(parent_1.genes, parent_2.genes)
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
 
@@ -46,17 +46,22 @@ func kill_animal():
 	timer.stop()
 	timer.start()
 
+# should handle "consumption state"(which is also a bad name), where the base state "resets"
+# every other state not affiliated with our current base state -> HUNGRY sets drinking_state to SEEKING and vice versa
 func set_base_state(dangerous_animals : Array[Animal]):
-	if hunger <= 0 or hydration <= 0 or health <= 0:
+	if nutrition <= 0 or hydration <= 0 or health <= 0:
 		kill_animal()
 	elif not dangerous_animals.is_empty():
 		animal_state = Animal_Base_States.FLEEING
-	elif hunger_norm < World.seek_nutrition_threshold and hunger_norm < hydration_norm:
+	elif nutrition_norm < seek_nutrition_norm: # and nutrition_norm < hydration_norm:
 		animal_state = Animal_Base_States.HUNGRY
-	elif hydration_norm < World.seek_hydration_threshold:
+	elif hydration_norm < seek_hydration_norm:
 		animal_state = Animal_Base_States.THIRSTY
 	else:
 		animal_state = Animal_Base_States.SATED
+
+func reset_acceleration():
+	acceleration *= 0
 
 func stop_animal():
 	velocity *= 0
@@ -67,7 +72,7 @@ func free_cadaver():
 	self.queue_free()
 
 func update_animal_norms():
-	hunger_norm = hunger/max_resources
+	nutrition_norm = nutrition/max_resources
 	hydration_norm = hydration/max_resources
 
 func can_see(pos) -> bool:
@@ -114,49 +119,6 @@ func find_closest_mate(animals_of_same_type : Array[Animal]) -> Animal:
 				closest_animal = dist
 	return result
 
-func get_flee_dir(animals : Array[Animal]) -> Vector2:
-	var force : Vector2 = Vector2(0, 0)
-	for animal in animals:
-		var dist = abs(position.distance_to(animal.position))
-		var temp_force = evade(animal)
-		force += temp_force/dist
-	return force.normalized()
-
-func get_separation_force(target: Animal):
-	var dist = abs(position.distance_to(target.position))
-	var dir = position.direction_to(target.position)
-	return dir/dist
-
-func get_cohesion_force(target: Animal):
-	var dist = abs(position.distance_to(target.position))
-	var dir = position.direction_to(target.position)
-	return dir/dist
-
-func get_alignment_force(target: Animal):
-	return target.curr_velocity.normalized()
-
-func get_flock_dir(animals: Array[Animal]) -> Vector2:
-	var force : Vector2 = Vector2(0, 0)
-	var separation_force : Vector2 = Vector2(0, 0)
-	var cohesion_force : Vector2 = Vector2(0, 0)
-	var alignment_force : Vector2 = Vector2(0, 0)
-	for animal in animals:
-		var dist = abs(position.distance_to(animal.position))
-		if dist < separation_radius:
-			separation_force -= get_separation_force(animal)
-		if dist < cohesion_radius:
-			cohesion_force += get_cohesion_force(animal)
-		if dist < alignment_radius:
-			alignment_force += get_alignment_force(animal)
-	force = (separation_force.normalized() * genes.separation_mult) + (cohesion_force.normalized() * genes.cohesion_mult) + (alignment_force.normalized() * genes.alignment_mult)
-	return force.normalized()
-
-func get_roam_dir(animals: Array[Animal]) -> Vector2: # BIG TODOOOOOO
-	# var force : Vector2 = wander()
-	var force = Vector2(0, 0)
-	if not animals.is_empty():
-		force += get_flock_dir(animals)
-	return force
 		
 func fight(defender : Animal) -> void: # mb have a combat log -> combat instance with participants(many herbivores fighting off a carnivore etc.)
 	defender.health -= attack_damage
@@ -206,6 +168,7 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 			result = tmp
 	return result
 
+# Water tiles are infinite atm... could be change to be a finite resource? probably not
 func drink_at_tile(delta : float):#, tile : World.Tile_Properties):
 	hydration += delta
 

@@ -40,8 +40,8 @@ var food_regrow_group : String = "Food_Regrow"
 var carnivore_script : String = "res://SCRIPTS/NPC_FSM/Carnivore.gd"
 var herbivore_script : String = "res://SCRIPTS/NPC_FSM/Herbivore.gd"
 
-var width = 50
-var height = 50
+var width = 35
+var height = 35
 
 var tile_size : Vector2 = Vector2(32, 32)
 var tile_size_i : Vector2i = Vector2i(tile_size.x, tile_size.y)

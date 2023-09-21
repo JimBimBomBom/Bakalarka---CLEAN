@@ -51,11 +51,10 @@ func herbivore_eat(crop, delta : float):
 	match consumption_state:
 		Consumption_State.SEEKING:
 			move_calc(smooth_seek(crop.position))
-			if curr_pos.distance_to(crop.position) < 10:
+			if position.distance_to(crop.position) < 10:
 				consumption_state = Consumption_State.CONSUMING
 		Consumption_State.CONSUMING:
 			stop_animal()
-			# hearing_range = max_hearing_range*hearing_while_consuming
 			eat_crop(crop)
 			consumption_state = Consumption_State.SEEKING
 
@@ -63,18 +62,15 @@ func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : f
 	var tile = select_hydration_tile(hydration_in_range)
 	match consumption_state:
 		Consumption_State.SEEKING:
-			hearing_range = max_hearing_range
 			var target = World.get_tile_pos(tile)
 			move_calc(smooth_seek(target))
-			if curr_pos.distance_to(target) < 10:
-				# hearing_range = max_hearing_range*hearing_while_consuming
+			if position.distance_to(target) < 10:
 				consumption_state = Consumption_State.CONSUMING
 		Consumption_State.CONSUMING:
 			stop_animal()
-			drink_at_tile(tile, delta) #TODO reason for animal to change into scanning, can be a timer
-			if curr_hydration_norm >= seek_hydration_threshold: #TODO so shit, mb handle using signals?
+			drink_at_tile(delta) #TODO reason for animal to change into scanning, can be a timer
+			if hydration_norm >= seek_hydration_norm: #TODO so shit, mb handle using signals?
 				consumption_state = Consumption_State.SEEKING
-				# hearing_range = max_hearing_range
 
 func get_closest_crop():
 	var closest : Food_Crop
@@ -84,14 +80,14 @@ func get_closest_crop():
 		if crop.is_eaten:
 			continue
 		edible_crop_was_found = true
-		var crop_dist = curr_pos.distance_to(crop.position)
+		var crop_dist = position.distance_to(crop.position)
 		if crop_dist < closest_dist:
 			closest_dist = crop_dist
 			closest = crop
 	return [closest, edible_crop_was_found]
 
 func eat_crop(crop):
-	curr_hunger += crop.yield_value * 10 #temporary 10
+	nutrition += crop.yield_value * 10 #temporary 10
 	crop.be_eaten()
 
 func _on_timer_timeout():
@@ -103,10 +99,9 @@ func _on_timer_timeout():
 
 func _physics_process(delta : float):
 	do_move(delta)
-	position = curr_pos
 
 func _on_Area2D_animal_entered(body):
-	if body is Animal and body.curr_pos != curr_pos:
+	if body is Animal and body.position != position:
 		detected_animals.append(body)
 	elif body is Food_Crop:
 		detected_crops.append(body)
@@ -118,7 +113,7 @@ func _on_Area2D_animal_exited(body):
 		detected_crops.erase(body)
 	
 func get_seek_dir(target : Animal) -> Vector2:
-	return curr_pos.direction_to(target.curr_pos).normalized()
+	return position.direction_to(target.position).normalized()
 
 func construct_herbivore(pos):
 	construct_animal(pos, World.Vore_Type.HERBIVORE)
