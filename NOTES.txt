@@ -4,3 +4,5 @@ Encoding Scheme: Value Encoding
 Selection Technique: "Propagation of the survivors"
 Crossover Operator: Uniform Crossover
 Mutation Operator: Displacement Mutation
+
+https://docs.google.com/spreadsheets/d/1P4PRSDI09WoJJIGBzLnNuzkaQsdPdGh_-RcLd3OLnZc/edit#gid=630397863
