@@ -4,9 +4,9 @@ class_name Animal_Genes
 var gender : World.Gender
 var size : float
 var musculature : float
+var agility : float
 var metabolic_rate : float
 var offense : float
-var vore_type : World.Vore_Type
 
 #Sexual
 var male_sex_cooldown : float # redundant atm
@@ -32,12 +32,9 @@ func generate_genes():
 		gender = World.Gender.FEMALE
 	size = randf_range(0, 1)
 	musculature = randf_range(0, 1)
+	agility = randf_range(0, 1)
 	metabolic_rate = randf_range(0, 1)
 	offense = randf_range(0, 1)
-	if randi_range(0, 1):
-		vore_type == World.Vore_Type.CARNIVORE
-	else:
-		vore_type == World.Vore_Type.HERBIVORE
 	
 	male_sex_cooldown = World.hours_in_day
 	pregnancy_duration = 2 * World.hours_in_day
@@ -60,9 +57,9 @@ func pass_down_genes(parent_1 : Animal_Genes, parent_2 : Animal_Genes):
 		gender = parent_2.gender
 	size = World.extract_gene(parent_1.size, parent_2.size)
 	musculature = World.extract_gene(parent_1.musculature, parent_2.musculature)
+	agility = World.extract_gene(parent_1.agility, parent_2.agility)
 	metabolic_rate = World.extract_gene(parent_1.metabolic_rate, parent_2.metabolic_rate)
 	offense = World.extract_gene(parent_1.offense, parent_2.offense)
-	vore_type = parent_1.vore_type
 
 	male_sex_cooldown = World.extract_gene(parent_1.male_sex_cooldown, parent_2.male_sex_cooldown)
 	pregnancy_duration = World.extract_gene(parent_1.pregnancy_duration, parent_2.pregnancy_duration)

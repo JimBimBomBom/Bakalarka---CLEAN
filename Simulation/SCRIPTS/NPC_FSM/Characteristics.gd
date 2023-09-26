@@ -5,25 +5,29 @@ class_name Animal_Characteristics
 var age : World.Age_Group
 var change_age_period : int
 
-var sexual_partner : Animal
+var sexual_partner
 var can_have_sex : bool
+var vore_type : World.Vore_Type
 
 #Locomotion
 var max_velocity : float
 var max_steering_force : float
-var desired_velocity : Vector2 = (0, 0)
+var desired_velocity = Vector2(0, 0)
+var direction : Vector2
 #Locomotion - Wander variables
-var wander_jitter : float = 1.0
-var wander_radius : float = 20.0
-var wander_distance : float = 10.0
+var wander_jitter : float = 1
+var wander_radius : float = 10.0
+var wander_distance : float = 30.0
 var wander_target : Vector2 # needs to be initialized
 
 var threat_range : float
 
+var flock_weight : float = 0.4
 var flock_behaviour_radius : float
 var separation_weight : float
 var cohesion_weight : float
 var alignment_weight : float
+
 
 #Base stats
 var mass : float
@@ -49,8 +53,14 @@ func set_characteristics(genes : Animal_Genes):
 	can_have_sex = true
 
 	#Locomotion
-	max_velocity = (genes.musculature + (genes.metabolic_rate/2)) / (genes.size + World.velocity_start_point) # hate it
-	max_steering_force = genes.musculature / genes.size
+	max_velocity = genes.musculature / genes.size  + 4# hate it
+	max_steering_force = genes.agility * 5
+	direction = Vector2(randf(), randf()).normalized() # set starting orientation
+
+	wander_jitter = genes.agility * 6
+	wander_radius = max_velocity
+	wander_distance = wander_radius # 2*max_velocity
+	wander_target = direction * wander_radius # we want to moving forward
 
 	threat_range = genes.sense_range # TODO
 	flock_behaviour_radius = genes.sense_range/3 # TODO
@@ -63,76 +73,92 @@ func set_characteristics(genes : Animal_Genes):
 	attack_damage = genes.musculature * mass * genes.offense
 	attack_range = genes.size * 15
 
-	max_resources = mass / (genes.musculature + World.resource_start_point)
+	max_resources = mass / genes.musculature # + World.resource_start_point)
 	nutrition = max_resources    /3
 	hydration = max_resources    /2
 
-	separation_radius = genes.size * 15
-	cohesion_radius = 100
-	alignment_radius = 100
-
-func _ready():
-	wander_target = Vector2(wander_radius, 0).rotated(randf() * TAU)
+	separation_weight = genes.size 
+	cohesion_weight = genes.size 
+	alignment_weight = genes.size 
 
 func get_tile_on_curr_pos() -> Vector2:
 	var result : Vector2i = position/World.tile_size
 	return Vector2(result.x, result.y)
 
+func set_next_move(force : Vector2):
+	desired_velocity = force.normalized()*max_velocity
+
 func do_move(delta : float) -> void:
-	var steering_force = (desired_velocity*max_velocity) - velocity # desired_velocity is always normalized -> *max_vel
+	var my_vel = velocity
+	var my_desired_vel = desired_velocity
+
+	var steering_force = (desired_velocity - velocity) * delta
 	steering_force.limit_length(max_steering_force)
+	velocity += steering_force
+	velocity.limit_length(max_velocity)
+	if velocity:
+		direction = velocity.normalized()
+	rotation = velocity.angle() + PI/2
+	position += velocity * delta * World.animal_velocity_mult
+
+func do_move_with_flock(delta : float, animals_of_same_type : Array[Animal]):
+	var flock_force = flock(animals_of_same_type).limit_length(max_velocity) # ???? 
+	var steering_force = (desired_velocity - velocity) + flock_weight*flock_force
+	steering_force.limit_length(max_steering_force)
+
 	velocity += steering_force
 	velocity.limit_length(max_velocity)
 	rotation = velocity.angle() + PI/2
 	position += velocity * delta #* World.animal_velocity_mult
 
 func seek(target : Vector2) -> Vector2:
-	var desired_velocity = position.direction_to(target) * max_velocity
-	return (desired_velocity - velocity).normalized()
+	var wanted_velocity = position.direction_to(target) * max_velocity
+	return wanted_velocity
+
+func smooth_seek(target : Vector2) -> Vector2:
+	var wanted_velocity = target - position
+	return wanted_velocity
 
 func flee(target : Vector2) -> Vector2:
-	var desired_velocity = target.direction_to(position) * max_velocity
-	return (desired_velocity - velocity).normalized()
+	var my_pos = position
+	var wanted_velocity = target.direction_to(position) * max_velocity
+	return wanted_velocity
 
 func wander() -> Vector2:
-	wander_target += Vector2(rand_range(-wander_jitter, wander_jitter), rand_range(-wander_jitter, wander_jitter))
+	wander_target = direction * wander_radius
+	wander_target += Vector2(randf_range(-wander_jitter, wander_jitter), randf_range(-wander_jitter, wander_jitter))
 	wander_target = wander_target.normalized() * wander_radius
-	var target_world_position = position + (velocity.normalized() * wander_distance) + wander_target
-	return seek(target_world_position)
+
+	var circle_pos = velocity.normalized() * wander_distance + position
+	var target = circle_pos + wander_target
+	return smooth_seek(target)
 
 func pursue(target: CharacterBody2D) -> Vector2:
-    var to_target = target.position - position
-    var relative_heading = velocity.normalized().dot(target.velocity.normalized())
-    
-    # Check if the target is ahead and facing the character with an angle less than 18 degrees
-    if to_target.dot(velocity.normalized()) > 0 and relative_heading < -0.95:  # cos(18°) is approximately 0.95
-        return seek(target.position)
-    
-    # Predict future position
-    var lookahead_time = to_target.length() / (max_velocity + target.velocity.length())
-    var predicted_target = target.position + target.velocity * lookahead_time
-    
-    return seek(predicted_target)
+	var to_target = target.position - position
+	var relative_heading = velocity.normalized().dot(target.velocity.normalized())
+	
+	if to_target.dot(velocity.normalized()) > 0 and relative_heading < -0.95:  # cos(18°) is approximately 0.95
+		return seek(target.position)
+	
+	var lookahead_time = to_target.length() / (max_velocity + target.velocity.length())
+	var predicted_target = target.position + target.velocity * lookahead_time
+	return seek(predicted_target)
 
 func evade(pursuer: CharacterBody2D) -> Vector2:
-    var distance = pursuer.position - position
-    if distance.length2() > threat_range * threat_range:
-        return Vector2()  # No need to evade if pursuer is far away
-    
-    var estimated_time = distance.length() / max_velocity
-    var predicted_position = pursuer.position + pursuer.velocity * estimated_time
-    
-    return flee(predicted_position)
+	var distance = pursuer.position - position
+	var estimated_time = distance.length() / max_velocity
+	var predicted_position = pursuer.position + pursuer.velocity * estimated_time
+	return flee(predicted_position)
 
-func get_flee_dir(animals : Array[Animal]) -> Vector2:
+func get_flee_dir(animals : Array[Animal]):# -> Vector2:
 	var force : Vector2 = Vector2(0, 0)
 	for animal in animals:
-		var dist = abs(position.distance_to(animal.position))
-		var temp_force = evade(animal)
+		var dist : float = abs(position.distance_to(animal.position))
+		var temp_force : Vector2 = evade(animal)
 		force += temp_force/dist
-	return force.normalized()
+	return force
 
-func flock() -> Vector2:
+func flock(animals_of_same_type : Array[Animal]) -> Vector2:
 	var separation_force = separation(animals_of_same_type)
 	var alignment_force = alignment(animals_of_same_type)
 	var cohesion_force = cohesion(animals_of_same_type)
@@ -140,7 +166,7 @@ func flock() -> Vector2:
 	var flocking_force = separation_force * separation_weight + alignment_force * alignment_weight + cohesion_force * cohesion_weight
 	return flocking_force
 
-func separation(animals) -> Vector2:
+func separation(animals : Array[Animal]) -> Vector2:
 	var force = Vector2()
 	for animal in animals:
 			var to_animal = position - animal.position
@@ -148,7 +174,7 @@ func separation(animals) -> Vector2:
 				force += to_animal.normalized() / to_animal.length()
 	return force
 
-func alignment(animals) -> Vector2:
+func alignment(animals : Array[Animal]) -> Vector2:
 	var avg_velocity = Vector2()
 	var count = 0
 	for animal in animals:
@@ -163,7 +189,7 @@ func alignment(animals) -> Vector2:
 	else:
 		return Vector2()
 
-func cohesion(animals) -> Vector2:
+func cohesion(animals : Array[Animal]) -> Vector2:
 	var center_mass = Vector2()
 	var count = 0
 	for animal in animals:
@@ -174,56 +200,3 @@ func cohesion(animals) -> Vector2:
 	if count > 0:
 		center_mass /= count
 	return seek(center_mass)
-
-func smooth_seek(target : Vector2) -> Vector2:
-	var force = seek(target)
-	var dist = position.distance_to(target)
-	if dist < 100:
-		force *= dist/100
-	return force
-
-
-func pursue(target : Animal) -> Vector2:
-	var look_ahead_magnitude = position.distance_to(target.position) / 20
-	var force = position.direction_to(target.position + (target.velocity * look_ahead_magnitude))
-	return (force - velocity).normalized()
-
-func evade(target : Animal) -> Vector2:
-	return pursue(target) * -1
-
-
-func get_separation_force(target: Animal):
-	var dist = abs(position.distance_to(target.position))
-	var dir = position.direction_to(target.position)
-	return dir/dist
-
-func get_cohesion_force(target: Animal):
-	var dist = abs(position.distance_to(target.position))
-	var dir = position.direction_to(target.position)
-	return dir/dist
-
-func get_alignment_force(target: Animal):
-	return target.velocity.normalized()
-
-func get_flock_dir(animals: Array[Animal]) -> Vector2:
-	var force : Vector2 = Vector2(0, 0)
-	var separation_force : Vector2 = Vector2(0, 0)
-	var cohesion_force : Vector2 = Vector2(0, 0)
-	var alignment_force : Vector2 = Vector2(0, 0)
-	for animal in animals:
-		var dist = abs(position.distance_to(animal.position))
-		if dist < separation_radius:
-			separation_force -= get_separation_force(animal)
-		if dist < cohesion_radius:
-			cohesion_force += get_cohesion_force(animal)
-		if dist < alignment_radius:
-			alignment_force += get_alignment_force(animal)
-	force = (separation_force.normalized() * genes.separation_mult) + (cohesion_force.normalized() * genes.cohesion_mult) + (alignment_force.normalized() * genes.alignment_mult)
-	return force.normalized()
-
-func get_roam_dir(animals: Array[Animal]) -> Vector2: # BIG TODOOOOOO
-	var force : Vector2 = wander()
-	var force = Vector2(0, 0)
-	if not animals.is_empty():
-		force += get_flock_dir(animals)
-	return force

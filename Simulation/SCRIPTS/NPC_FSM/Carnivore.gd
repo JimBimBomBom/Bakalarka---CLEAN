@@ -13,8 +13,7 @@ func carnivore_fsm(delta : float):
 
 	match animal_state:
 		Animal_Base_States.FLEEING:
-			var force = get_flee_dir(dangerous_animals)
-			move_calc(force)
+			var force = set_next_move(get_flee_dir(dangerous_animals))
 		Animal_Base_States.HUNGRY:
 			var animals_in_range : Array[Animal] 
 			if nutrition_norm < 0.1: #animals_in_hearing_range#filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
@@ -26,15 +25,15 @@ func carnivore_fsm(delta : float):
 			if not cadavers_in_range.is_empty() or not animals_in_range.is_empty(): #STALKING
 				carnivore_eat(animals_in_range, cadavers_in_range, delta)
 			else:
-				move_calc(get_roam_dir(animals_of_same_type))
+				set_next_move(wander())
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
 				animal_hydrate(hydration_in_range, delta)
 			else:
-				move_calc(get_roam_dir(animals_of_same_type))
+				set_next_move(wander())
 		Animal_Base_States.SATED:
-			move_calc(get_roam_dir(animals_of_same_type))
+			set_next_move(wander())
 
 enum Consumption_State {
 	CONSUMING,
@@ -46,11 +45,11 @@ func carnivore_eat(food_in_range : Array[Animal], cadavers_in_range : Array[Anim
 	match consumption_state:
 		Consumption_State.SEEKING:
 			if target.animal_state == Animal_Base_States.DEAD:
-				move_calc(smooth_seek(target.position))
+				set_next_move(smooth_seek(target.position))
 				if position.distance_to(target.position) < 10:
 					consumption_state = Consumption_State.CONSUMING
 			else:
-				move_calc(pursue(target))
+				set_next_move(pursue(target))
 				if is_target_in_range(target): #ATTACKING
 					consumption_state = Consumption_State.ATTACKING
 		Consumption_State.ATTACKING:
@@ -58,25 +57,20 @@ func carnivore_eat(food_in_range : Array[Animal], cadavers_in_range : Array[Anim
 			fight(target) # maybe the result of fight should tell us what our next_state is (we kill our prey -> consuming)
 			consumption_state = Consumption_State.SEEKING
 		Consumption_State.CONSUMING: #TODO will consume only half the time.. consume->seek->consum...
-			# stop_animal() can't be here -> if animal wasn't the one who finished of the cadaver its' state won't change
-			# so it will remain in state CONSUMING -> so next time it would see a next target it would stop
-			if not eat_animal(target, delta):
+			if position.distance_to(target.position) >= 10 or target.animal_state != Animal_Base_States.DEAD:
 				consumption_state = Consumption_State.SEEKING
+			else:
+				eat_animal(target, delta)
 
-func eat_animal(target : Animal, delta : float) -> bool:
-	if position.distance_to(target.position) >= 10 and target.animal_state != Animal_Base_States.DEAD:
-		return false
+func eat_animal(target : Animal, delta : float):
 	stop_animal() # we are currently eating -> stop
 	var food_gain = delta * 5 #TODO
 	if target.mass <= food_gain:
 		nutrition += target.mass
 		target.free_cadaver()
-		return false # We ate our prey -> change state to SEEKING
 	else:
 		nutrition += food_gain
 		target.mass -= food_gain
-
-	return true
 
 func is_target_in_range(target : Animal) -> bool:
 	if position.distance_to(target.position) < attack_range:
@@ -114,7 +108,7 @@ func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : f
 	match consumption_state:
 		Consumption_State.SEEKING:
 			var target = World.get_tile_pos(tile)
-			move_calc(smooth_seek(target))
+			set_next_move(seek(target))
 			if position.distance_to(target) < 10:
 				consumption_state = Consumption_State.CONSUMING
 		Consumption_State.CONSUMING:
@@ -129,7 +123,6 @@ func construct_carnivore(pos):
 
 func process_animal(delta : float):
 	update_animal_norms()
-	reset_acceleration() #every "move" is isolated
 	carnivore_fsm(delta)
 
 func _on_timer_timeout():

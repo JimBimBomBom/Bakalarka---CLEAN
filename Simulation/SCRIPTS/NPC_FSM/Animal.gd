@@ -28,11 +28,13 @@ var detected_animals : Array[Animal] = [] # right now every animal is detected
 
 func spawn_animal(pos, type, parent_1, parent_2):
 	genes = genes.pass_down_genes(parent_1.genes, parent_2.genes)
+	vore_type = type
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
 
 func construct_animal(pos : Vector2i, type : World.Vore_Type):
 	genes.generate_genes()
+	vore_type = type
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
 
@@ -61,11 +63,11 @@ func set_base_state(dangerous_animals : Array[Animal]):
 		animal_state = Animal_Base_States.SATED
 
 func reset_acceleration():
-	acceleration *= 0
+	desired_velocity *= 0
 
 func stop_animal():
 	velocity *= 0
-	acceleration *= 0
+	desired_velocity *= 0
 
 func free_cadaver():
 	remove_from_group(World.cadaver_group)
@@ -97,7 +99,7 @@ func get_cadavers() -> Array[Animal]:
 func filter_animals_by_danger() -> Array[Animal]:
 	var dangerous_animals : Array[Animal]
 	for animal in detected_animals:
-		if genes.vore_type == World.Vore_Type.HERBIVORE and animal.genes.vore_type == World.Vore_Type.CARNIVORE:
+		if vore_type == World.Vore_Type.HERBIVORE and animal.vore_type == World.Vore_Type.CARNIVORE:
 			dangerous_animals.append(animal)
 	return dangerous_animals
 
@@ -118,12 +120,11 @@ func find_closest_mate(animals_of_same_type : Array[Animal]) -> Animal:
 				result = animal
 				closest_animal = dist
 	return result
-
 		
 func fight(defender : Animal) -> void: # mb have a combat log -> combat instance with participants(many herbivores fighting off a carnivore etc.)
 	defender.health -= attack_damage
-	if position.distance_to(defender.position) < defender.attack_range and randf_range(0, 1) < 0.2:
-		health -= defender.attack_damage
+	#if randf_range(0, 1) < World.fight_back_chance:
+	#	health -= defender.attack_damage
 
 func within_bounds(tile_index : Vector2) -> bool:
 	if tile_index.x > -World.width and tile_index.x < World.width and tile_index.y > -World.height and tile_index.y < World.height:
@@ -133,8 +134,7 @@ func within_bounds(tile_index : Vector2) -> bool:
 func max(a : int, b : int) -> int:
 	if a > b:
 		return a
-	else:
-		return b
+	return b
 
 func get_tiles_from_senses() -> Array[World.Tile_Properties]:
 	var result : Array[World.Tile_Properties]
@@ -179,11 +179,11 @@ func select_potential_mates() -> Array[Animal]:
 			result.append(animal)
 	return result
 
-func reproduce_with_animal(animal):
+func reproduce_with_animal(animal : Animal):
 	# can_have_sex = false
 	animal.become_pregnant(self)
 
-func become_pregnant(partner):
+func become_pregnant(partner : Animal):
 	can_have_sex = false
 	sexual_partner = partner
 	get_node("pregnancy_timer").start()

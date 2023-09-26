@@ -44,6 +44,8 @@ func generate_vegetation():
 			var tile = World.Map.tiles[pos] # placeholder fttb
 			if tile.type == World.Tile_Type.WATER:
 				continue
+			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
+				continue
 
 			if between(moist, 0.6, 0.8) and between(temp, 0.4, 0.8):
 				place_vegetation(pos, World.Vegetation_Type.TREE_1, 0)
@@ -57,9 +59,6 @@ func generate_vegetation():
 				place_vegetation(pos, World.Vegetation_Type.BUSH_2, food_yield)
 
 func place_vegetation(pos, type, food_yield) -> void:
-	var rand = randf_range(0, 1)
-	if rand <= 0.75: #ADD mb custom probability?
-		return
 	var scene 
 	if food_yield:
 		scene = load("res://SCENES/FoodCrop.tscn")
@@ -110,10 +109,10 @@ func place_vegetation(pos, type, food_yield) -> void:
 func initialize_npcs():
 	var width = World.width
 	var height = World.height
-	construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	construct_npc(Vector2(1, 1), World.Vore_Type.HERBIVORE)
-	construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
-	return
+	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
+	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
+	# construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
+	# return
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
 			var pos = Vector2(x, y)

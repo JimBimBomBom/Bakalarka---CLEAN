@@ -27,7 +27,10 @@ var corpse_timer = 50
 var seek_hydration_threshold = 0.2
 var seek_nutrition_threshold = 0.2
 var animal_acceleration_mult = 10
-var animal_velocity_mult = 40
+var animal_velocity_mult = 5
+
+var fight_back_chance = 0.2
+var agility_modifier = 5
 
 #Groups
 var animal_group : String = "Animals"
