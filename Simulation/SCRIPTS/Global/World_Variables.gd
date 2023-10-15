@@ -43,11 +43,17 @@ var food_regrow_group : String = "Food_Regrow"
 var carnivore_script : String = "res://SCRIPTS/NPC_FSM/Carnivore.gd"
 var herbivore_script : String = "res://SCRIPTS/NPC_FSM/Herbivore.gd"
 
-var width = 35
-var height = 35
+var width = 100
+var height = 100
 
 var tile_size : Vector2 = Vector2(32, 32)
 var tile_size_i : Vector2i = Vector2i(tile_size.x, tile_size.y)
+
+var edge_tiles = 3
+var repulsion_margin = edge_tiles*tile_size.x # start repeling "edge_tiles" tiles from the edge
+var max_repulsion_force = 1
+var x_edge_from_center = width * tile_size.x
+var y_edge_from_center = height * tile_size.y
 
 var corpse_max_timer : float
 var mutation_prob = 0.01

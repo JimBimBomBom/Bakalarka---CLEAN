@@ -33,7 +33,15 @@ func carnivore_fsm(delta : float):
 			else:
 				set_next_move(wander())
 		Animal_Base_States.SATED:
-			set_next_move(wander())
+			if genes.gender == World.Gender.MALE and can_have_sex:
+				var potential_mates = select_potential_mates(animals_of_same_type)
+				if not potential_mates.is_empty():
+					var mate = select_mating_partner(potential_mates)
+					reproduce_with_animal(mate) # so far the only heuristic is viscinity
+			else:
+				set_next_move(wander())
+				
+
 
 enum Consumption_State {
 	CONSUMING,
@@ -49,7 +57,7 @@ func carnivore_eat(food_in_range : Array[Animal], cadavers_in_range : Array[Anim
 				if position.distance_to(target.position) < 10:
 					consumption_state = Consumption_State.CONSUMING
 			else:
-				set_next_move(pursue(target))
+				set_next_move(seek(target.position))
 				if is_target_in_range(target): #ATTACKING
 					consumption_state = Consumption_State.ATTACKING
 		Consumption_State.ATTACKING:
@@ -119,6 +127,10 @@ func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : f
 
 func construct_carnivore(pos):
 	construct_animal(pos, World.Vore_Type.CARNIVORE)
+	animal_type = Animal_Types.WOLF
+
+func spawn_carnivore(pos, mother, father):
+	spawn_animal(pos, World.Vore_Type.CARNIVORE, mother, father)
 	animal_type = Animal_Types.WOLF
 
 func process_animal(delta : float):

@@ -5,10 +5,6 @@ class_name Herbivore
 var consumption_state : Consumption_State = Consumption_State.SEEKING
 var detected_crops : Array[Food_Crop] = []
 
-func construct_herbivore(pos):
-	construct_animal(pos, World.Vore_Type.HERBIVORE)
-	animal_type = Animal_Types.DEER
-
 func herbivore_fsm(delta : float):
 	var animals_in_sight : Array[Animal] = get_animals_from_sight()
 	var animals_in_hearing_range = detected_animals
@@ -35,10 +31,11 @@ func herbivore_fsm(delta : float):
 			else:
 				set_next_move(wander())
 		Animal_Base_States.SATED:
-			# if gender == World.Gender.MALE and not reproduced_recently:
-			# 	var potential_mates = select_potential_mates()
-			# 	if not potential_mates.is_empty():
-			# 		reproduce_with_animal(potential_mates[0]) # so far the only heuristic is viscinity
+			if genes.gender == World.Gender.MALE and can_have_sex:
+				var potential_mates = select_potential_mates(animals_of_same_type)
+				if not potential_mates.is_empty():
+					var mate = select_mating_partner(potential_mates)
+					reproduce_with_animal(mate) # so far the only heuristic is viscinity
 			set_next_move(wander())
 
 enum Consumption_State {
@@ -91,6 +88,14 @@ func eat_crop(crop):
 	nutrition += crop.yield_value * 10 #temporary 10
 	crop.be_eaten()
 	
+func spawn_herbivore(pos, mother, father):
+	spawn_animal(pos, World.Vore_Type.HERBIVORE, mother, father)
+	animal_type = Animal_Types.WOLF
+
+func construct_herbivore(pos):
+	construct_animal(pos, World.Vore_Type.HERBIVORE)
+	animal_type = Animal_Types.DEER
+
 func process_animal(delta : float):
 	update_animal_norms()
 	herbivore_fsm(delta)

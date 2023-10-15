@@ -32,8 +32,8 @@ func _do_time() -> void:
 		# World.day_type = World.Day_Type.DAY # obsolete atm
 
 func generate_vegetation():
-	var width = World.width
-	var height = World.height
+	var width = World.width - World.edge_tiles
+	var height = World.height - World.edge_tiles
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
 			var pos = Vector2i(x, y)
@@ -143,19 +143,19 @@ func construct_npc(pos, type):
 #End of initialization
 
 
-func _on_animal_birth_request(pos, type, parent_1, parent_2):
+func _on_animal_birth_request(pos, type, mother, father):
 	var scene = load("res://SCENES/animal.tscn")
 	var inst = scene.instantiate()
 	match type:
 		World.Vore_Type.HERBIVORE:
 			var herbivore_script = load(World.herbivore_script)
 			inst.set_script(herbivore_script)
-			inst.spawn_animal(pos, parent_1.genes, parent_2.genes)
+			inst.spawn_herbivore(pos, mother.genes, father.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
 		World.Vore_Type.CARNIVORE:
 			var carnivore_script = load(World.carnivore_script)
 			inst.set_script(carnivore_script)
-			inst.spawn_animal(pos, parent_1, parent_2)
+			inst.spawn_carnivore(pos, mother.genes, father.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 	inst.add_to_group(World.animal_group)
 	inst.birth_request.connect(_on_animal_birth_request)

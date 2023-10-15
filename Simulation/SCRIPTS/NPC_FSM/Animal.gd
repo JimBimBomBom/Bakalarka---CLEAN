@@ -26,8 +26,8 @@ var detected_animals : Array[Animal] = [] # right now every animal is detected
 # could add animals_in_range to mean all animals within our Detection_Radius
 # + detected_animals for animals that we are aware of being in our radius
 
-func spawn_animal(pos, type, parent_1, parent_2):
-	genes = genes.pass_down_genes(parent_1.genes, parent_2.genes)
+func spawn_animal(pos, type, mother, father):
+	genes.pass_down_genes(mother, father)
 	vore_type = type
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
@@ -76,6 +76,7 @@ func free_cadaver():
 func update_animal_norms():
 	nutrition_norm = nutrition/max_resources
 	hydration_norm = hydration/max_resources
+	health_norm = health/max_health
 
 func can_see(pos) -> bool:
 	if abs(position.distance_to(pos)) < genes.vision_range and abs(position.angle_to(pos)) < genes.field_of_view_half:
@@ -172,16 +173,27 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 func drink_at_tile(delta : float):#, tile : World.Tile_Properties):
 	hydration += delta
 
-func select_potential_mates() -> Array[Animal]:
+func select_potential_mates(animals_of_same_type : Array[Animal]) -> Array[Animal]:
 	var result : Array[Animal]
-	for animal in detected_animals:
-		if animal.gender == World.Gender.FEMALE and not animal.is_pregnant:
+	for animal in animals_of_same_type:
+		if animal.genes.gender == World.Gender.FEMALE and animal.can_have_sex:
 			result.append(animal)
 	return result
 
+func select_mating_partner(potential_mates : Array[Animal]) -> Animal:
+	var best_dist = position.distance_to(potential_mates[0].position)
+	var selected_mate = potential_mates[0]
+	for mate in potential_mates:
+		var curr_dist = position.distance_to(mate.position)
+		if curr_dist < best_dist:
+			best_dist = curr_dist
+			selected_mate = mate
+	return selected_mate
+
 func reproduce_with_animal(animal : Animal):
-	# can_have_sex = false
+	can_have_sex = false
 	animal.become_pregnant(self)
+	get_node("sex_cooldown").start()
 
 func become_pregnant(partner : Animal):
 	can_have_sex = false
@@ -191,9 +203,12 @@ func become_pregnant(partner : Animal):
 #Node component functions:
 func _on_pregnancy_timer_timeout():
 	for i in range(0, genes.num_of_offspring):
-		birth_request.emit(position, genes.vore_type, self, sexual_partner)
+		birth_request.emit(position, vore_type, self, sexual_partner)
 	can_have_sex = true
 	sexual_partner = null
+
+func _on_sex_cooldown_timeout():
+	can_have_sex = true
 
 func _on_timer_timeout():
 	pass # this func gets defined in instances of Carnivore/Herbivore
@@ -208,15 +223,23 @@ func _on_Area2D_animal_exited(body):
 
 func _ready():
 	var timer = get_node("Timer") #?? mb add timeout for actions as an animal variable? could be interesting
+	# timer.set_wait_time(processing_speed) // should be interesting to turn this on
 	timer.timeout.connect(_on_timer_timeout)
 
 	var sex_timer = Timer.new()
-	if genes.gender == World.Gender.FEMALE: # TODO else to set male_sex_cooldown if wanted
+	if genes.gender == World.Gender.FEMALE:
 		sex_timer.set_name("pregnancy_timer")
 		sex_timer.set_wait_time(genes.pregnancy_duration)
 		sex_timer.set_one_shot(true)
 		sex_timer.timeout.connect(_on_pregnancy_timer_timeout)
 		add_child(sex_timer)
+	else:
+		sex_timer.set_name("sex_cooldown")
+		sex_timer.set_wait_time(genes.male_sex_cooldown)
+		sex_timer.set_one_shot(true)
+		sex_timer.timeout.connect(_on_sex_cooldown_timeout)
+		add_child(sex_timer)
+
 	
 	var animal_detector = get_node("Area_Detection")
 	animal_detector.body_entered.connect(_on_Area2D_animal_entered)

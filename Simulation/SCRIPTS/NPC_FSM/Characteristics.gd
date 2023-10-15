@@ -5,7 +5,7 @@ class_name Animal_Characteristics
 var age : World.Age_Group
 var change_age_period : int
 
-var sexual_partner
+var sexual_partner : Animal
 var can_have_sex : bool
 var vore_type : World.Vore_Type
 
@@ -28,8 +28,9 @@ var separation_weight : float
 var cohesion_weight : float
 var alignment_weight : float
 
-
 #Base stats
+var processing_speed : float
+
 var mass : float
 var max_health : float
 var health : float
@@ -53,19 +54,21 @@ func set_characteristics(genes : Animal_Genes):
 	can_have_sex = true
 
 	#Locomotion
-	max_velocity = genes.musculature / genes.size  + 4# hate it
+	max_velocity = (genes.agility + genes.musculature) / (genes.size + 1)  + 3
 	max_steering_force = genes.agility * 5
 	direction = Vector2(randf(), randf()).normalized() # set starting orientation
 
-	wander_jitter = genes.agility * 6
+	wander_jitter = genes.agility + 0.7
 	wander_radius = max_velocity
-	wander_distance = wander_radius # 2*max_velocity
-	wander_target = direction * wander_radius # we want to moving forward
+	wander_distance = wander_radius 
+	wander_target = direction * wander_radius # we want to start by moving forward
 
 	threat_range = genes.sense_range # TODO
 	flock_behaviour_radius = genes.sense_range/3 # TODO
 
 	#Base stats
+	processing_speed = 1 - (genes.inteligence * genes.agility)
+
 	mass = genes.size * 100
 	max_health = mass
 	health = max_health
@@ -88,16 +91,35 @@ func get_tile_on_curr_pos() -> Vector2:
 func set_next_move(force : Vector2):
 	desired_velocity = force.normalized()*max_velocity
 
-func do_move(delta : float) -> void:
-	var my_vel = velocity
-	var my_desired_vel = desired_velocity
+func repulsion_force(creature_position: Vector2) -> Vector2:
+	var force = Vector2()
+	if creature_position.x < -World.x_edge_from_center + World.repulsion_margin:
+		force.x = World.max_repulsion_force * (1 - (-World.x_edge_from_center + creature_position.x) / World.repulsion_margin)
+	elif creature_position.x > World.x_edge_from_center - World.repulsion_margin:
+		force.x = -World.max_repulsion_force * (1 - (World.x_edge_from_center - creature_position.x) / World.repulsion_margin)
+	if creature_position.y < -World.y_edge_from_center + World.repulsion_margin:
+		force.y = World.max_repulsion_force * (1 - (-World.y_edge_from_center + creature_position.y) / World.repulsion_margin)
+	elif creature_position.y > World.y_edge_from_center - World.repulsion_margin:
+		force.y = -World.max_repulsion_force * (1 - (World.y_edge_from_center - creature_position.y) / World.repulsion_margin)
+	return force
 
-	var steering_force = (desired_velocity - velocity) * delta
-	steering_force.limit_length(max_steering_force)
+func do_move(delta : float) -> void:
+	desired_velocity += repulsion_force(position)
+	desired_velocity = desired_velocity.limit_length(max_velocity)
+
+	var steering_force = (desired_velocity - velocity)
+	steering_force = steering_force.limit_length(max_steering_force)
+	steering_force *= delta * World.animal_velocity_mult
+
 	velocity += steering_force
-	velocity.limit_length(max_velocity)
-	if velocity:
+	velocity = velocity.limit_length(max_velocity)
+	if velocity: # used to preserve the direction we we going before we stopped to eat/drink etc.
+		wander_target = direction * wander_radius
 		direction = velocity.normalized()
+	else:
+		var dummy = true
+		var why_here_ = 123
+
 	rotation = velocity.angle() + PI/2
 	position += velocity * delta * World.animal_velocity_mult
 
@@ -125,7 +147,6 @@ func flee(target : Vector2) -> Vector2:
 	return wanted_velocity
 
 func wander() -> Vector2:
-	wander_target = direction * wander_radius
 	wander_target += Vector2(randf_range(-wander_jitter, wander_jitter), randf_range(-wander_jitter, wander_jitter))
 	wander_target = wander_target.normalized() * wander_radius
 
@@ -133,28 +154,11 @@ func wander() -> Vector2:
 	var target = circle_pos + wander_target
 	return smooth_seek(target)
 
-func pursue(target: CharacterBody2D) -> Vector2:
-	var to_target = target.position - position
-	var relative_heading = velocity.normalized().dot(target.velocity.normalized())
-	
-	if to_target.dot(velocity.normalized()) > 0 and relative_heading < -0.95:  # cos(18°) is approximately 0.95
-		return seek(target.position)
-	
-	var lookahead_time = to_target.length() / (max_velocity + target.velocity.length())
-	var predicted_target = target.position + target.velocity * lookahead_time
-	return seek(predicted_target)
-
-func evade(pursuer: CharacterBody2D) -> Vector2:
-	var distance = pursuer.position - position
-	var estimated_time = distance.length() / max_velocity
-	var predicted_position = pursuer.position + pursuer.velocity * estimated_time
-	return flee(predicted_position)
-
 func get_flee_dir(animals : Array[Animal]):# -> Vector2:
 	var force : Vector2 = Vector2(0, 0)
 	for animal in animals:
 		var dist : float = abs(position.distance_to(animal.position))
-		var temp_force : Vector2 = evade(animal)
+		var temp_force : Vector2 = flee(animal.position)
 		force += temp_force/dist
 	return force
 
