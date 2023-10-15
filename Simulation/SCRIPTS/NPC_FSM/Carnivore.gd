@@ -134,7 +134,7 @@ func spawn_carnivore(pos, mother, father):
 	animal_type = Animal_Types.WOLF
 
 func process_animal(delta : float):
-	update_animal_norms()
+	update_animal_resources(delta)
 	carnivore_fsm(delta)
 
 func _on_timer_timeout():

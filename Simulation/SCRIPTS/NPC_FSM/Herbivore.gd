@@ -17,11 +17,8 @@ func herbivore_fsm(delta : float):
 			set_next_move(get_flee_dir(dangerous_animals))
 		Animal_Base_States.HUNGRY:
 			if not detected_crops.is_empty():
-				var crop_valid = get_closest_crop()
-				if crop_valid[1]:
-					herbivore_eat(crop_valid[0], delta)
-				else:
-					set_next_move(wander())
+				var crop = get_closest_crop()
+				herbivore_eat(crop, delta)
 			else:
 				set_next_move(wander())
 		Animal_Base_States.THIRSTY:
@@ -71,18 +68,14 @@ func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : f
 				consumption_state = Consumption_State.SEEKING
 
 func get_closest_crop():
-	var closest : Food_Crop
-	var closest_dist = 1.79769e308
-	var edible_crop_was_found = false
+	var closest : Food_Crop = detected_crops[0]
+	var closest_dist = position.distance_to(closest.position) # detected crops is not empty
 	for crop in detected_crops:
-		if crop.is_eaten:
-			continue
-		edible_crop_was_found = true
 		var crop_dist = position.distance_to(crop.position)
 		if crop_dist < closest_dist:
 			closest_dist = crop_dist
 			closest = crop
-	return [closest, edible_crop_was_found]
+	return closest
 
 func eat_crop(crop):
 	nutrition += crop.yield_value * 10 #temporary 10
@@ -97,7 +90,7 @@ func construct_herbivore(pos):
 	animal_type = Animal_Types.DEER
 
 func process_animal(delta : float):
-	update_animal_norms()
+	update_animal_resources(delta)
 	herbivore_fsm(delta)
 
 func _on_timer_timeout():

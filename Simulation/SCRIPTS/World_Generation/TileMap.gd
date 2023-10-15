@@ -60,8 +60,9 @@ func get_type_from_temp(temp):
 
 func create_tile_properties(pos : Vector2i, temp, moist, tile_biome, tile_type):
 	var tile = World.Tile_Properties.new() 
-	tile.biome = tile_biome
 	tile.type = tile_type
+	tile.occupied = false
+	tile.biome = tile_biome
 	tile.index = pos
 	tiles[pos] = tile
 	# set_tile_properties(tile, tile_biome, tile_type)

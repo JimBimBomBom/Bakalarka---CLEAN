@@ -1,5 +1,9 @@
 extends TileMap
 
+#TODO list:
+# add energy cost to reproduction
+# fix water spawning -> too rare atm, and all water regions are very small 
+
 var map_scene = load("res://SCENES/tile_map.tscn")
 var Map : Tile_Map_Class = map_scene.instantiate()
 
@@ -26,8 +30,11 @@ var change_age_period_mult = 10 # how many days for an "average" animal to age
 var corpse_timer = 50
 var seek_hydration_threshold = 0.2
 var seek_nutrition_threshold = 0.2
+
 var animal_acceleration_mult = 10
 var animal_velocity_mult = 5
+var base_resource_use = 2
+var energy_per_resource_gain = 2
 
 var fight_back_chance = 0.2
 var agility_modifier = 5

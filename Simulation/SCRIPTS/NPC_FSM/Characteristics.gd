@@ -29,7 +29,9 @@ var cohesion_weight : float
 var alignment_weight : float
 
 #Base stats
+var energy_drain : float
 var processing_speed : float
+var metabolic_rate : float
 
 var mass : float
 var max_health : float
@@ -40,6 +42,8 @@ var attack_damage : float
 var attack_range : float
 
 var max_resources : float
+var energy: float
+var energy_norm : float
 var nutrition : float
 var nutrition_norm : float
 var seek_nutrition_norm : float = 0.8
@@ -50,7 +54,7 @@ var seek_hydration_norm : float = 0.3
 
 func set_characteristics(genes : Animal_Genes):
 	age = World.Age_Group.JUVENILE # TODO option -> have age influence a variety of characteristics ... right now ignored
-	change_age_period = int(genes.size) * int(genes.metabolic_rate) * World.change_age_period_mult * World.hours_in_day
+	change_age_period = int(2 + 2*genes.size - genes.metabolic_rate) * World.change_age_period_mult * World.hours_in_day
 	can_have_sex = true
 
 	#Locomotion
@@ -67,7 +71,9 @@ func set_characteristics(genes : Animal_Genes):
 	flock_behaviour_radius = genes.sense_range/3 # TODO
 
 	#Base stats
+	energy_drain = genes.agility + genes.musculature + genes.size/2
 	processing_speed = 1 - (genes.inteligence * genes.agility)
+	metabolic_rate = genes.metabolic_rate
 
 	mass = genes.size * 100
 	max_health = mass
@@ -77,8 +83,9 @@ func set_characteristics(genes : Animal_Genes):
 	attack_range = genes.size * 15
 
 	max_resources = mass / genes.musculature # + World.resource_start_point)
-	nutrition = max_resources    /3
-	hydration = max_resources    /2
+	energy = max_resources
+	nutrition = max_resources / 3
+	hydration = max_resources / 2
 
 	separation_weight = genes.size 
 	cohesion_weight = genes.size 
@@ -116,22 +123,19 @@ func do_move(delta : float) -> void:
 	if velocity: # used to preserve the direction we we going before we stopped to eat/drink etc.
 		wander_target = direction * wander_radius
 		direction = velocity.normalized()
-	else:
-		var dummy = true
-		var why_here_ = 123
 
 	rotation = velocity.angle() + PI/2
 	position += velocity * delta * World.animal_velocity_mult
 
-func do_move_with_flock(delta : float, animals_of_same_type : Array[Animal]):
-	var flock_force = flock(animals_of_same_type).limit_length(max_velocity) # ???? 
-	var steering_force = (desired_velocity - velocity) + flock_weight*flock_force
-	steering_force.limit_length(max_steering_force)
+# func do_move_with_flock(delta : float, animals_of_same_type : Array[Animal]):
+# 	var flock_force = flock(animals_of_same_type).limit_length(max_velocity) # ???? 
+# 	var steering_force = (desired_velocity - velocity) + flock_weight*flock_force
+# 	steering_force.limit_length(max_steering_force)
 
-	velocity += steering_force
-	velocity.limit_length(max_velocity)
-	rotation = velocity.angle() + PI/2
-	position += velocity * delta #* World.animal_velocity_mult
+# 	velocity += steering_force
+# 	velocity.limit_length(max_velocity)
+# 	rotation = velocity.angle() + PI/2
+# 	position += velocity * delta #* World.animal_velocity_mult
 
 func seek(target : Vector2) -> Vector2:
 	var wanted_velocity = position.direction_to(target) * max_velocity
@@ -162,45 +166,45 @@ func get_flee_dir(animals : Array[Animal]):# -> Vector2:
 		force += temp_force/dist
 	return force
 
-func flock(animals_of_same_type : Array[Animal]) -> Vector2:
-	var separation_force = separation(animals_of_same_type)
-	var alignment_force = alignment(animals_of_same_type)
-	var cohesion_force = cohesion(animals_of_same_type)
+# func flock(animals_of_same_type : Array[Animal]) -> Vector2:
+# 	var separation_force = separation(animals_of_same_type)
+# 	var alignment_force = alignment(animals_of_same_type)
+# 	var cohesion_force = cohesion(animals_of_same_type)
 	
-	var flocking_force = separation_force * separation_weight + alignment_force * alignment_weight + cohesion_force * cohesion_weight
-	return flocking_force
+# 	var flocking_force = separation_force * separation_weight + alignment_force * alignment_weight + cohesion_force * cohesion_weight
+# 	return flocking_force
 
-func separation(animals : Array[Animal]) -> Vector2:
-	var force = Vector2()
-	for animal in animals:
-			var to_animal = position - animal.position
-			if to_animal.length() < flock_behaviour_radius:
-				force += to_animal.normalized() / to_animal.length()
-	return force
+# func separation(animals : Array[Animal]) -> Vector2:
+# 	var force = Vector2()
+# 	for animal in animals:
+# 			var to_animal = position - animal.position
+# 			if to_animal.length() < flock_behaviour_radius:
+# 				force += to_animal.normalized() / to_animal.length()
+# 	return force
 
-func alignment(animals : Array[Animal]) -> Vector2:
-	var avg_velocity = Vector2()
-	var count = 0
-	for animal in animals:
-			var to_animal = position - animal.position
-			if to_animal.length() < flock_behaviour_radius:
-				avg_velocity += animal.velocity
-				count += 1
-	if count > 0:
-		avg_velocity /= count
-		avg_velocity = avg_velocity.normalized() * max_velocity
-		return avg_velocity - velocity
-	else:
-		return Vector2()
+# func alignment(animals : Array[Animal]) -> Vector2:
+# 	var avg_velocity = Vector2()
+# 	var count = 0
+# 	for animal in animals:
+# 			var to_animal = position - animal.position
+# 			if to_animal.length() < flock_behaviour_radius:
+# 				avg_velocity += animal.velocity
+# 				count += 1
+# 	if count > 0:
+# 		avg_velocity /= count
+# 		avg_velocity = avg_velocity.normalized() * max_velocity
+# 		return avg_velocity - velocity
+# 	else:
+# 		return Vector2()
 
-func cohesion(animals : Array[Animal]) -> Vector2:
-	var center_mass = Vector2()
-	var count = 0
-	for animal in animals:
-			var to_animal = position - animal.position
-			if to_animal.length() < flock_behaviour_radius:
-				center_mass += animal.position
-				count += 1
-	if count > 0:
-		center_mass /= count
-	return seek(center_mass)
+# func cohesion(animals : Array[Animal]) -> Vector2:
+# 	var center_mass = Vector2()
+# 	var count = 0
+# 	for animal in animals:
+# 			var to_animal = position - animal.position
+# 			if to_animal.length() < flock_behaviour_radius:
+# 				center_mass += animal.position
+# 				count += 1
+# 	if count > 0:
+# 		center_mass /= count
+# 	return seek(center_mass)

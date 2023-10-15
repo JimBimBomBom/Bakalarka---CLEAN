@@ -51,7 +51,7 @@ func kill_animal():
 # should handle "consumption state"(which is also a bad name), where the base state "resets"
 # every other state not affiliated with our current base state -> HUNGRY sets drinking_state to SEEKING and vice versa
 func set_base_state(dangerous_animals : Array[Animal]):
-	if nutrition <= 0 or hydration <= 0 or health <= 0:
+	if energy <= 0 or health <= 0:
 		kill_animal()
 	elif not dangerous_animals.is_empty():
 		animal_state = Animal_Base_States.FLEEING
@@ -73,7 +73,32 @@ func free_cadaver():
 	remove_from_group(World.cadaver_group)
 	self.queue_free()
 
-func update_animal_norms():
+func resource_calc(delta : float):
+	var resource_loss = metabolic_rate*delta*World.base_resource_use
+	var energy_gain = 0
+	if nutrition >= resource_loss:
+		energy_gain += resource_loss
+		nutrition -= resource_loss
+	else:
+		energy_gain += nutrition
+		nutrition = 0
+		# TODO consequences
+
+	if hydration >= resource_loss:
+		energy_gain += resource_loss
+		hydration -= resource_loss
+	else:
+		energy_gain += hydration
+		hydration = 0
+		# TODO consequences
+
+	var energy_drain_delta = energy_drain*delta # drain is an animals' characteristic
+	var total_energy_gain = energy_gain * World.energy_per_resource_gain
+	energy += total_energy_gain - energy_drain_delta
+
+func update_animal_resources(delta : float):
+	resource_calc(delta)
+	energy_norm = energy/max_resources
 	nutrition_norm = nutrition/max_resources
 	hydration_norm = hydration/max_resources
 	health_norm = health/max_health

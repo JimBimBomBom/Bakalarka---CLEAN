@@ -12,24 +12,40 @@ func _ready():
 	add_child(World.Player)
 	
 	generate_vegetation()
+	generate_food_crops()
 	initialize_npcs()
 
 	var timer = get_node("HourCounter") 
 	timer.timeout.connect(_do_time)
-
-func regrow_food() -> void:
-	var vegetation = get_tree().get_nodes_in_group(World.food_regrow_group)
-	for veg in vegetation:
-		veg.regrow()
 
 func _do_time() -> void:
 	World.hour += 1
 	if World.hour >= World.hours_in_day:
 		World.day += 1
 		if World.day % World.regrow_period == 0:
-			regrow_food()
+			generate_food_crops()
 		World.hour = 0
-		# World.day_type = World.Day_Type.DAY # obsolete atm
+
+func generate_food_crops():
+	var width = World.width - World.edge_tiles
+	var height = World.height - World.edge_tiles
+	for x in range(-width, width + 1):
+		for y in range(-height, height + 1):
+			var pos = Vector2i(x, y)
+			# var alt = World.altitude[pos]
+			var moist = World.moisture[pos]
+			var temp = World.temperature[pos]
+
+			var tile = World.Map.tiles[pos] # placeholder fttb
+			if tile.type == World.Tile_Type.WATER || tile.occupied:
+				continue
+			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
+				continue
+
+			if between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
+				place_food_crop(pos, World.Vegetation_Type.BUSH_1)
+			elif between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
+				place_food_crop(pos, World.Vegetation_Type.BUSH_2)
 
 func generate_vegetation():
 	var width = World.width - World.edge_tiles
@@ -42,28 +58,49 @@ func generate_vegetation():
 			var temp = World.temperature[pos]
 
 			var tile = World.Map.tiles[pos] # placeholder fttb
-			if tile.type == World.Tile_Type.WATER:
+			if tile.type == World.Tile_Type.WATER || tile.occupied:
 				continue
 			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
 				continue
 
 			if between(moist, 0.6, 0.8) and between(temp, 0.4, 0.8):
-				place_vegetation(pos, World.Vegetation_Type.TREE_1, 0)
+				place_vegetation(pos, World.Vegetation_Type.TREE_1)
 			elif between(moist, 0.6, 0.8) and between(temp, 0.0, 0.4):
-				place_vegetation(pos, World.Vegetation_Type.TREE_2, 0)
-			elif between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
-				var food_yield = temp*moist
-				place_vegetation(pos, World.Vegetation_Type.BUSH_1, food_yield)
-			elif between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
-				var food_yield = temp*moist
-				place_vegetation(pos, World.Vegetation_Type.BUSH_2, food_yield)
+				place_vegetation(pos, World.Vegetation_Type.TREE_2)
 
-func place_vegetation(pos, type, food_yield) -> void:
-	var scene 
-	if food_yield:
-		scene = load("res://SCENES/FoodCrop.tscn")
-	else:
-		scene = load("res://SCENES/Vegetation.tscn")
+func place_food_crop(pos : Vector2i, type) -> void:
+	var	scene = load("res://SCENES/FoodCrop.tscn")
+	var inst = scene.instantiate()
+	var tile = World.Map.tiles[pos]
+	match tile.biome:
+		World.Temperature_Type.TAIGA:
+			match type:		
+				World.Vegetation_Type.BUSH_1:
+					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
+				World.Vegetation_Type.BUSH_2:
+					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
+		World.Temperature_Type.TEMPERATE_LAND:
+			match type:		
+				World.Vegetation_Type.BUSH_1: # Cut from here -> tropical in temperate
+					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
+				World.Vegetation_Type.BUSH_2:
+					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
+		World.Temperature_Type.TROPICAL_LAND:
+			match type:		
+				World.Vegetation_Type.BUSH_1:
+					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
+				World.Vegetation_Type.BUSH_2:
+					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
+	
+	World.Map.tiles[pos].occupied = true
+	inst.tile_index = pos # used to set tile occupancy to false on be_eaten() ...
+
+	inst.position = Vector2(pos.x, pos.y)*World.tile_size
+	inst.add_to_group(World.food_crop_group)
+	add_child(inst)
+
+func place_vegetation(pos : Vector2i, type) -> void:
+	var scene = load("res://SCENES/Vegetation.tscn")
 	var inst = scene.instantiate()
 	var tile = World.Map.tiles[pos]
 	match tile.biome:
@@ -73,37 +110,22 @@ func place_vegetation(pos, type, food_yield) -> void:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Taiga_Tree_1.png")
 				World.Vegetation_Type.TREE_2: # Cut from here -> tropical in taiga
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Tropical_Tree_2.png")
-				World.Vegetation_Type.BUSH_1:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
-				World.Vegetation_Type.BUSH_2:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
 		World.Temperature_Type.TEMPERATE_LAND:
 			match type:		
 				World.Vegetation_Type.TREE_1:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Temperate_Tree_1.png")
 				World.Vegetation_Type.TREE_2:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Temperate_Tree_2.png")
-				World.Vegetation_Type.BUSH_1: # Cut from here -> tropical in temperate
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
-				World.Vegetation_Type.BUSH_2:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
 		World.Temperature_Type.TROPICAL_LAND:
 			match type:		
 				World.Vegetation_Type.TREE_1:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Tropical_Tree_1.png")
 				World.Vegetation_Type.TREE_2:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Trees/Tropical_Tree_2.png")
-				World.Vegetation_Type.BUSH_1:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
-				World.Vegetation_Type.BUSH_2:
-					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
 	
+	World.Map.tiles[pos].occupied = true
 	inst.position = Vector2(pos.x, pos.y)*World.tile_size
-	if food_yield:
-		inst.add_to_group(World.food_crop_group)
-		inst.yield_value = food_yield
-	else:
-		inst.add_to_group(World.vegetation_group)
+	inst.add_to_group(World.vegetation_group)
 	add_child(inst)
 
 func initialize_npcs():
