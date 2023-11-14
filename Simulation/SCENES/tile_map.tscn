@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://56rtxp41p3f1"]
+[gd_scene load_steps=11 format=3 uid="uid://dy8f3dol5pkcb"]
 
 [ext_resource type="Texture2D" uid="uid://mplpwur55kca" path="res://Sprites/Biomes/TUNDRA.png" id="1_oke6x"]
 [ext_resource type="Script" path="res://SCRIPTS/World_Generation/TileMap.gd" id="2_hixom"]

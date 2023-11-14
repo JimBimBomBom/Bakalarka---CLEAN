@@ -1,9 +1,10 @@
 extends Node2D
 
 func _init():
-	World.day = 0
-	# World.day_type = World.Day_Type.DAY
 	World.hour = 0
+	World.day = 0
+	World.week = 0
+	World.season = World.Season_Type.SPRING
 
 func _ready():
 	add_child(World.Map)
@@ -18,12 +19,20 @@ func _ready():
 	var timer = get_node("HourCounter") 
 	timer.timeout.connect(_do_time)
 
+func change_season() -> void:
+	World.season += 1
+	World.season %= 4 # loop back my 4 seasons
+
 func _do_time() -> void:
 	World.hour += 1
 	if World.hour >= World.hours_in_day:
 		World.day += 1
-		if World.day % World.regrow_period == 0:
-			generate_food_crops()
+		if World.day % World.days_in_week == 0:
+			World.week += 1
+			# generate_food_crops()
+			World.Map.update_map()
+			if World.week % World.weeks_in_season == 0:
+				change_season()
 		World.hour = 0
 
 func generate_food_crops():
@@ -46,27 +55,6 @@ func generate_food_crops():
 				place_food_crop(pos, World.Vegetation_Type.BUSH_1)
 			elif between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
 				place_food_crop(pos, World.Vegetation_Type.BUSH_2)
-
-func generate_vegetation():
-	var width = World.width - World.edge_tiles
-	var height = World.height - World.edge_tiles
-	for x in range(-width, width + 1):
-		for y in range(-height, height + 1):
-			var pos = Vector2i(x, y)
-			# var alt = World.altitude[pos]
-			var moist = World.moisture[pos]
-			var temp = World.temperature[pos]
-
-			var tile = World.Map.tiles[pos] # placeholder fttb
-			if tile.type == World.Tile_Type.WATER || tile.occupied:
-				continue
-			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
-				continue
-
-			if between(moist, 0.6, 0.8) and between(temp, 0.4, 0.8):
-				place_vegetation(pos, World.Vegetation_Type.TREE_1)
-			elif between(moist, 0.6, 0.8) and between(temp, 0.0, 0.4):
-				place_vegetation(pos, World.Vegetation_Type.TREE_2)
 
 func place_food_crop(pos : Vector2i, type) -> void:
 	var	scene = load("res://SCENES/FoodCrop.tscn")
@@ -98,6 +86,27 @@ func place_food_crop(pos : Vector2i, type) -> void:
 	inst.position = Vector2(pos.x, pos.y)*World.tile_size
 	inst.add_to_group(World.food_crop_group)
 	add_child(inst)
+
+func generate_vegetation():
+	var width = World.width
+	var height = World.height
+	for x in range(-width, width + 1):
+		for y in range(-height, height + 1):
+			var pos = Vector2i(x, y)
+			# var alt = World.altitude[pos]
+			var moist = World.moisture[pos]
+			var temp = World.temperature[pos]
+
+			var tile = World.Map.tiles[pos] # placeholder fttb
+			if tile.type == World.Tile_Type.WATER || tile.occupied:
+				continue
+			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
+				continue
+
+			if between(moist, 0.6, 0.8) and between(temp, 0.4, 0.8):
+				place_vegetation(pos, World.Vegetation_Type.TREE_1)
+			elif between(moist, 0.6, 0.8) and between(temp, 0.0, 0.4):
+				place_vegetation(pos, World.Vegetation_Type.TREE_2)
 
 func place_vegetation(pos : Vector2i, type) -> void:
 	var scene = load("res://SCENES/Vegetation.tscn")

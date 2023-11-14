@@ -9,6 +9,10 @@ var agility : float
 var metabolic_rate : float
 var offense : float
 
+#Temperature
+var ideal_temperature : float
+var ideal_temperature_range : float
+
 #Sexual
 var male_sex_cooldown : float # redundant atm
 var pregnancy_duration : float

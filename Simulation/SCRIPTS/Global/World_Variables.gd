@@ -4,8 +4,7 @@ extends TileMap
 # add energy cost to reproduction
 # fix water spawning -> too rare atm, and all water regions are very small 
 
-var map_scene = load("res://SCENES/tile_map.tscn")
-var Map : Tile_Map_Class = map_scene.instantiate()
+var Map
 
 var player_scene = load("res://SCENES/player.tscn")
 var Player : CharacterBody2D = player_scene.instantiate()
@@ -17,13 +16,31 @@ var moisture = {}
 var moist_seed = randi()
 var fast_noise = FastNoiseLite.new()
 
-var day : int
-var day_type : Day_Type
 var hour : float
+var day : int
+var week : int
+var season : Season_Type 
+
+var temperature_avg : float = 0
+var moisture_avg : float = 0
+
+var moisture_change_magnitude = 0.1
+
+var temp_correction_magnitude = 0.2
+var target_avg_temp : float = 0.5
+var avg_temp_interval: float = 0.5
+var season_ranges = {
+	Season_Type.SPRING: Vector2(-0.05, 0.15),
+	Season_Type.SUMMER: Vector2(-0.08, 0.12),
+	Season_Type.AUTUMN: Vector2(-0.15, 0.5),
+	Season_Type.WINTER: Vector2(-0.12, 0.8),
+}
 
 #World settings:
-var hours_in_day : float = 20
-var regrow_period : int = 7 # food regrows after x days
+var hours_in_day : float = 2
+var days_in_week : int = 1
+var weeks_in_season : int = 4
+
 var velocity_start_point = 0.3
 var resource_start_point = 0.3
 var change_age_period_mult = 10 # how many days for an "average" animal to age
@@ -67,10 +84,19 @@ var mutation_prob = 0.01
 
 const Tile_Properties = preload("res://SCRIPTS/World_Generation/Tile_Properties.gd")
 
-enum Day_Type {
-	DAY,
-	NIGHT,
+enum Season_Type {
+	SPRING,
+	SUMMER,
+	AUTUMN,
+	WINTER,
 }
+enum Weather_Type {
+	CLEAR,
+	CLOUDY,
+	RAIN,
+	STORM, #only an idea atm
+}
+
 enum Vore_Type {
 	CARNIVORE,
 	HERBIVORE,
@@ -121,5 +147,6 @@ func extract_gene(parent_1 : float, parent_2 : float) -> float: # only for float
 func get_tile_pos(tile : Tile_Properties) -> Vector2:
 	return Vector2(tile.index.x, tile.index.y)*tile_size + tile_size/2
 
-
-
+func _ready():
+	var map_scene = load("res://SCENES/tile_map.tscn")
+	Map = map_scene.instantiate()

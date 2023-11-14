@@ -6,3 +6,5 @@ Crossover Operator: Uniform Crossover
 Mutation Operator: Displacement Mutation
 
 https://docs.google.com/spreadsheets/d/1P4PRSDI09WoJJIGBzLnNuzkaQsdPdGh_-RcLd3OLnZc/edit#gid=630397863
+
+https://teams.microsoft.com/_#/school/conversations/unknown?groupId=90df2afc-43a9-409b-a141-44656bc2a411&threadId=19:VlIcIR1hPT2wGCoX4099SYvRdhvKNaZL5j8VZdTqR_Q1@thread.tacv2&ctx=channel
