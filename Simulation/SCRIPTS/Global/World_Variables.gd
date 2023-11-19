@@ -38,7 +38,7 @@ var season_ranges = {
 
 #World settings:
 var hours_in_day : float = 2
-var days_in_week : int = 1
+var days_in_week : int = 4
 var weeks_in_season : int = 4
 
 var velocity_start_point = 0.3

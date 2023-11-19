@@ -28,7 +28,7 @@ func generate_map(fast_noise, freq, oct, oct_gain):
 func generate_world():
 	World.temperature = generate_map(World.fast_noise, 0.005, 10, 0.3)
 	World.moisture = generate_map(World.fast_noise, 0.01, 5, 0.3)
-	World.altitude = generate_map(World.fast_noise, 0.005, 10, 0.3)
+	World.altitude = generate_map(World.fast_noise, 0.005, 3, 0.3)
 	set_tiles()
 			
 func set_tiles():

@@ -125,7 +125,7 @@ func get_cadavers() -> Array[Animal]:
 func filter_animals_by_danger() -> Array[Animal]:
 	var dangerous_animals : Array[Animal]
 	for animal in detected_animals:
-		if vore_type == World.Vore_Type.HERBIVORE and animal.vore_type == World.Vore_Type.CARNIVORE:
+		if animal.is_in_group(World.animal_group) and vore_type == World.Vore_Type.HERBIVORE and animal.vore_type == World.Vore_Type.CARNIVORE:
 			dangerous_animals.append(animal)
 	return dangerous_animals
 
