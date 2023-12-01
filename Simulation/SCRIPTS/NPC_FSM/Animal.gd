@@ -11,6 +11,11 @@ enum Animal_Base_States {
 	FLEEING,
 	# SLEEPING,
 }
+enum Consumption_State {
+	CONSUMING,
+	SEEKING,
+	ATTACKING,
+}
 enum Animal_Types {
 	WOLF,
 	DEER,
@@ -19,6 +24,7 @@ enum Animal_Types {
 signal birth_request(pos, type, parent_1, parent_2)
 
 var animal_state : Animal_Base_States = Animal_Base_States.INIT
+var consumption_state : Consumption_State = Consumption_State.SEEKING
 
 var genes : Animal_Genes = Animal_Genes.new()
 var animal_type : Animal_Types 
@@ -44,8 +50,9 @@ func kill_animal():
 	remove_from_group(World.animal_group) 
 	add_to_group(World.cadaver_group)
 	var timer = get_node("Timer") # hijack decision timer + set its' wait_time
-	timer.wait_time = World.corpse_timer
 	timer.stop()
+	timer.timeout.connect(_on_free_cadaver_timeout)
+	timer.wait_time = World.corpse_timer # TODO add decomposition based on tile temperature
 	timer.start()
 
 # should handle "consumption state"(which is also a bad name), where the base state "resets"
@@ -198,6 +205,19 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
 func drink_at_tile(delta : float):#, tile : World.Tile_Properties):
 	hydration += delta
 
+func animal_hydrate(water_tile, delta : float):
+	match consumption_state:
+		Consumption_State.SEEKING:
+			var target = World.get_tile_pos(water_tile)
+			set_next_move(smooth_seek(target))
+			if position.distance_to(target) < 10:
+				consumption_state = Consumption_State.CONSUMING
+		Consumption_State.CONSUMING:
+			stop_animal()
+			drink_at_tile(delta) #TODO reason for animal to change into scanning, can be a timer
+			if hydration_norm >= 1: #TODO so shit, mb handle using signals?
+				consumption_state = Consumption_State.SEEKING
+
 func select_potential_mates(animals_of_same_type : Array[Animal]) -> Array[Animal]:
 	var result : Array[Animal]
 	for animal in animals_of_same_type:
@@ -225,6 +245,9 @@ func become_pregnant(partner : Animal):
 	sexual_partner = partner
 	get_node("pregnancy_timer").start()
 
+func process_animal(delta : float):
+	pass # this function gets defines individually for Carnivores/Herbivores
+
 #Node component functions:
 func _on_pregnancy_timer_timeout():
 	for i in range(0, genes.num_of_offspring):
@@ -235,9 +258,6 @@ func _on_pregnancy_timer_timeout():
 func _on_sex_cooldown_timeout():
 	can_have_sex = true
 
-func _on_timer_timeout():
-	pass # this func gets defined in instances of Carnivore/Herbivore
-
 func _on_Area2D_animal_entered(body):
 	if body is Animal and body.position != position:
 		detected_animals.append(body)
@@ -246,10 +266,32 @@ func _on_Area2D_animal_exited(body):
 	if body is Animal:
 		detected_animals.erase(body)
 
+func _on_action_timeout():
+	var delta = processing_speed # once I give animals the chance to influence their delta with a gene -> replace only here
+	process_animal(delta)
+
+func _on_free_cadaver_timeout():
+	free_cadaver()
+
+func _on_change_age_timer_timeout():
+	if age == World.Age_Group.OLD:
+		kill_animal()
+	else:
+		age += 1
+		get_node("change_age_timer").start()
+
 func _ready():
-	var timer = get_node("Timer") #?? mb add timeout for actions as an animal variable? could be interesting
-	# timer.set_wait_time(processing_speed) // should be interesting to turn this on
-	timer.timeout.connect(_on_timer_timeout)
+	var action_timer = get_node("Timer") #?? mb add timeout for actions as an animal variable? could be interesting
+	action_timer.set_wait_time(processing_speed)
+	action_timer.timeout.connect(_on_action_timeout)
+
+	var age_timer = Timer.new() 
+	age_timer.set_name("change_age_timer")
+	age_timer.set_wait_time(change_age_period)
+	age_timer.set_one_shot(true)
+	age_timer.timeout.connect(_on_change_age_timer_timeout)
+	add_child(age_timer)
+	age_timer.start()
 
 	var sex_timer = Timer.new()
 	if genes.gender == World.Gender.FEMALE:

@@ -2,8 +2,6 @@ extends Animal
 
 class_name Carnivore
 
-var consumption_state : Consumption_State = Consumption_State.SEEKING # separate eating/drinking
-
 func carnivore_fsm(delta : float):
 	var animals_in_sight : Array[Animal] = get_animals_from_sight()
 	var animals_in_hearing_range : Array[Animal] = detected_animals#get_animals_from_hearing()
@@ -16,20 +14,22 @@ func carnivore_fsm(delta : float):
 			var force = set_next_move(get_flee_dir(dangerous_animals))
 		Animal_Base_States.HUNGRY:
 			var animals_in_range : Array[Animal] 
-			if nutrition_norm < 0.1: #animals_in_hearing_range#filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
+			if nutrition_norm < 0.2: #animals_in_hearing_range#filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
 				animals_in_range = animals_in_hearing_range # chase closest animal -> even predators
 			else:
 				animals_in_range = filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
 
 			var cadavers_in_range : Array[Animal] = get_cadavers()
 			if not cadavers_in_range.is_empty() or not animals_in_range.is_empty(): #STALKING
-				carnivore_eat(animals_in_range, cadavers_in_range, delta)
+				var target = select_target(animals_in_range, cadavers_in_range)
+				carnivore_eat(target, delta)
 			else:
 				set_next_move(wander())
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
-				animal_hydrate(hydration_in_range, delta)
+				var water_tile = select_hydration_tile(hydration_in_range)
+				animal_hydrate(water_tile, delta)
 			else:
 				set_next_move(wander())
 		Animal_Base_States.SATED:
@@ -39,17 +39,30 @@ func carnivore_fsm(delta : float):
 					var mate = select_mating_partner(potential_mates)
 					reproduce_with_animal(mate) # so far the only heuristic is viscinity
 			else:
-				set_next_move(wander())
-				
+				var target
+				var water_tile
 
+				var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
+				if not hydration_in_range.is_empty():
+					water_tile = select_hydration_tile(hydration_in_range)
+				var animals_in_range = filter_animals_by_type(animals_in_hearing_range, Animal_Types.DEER)
+				var cadavers_in_range : Array[Animal] = get_cadavers()
+				if not cadavers_in_range.is_empty() or not animals_in_range.is_empty(): #STALKING
+					target = select_target(animals_in_range, cadavers_in_range)
 
-enum Consumption_State {
-	CONSUMING,
-	SEEKING,
-	ATTACKING,
-}
-func carnivore_eat(food_in_range : Array[Animal], cadavers_in_range : Array[Animal], delta : float):
-	var target = select_target(food_in_range, cadavers_in_range)
+				if target and water_tile:
+					if position.distance_to(target.position) < position.distance_to(water_tile.position):
+						carnivore_eat(target, delta)
+					else:
+						animal_hydrate(water_tile, delta)
+				elif target:
+					carnivore_eat(target, delta)
+				elif water_tile:
+					animal_hydrate(water_tile, delta)
+				else:
+					set_next_move(wander())
+
+func carnivore_eat(target : Animal, delta : float):
 	match consumption_state:
 		Consumption_State.SEEKING:
 			if target.animal_state == Animal_Base_States.DEAD:
@@ -111,11 +124,10 @@ func select_target(animals_in_range : Array[Animal], cadavers_in_range : Array[A
 
 	return result
 
-func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
-	var tile = select_hydration_tile(hydration_in_range)
+func animal_hydrate(water_tile, delta : float):
 	match consumption_state:
 		Consumption_State.SEEKING:
-			var target = World.get_tile_pos(tile)
+			var target = World.get_tile_pos(water_tile)
 			set_next_move(seek(target))
 			if position.distance_to(target) < 10:
 				consumption_state = Consumption_State.CONSUMING
@@ -136,13 +148,6 @@ func spawn_carnivore(pos, mother, father):
 func process_animal(delta : float):
 	update_animal_resources(delta)
 	carnivore_fsm(delta)
-
-func _on_timer_timeout():
-	var delta = 0.1
-	if animal_state != Animal_Base_States.DEAD:
-		process_animal(delta)
-	else:
-		free_cadaver()
 
 func _physics_process(delta : float):
 	do_move(delta)

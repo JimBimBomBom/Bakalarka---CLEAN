@@ -29,10 +29,12 @@ func _do_time() -> void:
 		World.day += 1
 		if World.day % World.days_in_week == 0:
 			World.week += 1
-			# generate_food_crops()
+			destroy_food_crop_during_storms()
+			generate_food_crops()
 			World.Map.update_map()
 			if World.week % World.weeks_in_season == 0:
 				change_season()
+				print("Season: ", World.season)
 		World.hour = 0
 
 func generate_food_crops():
@@ -45,15 +47,15 @@ func generate_food_crops():
 			var moist = World.moisture[pos]
 			var temp = World.temperature[pos]
 
-			var tile = World.Map.tiles[pos] # placeholder fttb
-			if tile.type == World.Tile_Type.WATER || tile.occupied:
+			var tile = World.Map.tiles[pos] 
+			if tile.type == World.Tile_Type.WATER || tile.occupied || tile.weather == World.Weather_Type.STORM:
 				continue
-			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
+			if moist + randf_range(0, 0.75) <= 1.0: # pretty random
 				continue
 
-			if between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
+			if between(moist, 0.4, 0.6) and between(temp, -0.3, 0.9):
 				place_food_crop(pos, World.Vegetation_Type.BUSH_1)
-			elif between(moist, 0.4, 0.6) and between(temp, 0.0, 0.8):
+			elif between(temp, -0.7, 0.2):
 				place_food_crop(pos, World.Vegetation_Type.BUSH_2)
 
 func place_food_crop(pos : Vector2i, type) -> void:
@@ -87,25 +89,30 @@ func place_food_crop(pos : Vector2i, type) -> void:
 	inst.add_to_group(World.food_crop_group)
 	add_child(inst)
 
+func destroy_food_crop_during_storms():
+	for crop in get_tree().get_nodes_in_group(World.food_crop_group):
+		if World.Map.tiles[crop.tile_index].weather == World.Weather_Type.STORM:
+			crop.be_eaten() # be_eaten simply removes the crop from all contexts
+
 func generate_vegetation():
 	var width = World.width
 	var height = World.height
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
 			var pos = Vector2i(x, y)
-			# var alt = World.altitude[pos]
+			var alt = World.altitude[pos]
 			var moist = World.moisture[pos]
 			var temp = World.temperature[pos]
 
-			var tile = World.Map.tiles[pos] # placeholder fttb
+			var tile = World.Map.tiles[pos]
 			if tile.type == World.Tile_Type.WATER || tile.occupied:
 				continue
-			if randf_range(0, 1) <= 0.75: #ADD mb custom probability?
+			if randf_range(0, 1) <= 0.82:
 				continue
 
-			if between(moist, 0.6, 0.8) and between(temp, 0.4, 0.8):
+			if between(alt, -0.45, 0.4) and between(temp, -0.3, 0.8):
 				place_vegetation(pos, World.Vegetation_Type.TREE_1)
-			elif between(moist, 0.6, 0.8) and between(temp, 0.0, 0.4):
+			elif between(alt, -0.15, 0.7) and between(temp, -0.7, 0.4):
 				place_vegetation(pos, World.Vegetation_Type.TREE_2)
 
 func place_vegetation(pos : Vector2i, type) -> void:
@@ -140,13 +147,13 @@ func place_vegetation(pos : Vector2i, type) -> void:
 func initialize_npcs():
 	var width = World.width
 	var height = World.height
-	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	# construct_npc(Vector2(0, 0), World.Vore_Type.HERBIVORE)
-	# construct_npc(Vector2(2, 3), World.Vore_Type.CARNIVORE)
-	# return
 	for x in range(-width, width + 1):
 		for y in range(-height, height + 1):
-			var pos = Vector2(x, y)
+			var pos = Vector2i(x, y)
+			var tile = World.Map.tiles[pos]
+			if tile.type == World.Tile_Type.WATER || tile.occupied:
+				continue
+
 			var prob = randf_range(0, 1)
 			if between(prob, 0.95, 0.956):
 				construct_npc(pos, World.Vore_Type.HERBIVORE)
@@ -172,7 +179,6 @@ func construct_npc(pos, type):
 	add_child(inst)
 
 #End of initialization
-
 
 func _on_animal_birth_request(pos, type, mother, father):
 	var scene = load("res://SCENES/animal.tscn")

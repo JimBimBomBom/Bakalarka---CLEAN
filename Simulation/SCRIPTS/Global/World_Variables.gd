@@ -4,17 +4,17 @@ extends TileMap
 # add energy cost to reproduction
 # fix water spawning -> too rare atm, and all water regions are very small 
 
-var Map
+var Map : Tile_Map_Class
 
 var player_scene = load("res://SCENES/player.tscn")
 var Player : CharacterBody2D = player_scene.instantiate()
 
 var temperature = {}
 var altitude = {}
-var alt_seed = randi()
 var moisture = {}
-var moist_seed = randi()
 var fast_noise = FastNoiseLite.new()
+var world_seed = randi() % 100
+# var world_seed = 0
 
 var hour : float
 var day : int
@@ -24,26 +24,25 @@ var season : Season_Type
 var temperature_avg : float = 0
 var moisture_avg : float = 0
 
-var moisture_change_magnitude = 0.1
+#World settings:
+var hours_in_day : float = 2
+var days_in_week : int = 2
+var weeks_in_season : int = 4
 
-var temp_correction_magnitude = 0.2
-var target_avg_temp : float = 0.5
-var avg_temp_interval: float = 0.5
+var target_avg_temp : float = 0 
+var non_extreme_temp_interval: float = 0.4
+var moisture_change_magnitude = 0.4
+var temp_correction_magnitude = 0.1
 var season_ranges = {
 	Season_Type.SPRING: Vector2(-0.05, 0.15),
 	Season_Type.SUMMER: Vector2(-0.08, 0.12),
-	Season_Type.AUTUMN: Vector2(-0.15, 0.5),
-	Season_Type.WINTER: Vector2(-0.12, 0.8),
+	Season_Type.AUTUMN: Vector2(-0.15, 0.05),
+	Season_Type.WINTER: Vector2(-0.12, 0.08),
 }
-
-#World settings:
-var hours_in_day : float = 2
-var days_in_week : int = 4
-var weeks_in_season : int = 4
 
 var velocity_start_point = 0.3
 var resource_start_point = 0.3
-var change_age_period_mult = 10 # how many days for an "average" animal to age
+var change_age_period_mult = 50 # how many days for an "average" animal to age
 var corpse_timer = 50
 var seek_hydration_threshold = 0.2
 var seek_nutrition_threshold = 0.2
@@ -85,10 +84,10 @@ var mutation_prob = 0.01
 const Tile_Properties = preload("res://SCRIPTS/World_Generation/Tile_Properties.gd")
 
 enum Season_Type {
-	SPRING,
-	SUMMER,
-	AUTUMN,
-	WINTER,
+	SPRING = 0,
+	SUMMER = 1,
+	AUTUMN = 2,
+	WINTER = 3,
 }
 enum Weather_Type {
 	CLEAR,
@@ -125,9 +124,10 @@ enum Gender {
 	FEMALE,
 }
 enum Age_Group {
-	JUVENILE,
-	ADULT,
-	OLD,
+	JUVENILE = 0,
+	ADOLESCENT = 1,
+	ADULT = 2,
+	OLD = 3,
 }
 
 func extract_gene(parent_1 : float, parent_2 : float) -> float: # only for float genes -> need new func for other types

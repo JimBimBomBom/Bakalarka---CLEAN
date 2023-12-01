@@ -46,15 +46,15 @@ var energy: float
 var energy_norm : float
 var nutrition : float
 var nutrition_norm : float
-var seek_nutrition_norm : float = 0.8
+var seek_nutrition_norm : float = 0.4
 var hydration : float
 var hydration_norm : float
-var seek_hydration_norm : float = 0.3
+var seek_hydration_norm : float = 0.4
 
 
 func set_characteristics(genes : Animal_Genes):
 	age = World.Age_Group.JUVENILE # TODO option -> have age influence a variety of characteristics ... right now ignored
-	change_age_period = int(2 + 2*genes.size - genes.metabolic_rate) * World.change_age_period_mult * World.hours_in_day
+	change_age_period = int(2 + 2*genes.size - genes.metabolic_rate) * World.change_age_period_mult# * World.hours_in_day
 	can_have_sex = true
 
 	#Locomotion

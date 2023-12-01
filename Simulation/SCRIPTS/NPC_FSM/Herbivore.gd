@@ -2,7 +2,6 @@ extends Animal
 
 class_name Herbivore
 
-var consumption_state : Consumption_State = Consumption_State.SEEKING
 var detected_crops : Array[Food_Crop] = []
 
 func herbivore_fsm(delta : float):
@@ -14,6 +13,7 @@ func herbivore_fsm(delta : float):
 
 	match animal_state:
 		Animal_Base_States.FLEEING:
+			consumption_state = Consumption_State.SEEKING # if an animal was eating/drinking when a danger entered its area if should not remain in consuming state
 			set_next_move(get_flee_dir(dangerous_animals))
 		Animal_Base_States.HUNGRY:
 			if not detected_crops.is_empty():
@@ -24,7 +24,8 @@ func herbivore_fsm(delta : float):
 		Animal_Base_States.THIRSTY:
 			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
-				animal_hydrate(hydration_in_range, delta)
+				var water_tile = select_hydration_tile(hydration_in_range)
+				animal_hydrate(water_tile, delta)
 			else:
 				set_next_move(wander())
 		Animal_Base_States.SATED:
@@ -33,12 +34,28 @@ func herbivore_fsm(delta : float):
 				if not potential_mates.is_empty():
 					var mate = select_mating_partner(potential_mates)
 					reproduce_with_animal(mate) # so far the only heuristic is viscinity
-			set_next_move(wander())
+			else: # eat/drink closest 
+				var crop
+				var water_tile
 
-enum Consumption_State {
-	CONSUMING,
-	SEEKING,
-}
+				var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
+				if not hydration_in_range.is_empty():
+					water_tile = select_hydration_tile(hydration_in_range)
+				if not detected_crops.is_empty():
+					crop = get_closest_crop()
+
+				if crop and water_tile:
+					if position.distance_to(crop.position) < position.distance_to(water_tile.position):
+						herbivore_eat(crop, delta)
+					else:
+						animal_hydrate(water_tile, delta)
+				elif crop:
+					herbivore_eat(crop, delta)
+				elif water_tile:
+					animal_hydrate(water_tile, delta)
+				else:
+					set_next_move(wander())
+
 func herbivore_eat(crop, delta : float):
 	match consumption_state:
 		Consumption_State.SEEKING:
@@ -51,20 +68,6 @@ func herbivore_eat(crop, delta : float):
 			else:
 				stop_animal()
 				eat_crop(crop)
-				consumption_state = Consumption_State.SEEKING
-
-func animal_hydrate(hydration_in_range : Array[World.Tile_Properties], delta : float):
-	var tile = select_hydration_tile(hydration_in_range)
-	match consumption_state:
-		Consumption_State.SEEKING:
-			var target = World.get_tile_pos(tile)
-			set_next_move(smooth_seek(target))
-			if position.distance_to(target) < 10:
-				consumption_state = Consumption_State.CONSUMING
-		Consumption_State.CONSUMING:
-			stop_animal()
-			drink_at_tile(delta) #TODO reason for animal to change into scanning, can be a timer
-			if hydration_norm >= seek_hydration_norm: #TODO so shit, mb handle using signals?
 				consumption_state = Consumption_State.SEEKING
 
 func get_closest_crop():
@@ -92,13 +95,6 @@ func construct_herbivore(pos):
 func process_animal(delta : float):
 	update_animal_resources(delta)
 	herbivore_fsm(delta)
-
-func _on_timer_timeout():
-	var delta = 0.1 # once I give animals the chance to influence their delta with a gene -> replace only here
-	if animal_state != Animal_Base_States.DEAD: # could separate branches into functions + set timer to appropriate func
-		process_animal(delta)
-	else:
-		free_cadaver()
 
 func _physics_process(delta : float):
 	do_move(delta)
