@@ -9,6 +9,9 @@ var sexual_partner : Animal
 var can_have_sex : bool
 var vore_type : World.Vore_Type
 
+# tracking data
+var generation : int
+
 #Locomotion
 var max_velocity : float
 var max_steering_force : float
@@ -98,7 +101,7 @@ func get_tile_on_curr_pos() -> Vector2:
 func set_next_move(force : Vector2):
 	desired_velocity = force.normalized()*max_velocity
 
-func repulsion_force(creature_position: Vector2) -> Vector2:
+func repulsion_force(creature_position: Vector2) -> Vector2: # NOTE: ensures that creatures are kept away from the edges of the world
 	var force = Vector2()
 	if creature_position.x < -World.x_edge_from_center + World.repulsion_margin:
 		force.x = World.max_repulsion_force * (1 - (-World.x_edge_from_center + creature_position.x) / World.repulsion_margin)

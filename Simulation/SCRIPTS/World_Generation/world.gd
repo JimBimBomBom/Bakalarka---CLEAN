@@ -158,8 +158,9 @@ func initialize_npcs():
 			if between(prob, 0.95, 0.956):
 				construct_npc(pos, World.Vore_Type.HERBIVORE)
 			elif between(prob, 0.956, 0.958):
-				construct_npc(pos, World.Vore_Type.CARNIVORE)
-			
+				# construct_npc(pos, World.Vore_Type.CARNIVORE)
+				pass
+
 func construct_npc(pos, type):
 	var scene = load("res://SCENES/animal.tscn")
 	var inst = scene.instantiate()

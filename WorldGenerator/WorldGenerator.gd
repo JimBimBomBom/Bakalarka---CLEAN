@@ -1,8 +1,8 @@
 extends Node2D
 
 @onready var tilemap = $TileMap
-var width = 1024
-var height = 1024
+var width = 100
+var height = 100
 
 var temperature = {}
 var altitude = {}
@@ -14,10 +14,12 @@ func generate_map(freq, oct):
 	fast_noise.seed = randi()
 	fast_noise.frequency = freq
 	fast_noise.fractal_octaves = oct
+	fast_noise.noise_type = FastNoiseLite.NoiseType.Perlin
+
 	var grid_name = {}
 	for x in width:
 		for y in height:
-			var rand = 2*(abs(fast_noise.get_noise_2d(x,y)))
+			var rand = (abs(fast_noise.get_noise_2d(x,y)))
 			grid_name[Vector2(x, y)] = rand
 	return grid_name
 

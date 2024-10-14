@@ -38,11 +38,15 @@ func spawn_animal(pos, type, mother, father):
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
 
+	generation = max(mother.generation, father.generation) + 1 # NOTE: generation is only interesting for graphing the composition of the population
+
 func construct_animal(pos : Vector2i, type : World.Vore_Type):
 	genes.generate_genes()
 	vore_type = type
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
+
+	generation = 0 # NOTE: here animals are created to populate the initial world, so in effect they represent the 0th generation of randomly generated animals
 
 func kill_animal():
 	animal_state = Animal_Base_States.DEAD
@@ -52,7 +56,7 @@ func kill_animal():
 	var timer = get_node("Timer") # hijack decision timer + set its' wait_time
 	timer.stop()
 	timer.timeout.connect(_on_free_cadaver_timeout)
-	timer.wait_time = World.corpse_timer # TODO add decomposition based on tile temperature
+	timer.wait_time = World.corpse_timer # TODO add decomposition based on tile temperature, etc.
 	timer.start()
 
 # should handle "consumption state"(which is also a bad name), where the base state "resets"

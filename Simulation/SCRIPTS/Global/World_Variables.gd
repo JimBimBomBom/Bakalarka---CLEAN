@@ -25,7 +25,7 @@ var temperature_avg : float = 0
 var moisture_avg : float = 0
 
 #World settings:
-var hours_in_day : float = 2
+var hours_in_day : float = 8
 var days_in_week : int = 2
 var weeks_in_season : int = 4
 
