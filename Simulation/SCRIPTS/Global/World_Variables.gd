@@ -1,9 +1,5 @@
 extends TileMap
 
-#TODO list:
-# add energy cost to reproduction
-# fix water spawning -> too rare atm, and all water regions are very small 
-
 var Map : Tile_Map_Class
 
 var player_scene = load("res://SCENES/player.tscn")
@@ -16,41 +12,31 @@ var fast_noise = FastNoiseLite.new()
 var world_seed = randi() % 100
 # var world_seed = 0
 
-var hour : float
-var day : int
-var week : int
-var season : Season_Type 
+var game_speed = 1
 
+# NOTE: right now only serve to inform what the world average looks like
 var temperature_avg : float = 0
 var moisture_avg : float = 0
 
 #World settings:
-var hours_in_day : float = 8
-var days_in_week : int = 2
-var weeks_in_season : int = 4
+var food_regrow_time : float = 48
 
 var target_avg_temp : float = 0 
 var non_extreme_temp_interval: float = 0.4
 var moisture_change_magnitude = 0.4
 var temp_correction_magnitude = 0.1
-var season_ranges = {
-	Season_Type.SPRING: Vector2(-0.05, 0.15),
-	Season_Type.SUMMER: Vector2(-0.08, 0.12),
-	Season_Type.AUTUMN: Vector2(-0.15, 0.05),
-	Season_Type.WINTER: Vector2(-0.12, 0.08),
-}
 
 var velocity_start_point = 0.3
 var resource_start_point = 0.3
-var change_age_period_mult = 50 # how many days for an "average" animal to age
+var change_age_period_mult = 50
 var corpse_timer = 50
-var seek_hydration_threshold = 0.2
-var seek_nutrition_threshold = 0.2
+var seek_hydration_threshold = 0.4
+var seek_nutrition_threshold = 0.4
 
 var animal_acceleration_mult = 10
 var animal_velocity_mult = 5
-var base_resource_use = 2
-var energy_per_resource_gain = 2
+
+var food_crop_yield = 2
 
 var fight_back_chance = 0.2
 var agility_modifier = 5
@@ -66,8 +52,8 @@ var food_regrow_group : String = "Food_Regrow"
 var carnivore_script : String = "res://SCRIPTS/NPC_FSM/Carnivore.gd"
 var herbivore_script : String = "res://SCRIPTS/NPC_FSM/Herbivore.gd"
 
-var width = 100
-var height = 100
+var width = 25
+var height = 25
 
 var tile_size : Vector2 = Vector2(32, 32)
 var tile_size_i : Vector2i = Vector2i(tile_size.x, tile_size.y)
@@ -82,19 +68,6 @@ var corpse_max_timer : float
 var mutation_prob = 0.01
 
 const Tile_Properties = preload("res://SCRIPTS/World_Generation/Tile_Properties.gd")
-
-enum Season_Type {
-	SPRING = 0,
-	SUMMER = 1,
-	AUTUMN = 2,
-	WINTER = 3,
-}
-enum Weather_Type {
-	CLEAR,
-	CLOUDY,
-	RAIN,
-	STORM, #only an idea atm
-}
 
 enum Vore_Type {
 	CARNIVORE,
@@ -119,10 +92,8 @@ enum Temperature_Type {#selects the tile_set
 	TROPICAL_LAND = 3,
 	DESERT = 4,
 }
-enum Gender {
-	MALE,
-	FEMALE,
-}
+
+#NOTE : not used atm
 enum Age_Group {
 	JUVENILE = 0,
 	ADOLESCENT = 1,

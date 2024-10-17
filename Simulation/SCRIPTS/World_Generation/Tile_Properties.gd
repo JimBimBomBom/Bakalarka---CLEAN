@@ -6,6 +6,5 @@ var position : Vector2
 var index : Vector2i
 
 var biome : World.Temperature_Type
-var weather : World.Weather_Type
 
 # var movement_difficulty : float 

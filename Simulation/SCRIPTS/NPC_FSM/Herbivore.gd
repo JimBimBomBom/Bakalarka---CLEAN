@@ -29,7 +29,7 @@ func herbivore_fsm(delta : float):
 			else:
 				set_next_move(wander())
 		Animal_Base_States.SATED:
-			if genes.gender == World.Gender.MALE and can_have_sex:
+			if can_have_sex:
 				var potential_mates = select_potential_mates(animals_of_same_type)
 				if not potential_mates.is_empty():
 					var mate = select_mating_partner(potential_mates)
@@ -84,19 +84,20 @@ func eat_crop(crop):
 	nutrition += crop.yield_value * 10 #temporary 10
 	crop.be_eaten()
 	
-func spawn_herbivore(pos, mother, father):
-	spawn_animal(pos, World.Vore_Type.HERBIVORE, mother, father)
-	animal_type = Animal_Types.WOLF
+func spawn_herbivore(pos, parent_1, parent_2):
+	spawn_animal(pos, World.Vore_Type.HERBIVORE, parent_1, parent_2)
+	animal_type = Animal_Types.DEER
 
 func construct_herbivore(pos):
 	construct_animal(pos, World.Vore_Type.HERBIVORE)
 	animal_type = Animal_Types.DEER
 
 func process_animal(delta : float):
-	update_animal_resources(delta)
-	herbivore_fsm(delta)
+	pass
 
 func _physics_process(delta : float):
+	update_animal_resources(delta)
+	herbivore_fsm(delta)
 	do_move(delta)
 
 func _on_Area2D_animal_entered(body):

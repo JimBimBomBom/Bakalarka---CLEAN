@@ -1,41 +1,29 @@
 extends Node2D
 
-func _init():
-	World.hour = 0
-	World.day = 0
-	World.week = 0
-	World.season = World.Season_Type.SPRING
-
 func _ready():
+	
+	
 	add_child(World.Map)
 	World.Map.generate_world()
-
+	
 	add_child(World.Player)
 	
 	generate_vegetation()
 	generate_food_crops()
 	initialize_npcs()
+	
+	var food_regrow_timer = Timer.new()
+	food_regrow_timer.set_name("FoodRegrowTimer")
+	food_regrow_timer.timeout.connect(_regrow_food)
+	food_regrow_timer.wait_time = World.food_regrow_time
+	food_regrow_timer.autostart = true
+	add_child(food_regrow_timer)
+	food_regrow_timer.start()
+	
+	GameSpeedController.set_game_speed(8)
 
-	var timer = get_node("HourCounter") 
-	timer.timeout.connect(_do_time)
-
-func change_season() -> void:
-	World.season += 1
-	World.season %= 4 # loop back my 4 seasons
-
-func _do_time() -> void:
-	World.hour += 1
-	if World.hour >= World.hours_in_day:
-		World.day += 1
-		if World.day % World.days_in_week == 0:
-			World.week += 1
-			destroy_food_crop_during_storms()
-			generate_food_crops()
-			World.Map.update_map()
-			if World.week % World.weeks_in_season == 0:
-				change_season()
-				print("Season: ", World.season)
-		World.hour = 0
+func _regrow_food() -> void:
+	generate_food_crops()
 
 func generate_food_crops():
 	var width = World.width - World.edge_tiles
@@ -48,7 +36,7 @@ func generate_food_crops():
 			var temp = World.temperature[pos]
 
 			var tile = World.Map.tiles[pos] 
-			if tile.type == World.Tile_Type.WATER || tile.occupied || tile.weather == World.Weather_Type.STORM:
+			if tile.type == World.Tile_Type.WATER || tile.occupied:
 				continue
 			if moist + randf_range(0, 0.75) <= 1.0: # pretty random
 				continue
@@ -88,11 +76,6 @@ func place_food_crop(pos : Vector2i, type) -> void:
 	inst.position = Vector2(pos.x, pos.y)*World.tile_size
 	inst.add_to_group(World.food_crop_group)
 	add_child(inst)
-
-func destroy_food_crop_during_storms():
-	for crop in get_tree().get_nodes_in_group(World.food_crop_group):
-		if World.Map.tiles[crop.tile_index].weather == World.Weather_Type.STORM:
-			crop.be_eaten() # be_eaten simply removes the crop from all contexts
 
 func generate_vegetation():
 	var width = World.width
@@ -158,6 +141,7 @@ func initialize_npcs():
 			if between(prob, 0.95, 0.956):
 				construct_npc(pos, World.Vore_Type.HERBIVORE)
 			elif between(prob, 0.956, 0.958):
+				#NOTE: testing with herbivores for now
 				# construct_npc(pos, World.Vore_Type.CARNIVORE)
 				pass
 
@@ -181,26 +165,31 @@ func construct_npc(pos, type):
 
 #End of initialization
 
-func _on_animal_birth_request(pos, type, mother, father):
+func _on_animal_birth_request(pos, type, parent_1, parent_2):
 	var scene = load("res://SCENES/animal.tscn")
 	var inst = scene.instantiate()
 	match type:
 		World.Vore_Type.HERBIVORE:
 			var herbivore_script = load(World.herbivore_script)
 			inst.set_script(herbivore_script)
-			inst.spawn_herbivore(pos, mother.genes, father.genes)
+			inst.spawn_herbivore(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
+			inst.generation = max(parent_1.generation, parent_2.generation) + 1
 		World.Vore_Type.CARNIVORE:
 			var carnivore_script = load(World.carnivore_script)
 			inst.set_script(carnivore_script)
-			inst.spawn_carnivore(pos, mother.genes, father.genes)
+			inst.spawn_carnivore(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
+			inst.generation = max(parent_1.generation, parent_2.generation) + 1
 	inst.add_to_group(World.animal_group)
 	inst.birth_request.connect(_on_animal_birth_request)
 	add_child(inst)
 
-	
 func between(val, start, end):
 	if start <= val and val <= end:
 		return true
 	return false
+
+func _process(delta):
+	if Input.is_action_just_pressed("toggle_camera"):
+		self.visible = not self.visible		

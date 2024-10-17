@@ -33,7 +33,7 @@ func carnivore_fsm(delta : float):
 			else:
 				set_next_move(wander())
 		Animal_Base_States.SATED:
-			if genes.gender == World.Gender.MALE and can_have_sex:
+			if can_have_sex:
 				var potential_mates = select_potential_mates(animals_of_same_type)
 				if not potential_mates.is_empty():
 					var mate = select_mating_partner(potential_mates)

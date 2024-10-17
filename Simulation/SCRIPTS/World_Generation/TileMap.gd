@@ -71,22 +71,9 @@ func get_type_from_temp(temp):
 		temp_type = World.Temperature_Type.TROPICAL_LAND
 	return temp_type
 
-func get_tile_weather(moist : float) -> World.Weather_Type:
-	var weather : World.Weather_Type
-	if moist < 0.4:
-		weather = World.Weather_Type.CLEAR
-	elif moist < 0.6:
-		weather = World.Weather_Type.CLOUDY
-	elif moist < 0.9:
-		weather = World.Weather_Type.RAIN
-	else:
-		weather = World.Weather_Type.STORM
-	return weather
-
 func set_current_cell(pos, tile, alt, temp, moist):
 	var temperature_type = get_type_from_temp(temp)
 	tile.biome = temperature_type
-	tile.weather = get_tile_weather(moist)
 	var sprite_coord = Vector2i(0, 0) # base plain tile coord
 	if tile.type == World.Tile_Type.WATER:
 		sprite_coord = Vector2i(2, 2) # base water tile coord
@@ -100,9 +87,6 @@ func update_map():
 	var temp_correction_factor = get_balancing_factor()
 	for x in range(-World.width, World.width + 1):
 		for y in range(-World.height, World.height + 1):
-			var seasonal_variation = temp_change[Vector2i(x, y)]
-			seasonal_variation = adjust_for_season(seasonal_variation)
-			World.temperature[Vector2i(x, y)] += seasonal_variation #+ temp_correction_factor 
 			World.temperature[Vector2i(x, y)] = clamp(World.temperature[Vector2i(x, y)], -1.0, 1.0)
 
 			var weekly_variation = moist_change[Vector2i(x, y)]
@@ -140,10 +124,6 @@ func get_balancing_factor() -> float:
 		correction_factor = World.temp_correction_magnitude * (-max(0, (current_avg_temp - target_avg_temp) / target_avg_temp))
 
 	return correction_factor
-
-func adjust_for_season(seasonal_variation: float) -> float:
-	var range = World.season_ranges[World.season]
-	return map(seasonal_variation, -1, 1, range.x, range.y)
 
 func map(value: float, start1: float, stop1: float, start2: float, stop2: float) -> float:
 	return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))

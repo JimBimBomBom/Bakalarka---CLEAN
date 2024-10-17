@@ -17,6 +17,7 @@ var max_velocity : float
 var max_steering_force : float
 var desired_velocity = Vector2(0, 0)
 var direction : Vector2
+
 #Locomotion - Wander variables
 var wander_jitter : float = 1
 var wander_radius : float = 10.0
@@ -47,17 +48,20 @@ var attack_range : float
 var max_resources : float
 var energy: float
 var energy_norm : float
+
 var nutrition : float
 var nutrition_norm : float
 var seek_nutrition_norm : float = 0.4
+var nutrition_satisfied_norm : float = 1
+
 var hydration : float
 var hydration_norm : float
 var seek_hydration_norm : float = 0.4
-
+var hydration_satisfied_norm : float = 1
 
 func set_characteristics(genes : Animal_Genes):
 	age = World.Age_Group.JUVENILE # TODO option -> have age influence a variety of characteristics ... right now ignored
-	change_age_period = int(2 + 2*genes.size - genes.metabolic_rate) * World.change_age_period_mult# * World.hours_in_day
+	change_age_period = int(2 + 2*genes.size - genes.metabolic_rate) * World.change_age_period_mult
 	can_have_sex = true
 
 	#Locomotion
@@ -119,9 +123,9 @@ func do_move(delta : float) -> void:
 
 	var steering_force = (desired_velocity - velocity)
 	steering_force = steering_force.limit_length(max_steering_force)
-	steering_force *= delta * World.animal_velocity_mult
+	steering_force *= delta * 2 #* World.animal_velocity_mult
 
-	velocity += steering_force
+	velocity += steering_force 
 	velocity = velocity.limit_length(max_velocity)
 	if velocity: # used to preserve the direction we we going before we stopped to eat/drink etc.
 		wander_target = direction * wander_radius
@@ -129,16 +133,6 @@ func do_move(delta : float) -> void:
 
 	rotation = velocity.angle() + PI/2
 	position += velocity * delta * World.animal_velocity_mult
-
-# func do_move_with_flock(delta : float, animals_of_same_type : Array[Animal]):
-# 	var flock_force = flock(animals_of_same_type).limit_length(max_velocity) # ???? 
-# 	var steering_force = (desired_velocity - velocity) + flock_weight*flock_force
-# 	steering_force.limit_length(max_steering_force)
-
-# 	velocity += steering_force
-# 	velocity.limit_length(max_velocity)
-# 	rotation = velocity.angle() + PI/2
-# 	position += velocity * delta #* World.animal_velocity_mult
 
 func seek(target : Vector2) -> Vector2:
 	var wanted_velocity = position.direction_to(target) * max_velocity
@@ -168,46 +162,3 @@ func get_flee_dir(animals : Array[Animal]):# -> Vector2:
 		var temp_force : Vector2 = flee(animal.position)
 		force += temp_force/dist
 	return force
-
-# func flock(animals_of_same_type : Array[Animal]) -> Vector2:
-# 	var separation_force = separation(animals_of_same_type)
-# 	var alignment_force = alignment(animals_of_same_type)
-# 	var cohesion_force = cohesion(animals_of_same_type)
-	
-# 	var flocking_force = separation_force * separation_weight + alignment_force * alignment_weight + cohesion_force * cohesion_weight
-# 	return flocking_force
-
-# func separation(animals : Array[Animal]) -> Vector2:
-# 	var force = Vector2()
-# 	for animal in animals:
-# 			var to_animal = position - animal.position
-# 			if to_animal.length() < flock_behaviour_radius:
-# 				force += to_animal.normalized() / to_animal.length()
-# 	return force
-
-# func alignment(animals : Array[Animal]) -> Vector2:
-# 	var avg_velocity = Vector2()
-# 	var count = 0
-# 	for animal in animals:
-# 			var to_animal = position - animal.position
-# 			if to_animal.length() < flock_behaviour_radius:
-# 				avg_velocity += animal.velocity
-# 				count += 1
-# 	if count > 0:
-# 		avg_velocity /= count
-# 		avg_velocity = avg_velocity.normalized() * max_velocity
-# 		return avg_velocity - velocity
-# 	else:
-# 		return Vector2()
-
-# func cohesion(animals : Array[Animal]) -> Vector2:
-# 	var center_mass = Vector2()
-# 	var count = 0
-# 	for animal in animals:
-# 			var to_animal = position - animal.position
-# 			if to_animal.length() < flock_behaviour_radius:
-# 				center_mass += animal.position
-# 				count += 1
-# 	if count > 0:
-# 		center_mass /= count
-# 	return seek(center_mass)

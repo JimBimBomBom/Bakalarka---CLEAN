@@ -3,7 +3,6 @@ extends Animal_Characteristics
 class_name Animal
 
 enum Animal_Base_States {
-	INIT,
 	DEAD,
 	SATED,
 	HUNGRY,
@@ -23,7 +22,7 @@ enum Animal_Types {
 
 signal birth_request(pos, type, parent_1, parent_2)
 
-var animal_state : Animal_Base_States = Animal_Base_States.INIT
+var animal_state : Animal_Base_States = Animal_Base_States.SATED
 var consumption_state : Consumption_State = Consumption_State.SEEKING
 
 var genes : Animal_Genes = Animal_Genes.new()
@@ -38,14 +37,12 @@ func spawn_animal(pos, type, mother, father):
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
 
-	generation = max(mother.generation, father.generation) + 1 # NOTE: generation is only interesting for graphing the composition of the population
-
 func construct_animal(pos : Vector2i, type : World.Vore_Type):
 	genes.generate_genes()
 	vore_type = type
 	set_characteristics(genes)
 	position = Vector2(pos.x, pos.y) * World.tile_size
-
+	animal_state = Animal_Base_States.SATED
 	generation = 0 # NOTE: here animals are created to populate the initial world, so in effect they represent the 0th generation of randomly generated animals
 
 func kill_animal():
@@ -53,11 +50,12 @@ func kill_animal():
 	stop_animal()
 	remove_from_group(World.animal_group) 
 	add_to_group(World.cadaver_group)
-	var timer = get_node("Timer") # hijack decision timer + set its' wait_time
-	timer.stop()
-	timer.timeout.connect(_on_free_cadaver_timeout)
-	timer.wait_time = World.corpse_timer # TODO add decomposition based on tile temperature, etc.
-	timer.start()
+	var cadaver_timer = Timer.new()
+	cadaver_timer.set_name("cadaver_timer")
+	cadaver_timer.set_wait_time(World.corpse_timer)
+	cadaver_timer.timeout.connect(_on_free_cadaver_timeout)
+	add_child(cadaver_timer)
+	cadaver_timer.start()
 
 # should handle "consumption state"(which is also a bad name), where the base state "resets"
 # every other state not affiliated with our current base state -> HUNGRY sets drinking_state to SEEKING and vice versa
@@ -66,26 +64,39 @@ func set_base_state(dangerous_animals : Array[Animal]):
 		kill_animal()
 	elif not dangerous_animals.is_empty():
 		animal_state = Animal_Base_States.FLEEING
-	elif nutrition_norm < seek_nutrition_norm: # and nutrition_norm < hydration_norm:
-		animal_state = Animal_Base_States.HUNGRY
-	elif hydration_norm < seek_hydration_norm:
-		animal_state = Animal_Base_States.THIRSTY
-	else:
-		animal_state = Animal_Base_States.SATED
+	elif animal_state == Animal_Base_States.SATED:
+		if nutrition_norm < seek_nutrition_norm and nutrition_norm < hydration_norm:
+			animal_state = Animal_Base_States.HUNGRY
+		elif hydration_norm < seek_hydration_norm and hydration_norm < nutrition_norm:
+			animal_state = Animal_Base_States.THIRSTY
+	elif animal_state == Animal_Base_States.HUNGRY:
+		if nutrition_norm > seek_nutrition_norm and hydration_norm < seek_hydration_norm and nutrition_norm < seek_nutrition_norm:
+			animal_state = Animal_Base_States.THIRSTY
+		elif nutrition_norm >= nutrition_satisfied_norm: 
+			animal_state = Animal_Base_States.SATED
+		# if nutrition_norm >= nutrition_satisfied_norm: 
+		# 	animal_state = Animal_Base_States.SATED
+	elif animal_state == Animal_Base_States.THIRSTY:
+		# if nutrition_norm < seek_nutrition_norm and hydration_norm < seek_hydration_norm:
+		# 	animal_state = Animal_Base_States.HUNGRY
+		# elif hydration_norm >= hydration_satisfied_norm:
+		# 	animal_state = Animal_Base_States.SATED
+		if hydration_norm >= hydration_satisfied_norm:
+			animal_state = Animal_Base_States.SATED
 
 func reset_acceleration():
-	desired_velocity *= 0
+	desired_velocity *= 0.01
 
 func stop_animal():
-	velocity *= 0
-	desired_velocity *= 0
+	velocity *= 0.01
+	desired_velocity *= 0.01
 
 func free_cadaver():
 	remove_from_group(World.cadaver_group)
-	self.queue_free()
+	queue_free()
 
 func resource_calc(delta : float):
-	var resource_loss = metabolic_rate*delta*World.base_resource_use
+	var resource_loss = metabolic_rate*delta
 	var energy_gain = 0
 	if nutrition >= resource_loss:
 		energy_gain += resource_loss
@@ -104,7 +115,7 @@ func resource_calc(delta : float):
 		# TODO consequences
 
 	var energy_drain_delta = energy_drain*delta # drain is an animals' characteristic
-	var total_energy_gain = energy_gain * World.energy_per_resource_gain
+	var total_energy_gain = energy_gain
 	energy += total_energy_gain - energy_drain_delta
 
 func update_animal_resources(delta : float):
@@ -133,6 +144,7 @@ func get_cadavers() -> Array[Animal]:
 			result.append(animal)
 	return result
 
+# TODO: make everyone using this function use filter_animals_by_type instead
 func filter_animals_by_danger() -> Array[Animal]:
 	var dangerous_animals : Array[Animal]
 	for animal in detected_animals:
@@ -147,11 +159,12 @@ func filter_animals_by_type(animals_in_sight : Array[Animal], type : Animal_Type
 			animals_of_type.append(animal)
 	return animals_of_type
 
+# TODO: make everyone using this function use filter_animals_by_type instead + filter out animals that can't have sex
 func find_closest_mate(animals_of_same_type : Array[Animal]) -> Animal:
 	var result : Animal = animals_of_same_type[0]
 	var closest_animal : float = position.distance_to(animals_of_same_type[0].position)
 	for animal in animals_of_same_type:
-		if animal.gender == World.Gender.FEMALE:
+		if animal.can_have_sex:
 			var dist = position.distance_to(animal.position)
 			if dist < closest_animal:
 				result = animal
@@ -225,7 +238,7 @@ func animal_hydrate(water_tile, delta : float):
 func select_potential_mates(animals_of_same_type : Array[Animal]) -> Array[Animal]:
 	var result : Array[Animal]
 	for animal in animals_of_same_type:
-		if animal.genes.gender == World.Gender.FEMALE and animal.can_have_sex:
+		if animal.can_have_sex:
 			result.append(animal)
 	return result
 
@@ -241,24 +254,17 @@ func select_mating_partner(potential_mates : Array[Animal]) -> Animal:
 
 func reproduce_with_animal(animal : Animal):
 	can_have_sex = false
-	animal.become_pregnant(self)
 	get_node("sex_cooldown").start()
 
-func become_pregnant(partner : Animal):
-	can_have_sex = false
-	sexual_partner = partner
-	get_node("pregnancy_timer").start()
+	animal.can_have_sex = false
+	animal.get_node("sex_cooldown").start()
+
+	birth_request.emit(position, vore_type, self, animal)
 
 func process_animal(delta : float):
-	pass # this function gets defines individually for Carnivores/Herbivores
+	pass # this function gets defined individually for Carnivores/Herbivores
 
 #Node component functions:
-func _on_pregnancy_timer_timeout():
-	for i in range(0, genes.num_of_offspring):
-		birth_request.emit(position, vore_type, self, sexual_partner)
-	can_have_sex = true
-	sexual_partner = null
-
 func _on_sex_cooldown_timeout():
 	can_have_sex = true
 
@@ -279,15 +285,19 @@ func _on_free_cadaver_timeout():
 
 func _on_change_age_timer_timeout():
 	if age == World.Age_Group.OLD:
-		kill_animal()
+		# kill_animal()
+		pass
 	else:
 		age += 1
 		get_node("change_age_timer").start()
 
 func _ready():
-	var action_timer = get_node("Timer") #?? mb add timeout for actions as an animal variable? could be interesting
+	var action_timer = Timer.new() 
+	action_timer.set_name("action_timer")
 	action_timer.set_wait_time(processing_speed)
 	action_timer.timeout.connect(_on_action_timeout)
+	add_child(action_timer)
+	action_timer.start()
 
 	var age_timer = Timer.new() 
 	age_timer.set_name("change_age_timer")
@@ -298,18 +308,11 @@ func _ready():
 	age_timer.start()
 
 	var sex_timer = Timer.new()
-	if genes.gender == World.Gender.FEMALE:
-		sex_timer.set_name("pregnancy_timer")
-		sex_timer.set_wait_time(genes.pregnancy_duration)
-		sex_timer.set_one_shot(true)
-		sex_timer.timeout.connect(_on_pregnancy_timer_timeout)
-		add_child(sex_timer)
-	else:
-		sex_timer.set_name("sex_cooldown")
-		sex_timer.set_wait_time(genes.male_sex_cooldown)
-		sex_timer.set_one_shot(true)
-		sex_timer.timeout.connect(_on_sex_cooldown_timeout)
-		add_child(sex_timer)
+	sex_timer.set_name("sex_cooldown")
+	sex_timer.set_wait_time(genes.sex_cooldown)
+	sex_timer.set_one_shot(true)
+	sex_timer.timeout.connect(_on_sex_cooldown_timeout)
+	add_child(sex_timer)
 
 	
 	var animal_detector = get_node("Area_Detection")

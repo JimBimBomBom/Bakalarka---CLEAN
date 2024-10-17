@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 class_name Food_Crop
 
-var yield_value : float = 1
+var yield_value : float = World.food_crop_yield
 var tile_index : Vector2i
 
 func be_eaten():

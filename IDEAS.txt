@@ -5,6 +5,38 @@ overpopulation (followed by mass extinction) or simply mass extinction straight 
 genetic algorithm itself to evolve optimal parameters for an ecosystem.
 
 NOT IMPLEMENTED:
+
+NEW:
+1. give animals memory of water sources and food sources
+
+2. should hydration be used in the same way as nutrition? or should it not provide energy, and instead only give debuffs when lacking?
+
+3. collision layers -> hunters collide with hunters and prey. prey collides with prey and vegetables
+
+4. export game in standalone executalbve
+
+5. export game in --headless
+
+6. disable collisionshape from animal, keep detection area only
+
+7. try reducing physics updates relative to game speed per second
+
+8. enable physics interpolation -> godot 4.3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 1. Life is about balance between energy, food and hydration. So all animals need to balance these values accordingly.
 Animals feel free to use their energy during the day, to allow themselves to search for food/hydration, or
 evade predators. An animal will prioritize satisfying its most lacking value, meaning that whenever an animal goes hungry it will 

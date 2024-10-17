@@ -175,7 +175,7 @@ sources/3 = SubResource("TileSetAtlasSource_3taqo")
 
 [node name="TileMap" type="TileMap"]
 tile_set = SubResource("TileSet_rnm61")
-cell_quadrant_size = 32
+rendering_quadrant_size = 32
 format = 2
 layer_0/name = "Background"
 script = ExtResource("2_hixom")
