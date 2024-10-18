@@ -1,29 +1,26 @@
-Use an L-system to generate instructions for how a creature should move or behave.
-
-One of the greatest challenges in ecosystem simulations is achieving a nice balance. You will likely find that most of your attempts result in either mass 
-overpopulation (followed by mass extinction) or simply mass extinction straight away. What techniques can you employ to achieve balance? Consider using the 
-genetic algorithm itself to evolve optimal parameters for an ecosystem.
-
-NOT IMPLEMENTED:
-
 NEW:
 1. give animals memory of water sources and food sources
-
 2. should hydration be used in the same way as nutrition? or should it not provide energy, and instead only give debuffs when lacking?
 
+
+SPECULATIVE:
+9. handle consumption of vegetables/prey with a small "eat_radius" area instead of handling this manually? -> might increase performance?
+
+10. animals seem to be confused when SATED, check their wander mechanics in this instance
+
+
+DONE:
 3. collision layers -> hunters collide with hunters and prey. prey collides with prey and vegetables
-
+    - prey collides with hunter, prey and vegetables so that they can detect each other and reproduce
 4. export game in standalone executalbve
-
 5. export game in --headless
-
-6. disable collisionshape from animal, keep detection area only
-
 7. try reducing physics updates relative to game speed per second
-
 8. enable physics interpolation -> godot 4.3
 
 
+ABANDONED:
+6. disable collisionshape from animal, keep detection area only 
+    - characterbody2d is "detectable", but it requires collisionshape2d to specify its size -> cannot remove collisionshape without sacrificing _on_area_entered
 
 
 

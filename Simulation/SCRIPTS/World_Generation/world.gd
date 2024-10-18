@@ -146,44 +146,52 @@ func initialize_npcs():
 				pass
 
 func construct_npc(pos, type):
-	var scene = load("res://SCENES/animal.tscn")
-	var inst = scene.instantiate()
 	match type:
 		World.Vore_Type.HERBIVORE:
+			var scene = load("res://SCENES/herbivore.tscn")
+			var inst = scene.instantiate()
 			var herbivore_script = load(World.herbivore_script)
 			inst.set_script(herbivore_script)
 			inst.construct_herbivore(pos)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
+			inst.add_to_group(World.animal_group)
+			inst.birth_request.connect(_on_animal_birth_request)
+			add_child(inst)
 		World.Vore_Type.CARNIVORE:
+			var scene = load("res://SCENES/carnivore.tscn")
+			var inst = scene.instantiate()
 			var carnivore_script = load(World.carnivore_script)
 			inst.set_script(carnivore_script)
 			inst.construct_carnivore(pos)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
-	inst.add_to_group(World.animal_group)
-	inst.birth_request.connect(_on_animal_birth_request)
-	add_child(inst)
+			inst.add_to_group(World.animal_group)
+			inst.birth_request.connect(_on_animal_birth_request)
+			add_child(inst)
 
 #End of initialization
 
 func _on_animal_birth_request(pos, type, parent_1, parent_2):
-	var scene = load("res://SCENES/animal.tscn")
-	var inst = scene.instantiate()
 	match type:
 		World.Vore_Type.HERBIVORE:
+			var scene = load("res://SCENES/herbivore.tscn")
+			var inst = scene.instantiate()
 			var herbivore_script = load(World.herbivore_script)
-			inst.set_script(herbivore_script)
 			inst.spawn_herbivore(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
 			inst.generation = max(parent_1.generation, parent_2.generation) + 1
+			inst.add_to_group(World.animal_group)
+			inst.birth_request.connect(_on_animal_birth_request)
+			add_child(inst)
 		World.Vore_Type.CARNIVORE:
+			var scene = load("res://SCENES/carnivore.tscn")
+			var inst = scene.instantiate()
 			var carnivore_script = load(World.carnivore_script)
-			inst.set_script(carnivore_script)
 			inst.spawn_carnivore(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 			inst.generation = max(parent_1.generation, parent_2.generation) + 1
-	inst.add_to_group(World.animal_group)
-	inst.birth_request.connect(_on_animal_birth_request)
-	add_child(inst)
+			inst.add_to_group(World.animal_group)
+			inst.birth_request.connect(_on_animal_birth_request)
+			add_child(inst)
 
 func between(val, start, end):
 	if start <= val and val <= end:
