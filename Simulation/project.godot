@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 World="*res://SCRIPTS/Global/World_Variables.gd"
-GameSpeedController="*res://SCRIPTS/Global/game_speed_controlled.gd"
 
 [input]
 
@@ -46,6 +45,7 @@ toggle_camera={
 2d_physics/layer_1="Deer_Layer"
 2d_physics/layer_2="Wolf_Layer"
 2d_physics/layer_3="FoodCrop_Layer"
+2d_physics/layer_4="Cadaver_Layer"
 
 [physics]
 

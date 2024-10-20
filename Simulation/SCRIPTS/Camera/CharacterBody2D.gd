@@ -16,8 +16,8 @@ func _process(delta):
 
 	if Input.is_action_just_pressed("speed_up_time"):
 		game_speed *= 2
-		GameSpeedController.set_game_speed(game_speed)
+		World.game_speed_controller.set_game_speed(game_speed)
 		
 	if Input.is_action_just_pressed("speed_down_time"):
 		game_speed *= 0.5
-		GameSpeedController.set_game_speed(game_speed)
+		World.game_speed_controller.set_game_speed(game_speed)

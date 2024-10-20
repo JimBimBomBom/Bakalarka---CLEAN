@@ -1,12 +1,16 @@
 NEW:
 1. give animals memory of water sources and food sources
 2. should hydration be used in the same way as nutrition? or should it not provide energy, and instead only give debuffs when lacking?
+11. for now change fights not to involve health, but rather when a predator is in range of prey, it dies. predator on predator will not be allowed
 
 
 SPECULATIVE:
 9. handle consumption of vegetables/prey with a small "eat_radius" area instead of handling this manually? -> might increase performance?
+    - possible downside is accidental consumption when for example running away from a predator
 
 10. animals seem to be confused when SATED, check their wander mechanics in this instance
+12. make water tiles into detectable objects?
+13. aggregate joined water tiles into water bodies? could help animals store info about water bodies, on big maps might be useful.. very speculative
 
 
 DONE:

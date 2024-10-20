@@ -1,26 +1,22 @@
 extends Node2D
 
 func _ready():
-	
-	
 	add_child(World.Map)
 	World.Map.generate_world()
-	
+
 	add_child(World.Player)
-	
+
 	generate_vegetation()
 	generate_food_crops()
 	initialize_npcs()
-	
-	var food_regrow_timer = Timer.new()
-	food_regrow_timer.set_name("FoodRegrowTimer")
-	food_regrow_timer.timeout.connect(_regrow_food)
-	food_regrow_timer.wait_time = World.food_regrow_time
-	food_regrow_timer.autostart = true
-	add_child(food_regrow_timer)
-	food_regrow_timer.start()
-	
-	GameSpeedController.set_game_speed(8)
+		
+	World.game_speed_controller.set_game_speed(128)
+
+	World.food_regrow_timer = SimulationTimer.new()
+	World.food_regrow_timer.trigger_time = World.food_regrow_time
+	World.food_regrow_timer.active = true
+	World.food_regrow_timer.timer_triggered.connect(_regrow_food)
+
 
 func _regrow_food() -> void:
 	generate_food_crops()
@@ -52,7 +48,7 @@ func place_food_crop(pos : Vector2i, type) -> void:
 	var tile = World.Map.tiles[pos]
 	match tile.biome:
 		World.Temperature_Type.TAIGA:
-			match type:		
+			match type:
 				World.Vegetation_Type.BUSH_1:
 					inst.get_node("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
 				World.Vegetation_Type.BUSH_2:
@@ -140,9 +136,8 @@ func initialize_npcs():
 			var prob = randf_range(0, 1)
 			if between(prob, 0.95, 0.956):
 				construct_npc(pos, World.Vore_Type.HERBIVORE)
-			elif between(prob, 0.956, 0.958):
-				#NOTE: testing with herbivores for now
-				# construct_npc(pos, World.Vore_Type.CARNIVORE)
+			elif between(prob, 0.957, 0.958):
+				construct_npc(pos, World.Vore_Type.CARNIVORE)
 				pass
 
 func construct_npc(pos, type):
@@ -156,6 +151,7 @@ func construct_npc(pos, type):
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
 			inst.add_to_group(World.animal_group)
 			inst.birth_request.connect(_on_animal_birth_request)
+			inst.death.connect(_place_cadaver)
 			add_child(inst)
 		World.Vore_Type.CARNIVORE:
 			var scene = load("res://SCENES/carnivore.tscn")
@@ -166,6 +162,7 @@ func construct_npc(pos, type):
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 			inst.add_to_group(World.animal_group)
 			inst.birth_request.connect(_on_animal_birth_request)
+			inst.death.connect(_place_cadaver)
 			add_child(inst)
 
 #End of initialization
@@ -176,22 +173,37 @@ func _on_animal_birth_request(pos, type, parent_1, parent_2):
 			var scene = load("res://SCENES/herbivore.tscn")
 			var inst = scene.instantiate()
 			var herbivore_script = load(World.herbivore_script)
+			inst.set_script(herbivore_script)
 			inst.spawn_herbivore(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Herbivore.png")
 			inst.generation = max(parent_1.generation, parent_2.generation) + 1
 			inst.add_to_group(World.animal_group)
 			inst.birth_request.connect(_on_animal_birth_request)
+			inst.death.connect(_place_cadaver)
 			add_child(inst)
 		World.Vore_Type.CARNIVORE:
 			var scene = load("res://SCENES/carnivore.tscn")
 			var inst = scene.instantiate()
 			var carnivore_script = load(World.carnivore_script)
+			inst.set_script(carnivore_script)
 			inst.spawn_carnivore(pos, parent_1.genes, parent_2.genes)
 			inst.get_node("Sprite2D").texture = load("res://Sprites/Carnivore.png")
 			inst.generation = max(parent_1.generation, parent_2.generation) + 1
 			inst.add_to_group(World.animal_group)
 			inst.birth_request.connect(_on_animal_birth_request)
+			inst.death.connect(_place_cadaver)
 			add_child(inst)
+
+func _place_cadaver(pos, source):
+	var scene = load("res://SCENES/Cadaver.tscn")
+	var inst = scene.instantiate()
+	var cadaver_script = load(World.cadaver_script)
+	inst.set_script(cadaver_script)
+	inst.get_node("Sprite2D").texture = source.get_node("Sprite2D").texture
+	inst.nutrition = source.mass
+	inst.position = Vector2(pos.x, pos.y)
+	inst.add_to_group(World.cadaver_group)
+	add_child(inst)
 
 func between(val, start, end):
 	if start <= val and val <= end:
@@ -201,3 +213,9 @@ func between(val, start, end):
 func _process(delta):
 	if Input.is_action_just_pressed("toggle_camera"):
 		self.visible = not self.visible		
+
+func do_timers(delta):
+	World.food_regrow_timer.do_timer(delta) # this timer will always be active
+
+func _physics_process(delta):
+	do_timers(delta)

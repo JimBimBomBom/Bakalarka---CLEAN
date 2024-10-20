@@ -1,4 +1,4 @@
-extends CharacterBody2D
+extends StaticBody2D
 
 class_name Food_Crop
 
@@ -8,4 +8,4 @@ var tile_index : Vector2i
 func be_eaten():
 	remove_from_group(World.food_crop_group)
 	World.Map.tiles[tile_index].occupied = false
-	self.queue_free()
+	queue_free()

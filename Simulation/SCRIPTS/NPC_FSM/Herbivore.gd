@@ -2,13 +2,13 @@ extends Animal
 
 class_name Herbivore
 
-var detected_crops : Array[Food_Crop] = []
+var detected_crops: Array[Food_Crop] = []
 
-func herbivore_fsm(delta : float):
-	var animals_in_sight : Array[Animal] = get_animals_from_sight()
+func herbivore_fsm(delta: float):
+	var animals_in_sight: Array[Animal] = get_animals_from_sight()
 	var animals_in_hearing_range = detected_animals
-	var dangerous_animals : Array[Animal] = filter_animals_by_danger()
-	var animals_of_same_type : Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
+	var dangerous_animals: Array[Animal] = filter_animals_by_danger()
+	var animals_of_same_type: Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
 	set_base_state(dangerous_animals)
 
 	match animal_state:
@@ -22,7 +22,7 @@ func herbivore_fsm(delta : float):
 			else:
 				set_next_move(wander())
 		Animal_Base_States.THIRSTY:
-			var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
+			var hydration_in_range: Array[World.Tile_Properties] = hydration_in_range()
 			if not hydration_in_range.is_empty():
 				var water_tile = select_hydration_tile(hydration_in_range)
 				animal_hydrate(water_tile, delta)
@@ -34,11 +34,13 @@ func herbivore_fsm(delta : float):
 				if not potential_mates.is_empty():
 					var mate = select_mating_partner(potential_mates)
 					reproduce_with_animal(mate) # so far the only heuristic is viscinity
-			else: # eat/drink closest 
+				else:
+					set_next_move(wander())
+			else: # eat/drink closest
 				var crop
 				var water_tile
 
-				var hydration_in_range : Array[World.Tile_Properties] = hydration_in_range()
+				var hydration_in_range: Array[World.Tile_Properties] = hydration_in_range()
 				if not hydration_in_range.is_empty():
 					water_tile = select_hydration_tile(hydration_in_range)
 				if not detected_crops.is_empty():
@@ -56,7 +58,7 @@ func herbivore_fsm(delta : float):
 				else:
 					set_next_move(wander())
 
-func herbivore_eat(crop, delta : float):
+func herbivore_eat(crop, delta: float):
 	match consumption_state:
 		Consumption_State.SEEKING:
 			set_next_move(smooth_seek(crop.position))
@@ -71,7 +73,7 @@ func herbivore_eat(crop, delta : float):
 				consumption_state = Consumption_State.SEEKING
 
 func get_closest_crop():
-	var closest : Food_Crop = detected_crops[0]
+	var closest: Food_Crop = detected_crops[0]
 	var closest_dist = position.distance_to(closest.position) # detected crops is not empty
 	for crop in detected_crops:
 		var crop_dist = position.distance_to(crop.position)
@@ -81,7 +83,7 @@ func get_closest_crop():
 	return closest
 
 func eat_crop(crop):
-	nutrition += crop.yield_value * 10 #temporary 10
+	nutrition += crop.yield_value
 	crop.be_eaten()
 	
 func spawn_herbivore(pos, parent_1, parent_2):
@@ -92,10 +94,8 @@ func construct_herbivore(pos):
 	construct_animal(pos, World.Vore_Type.HERBIVORE)
 	animal_type = Animal_Types.DEER
 
-func process_animal(delta : float):
-	pass
-
-func _physics_process(delta : float):
+func _physics_process(delta: float):
+	do_timers(delta) # each physics step -> only step we use, increment timers and execute if needed
 	update_animal_resources(delta)
 	herbivore_fsm(delta)
 	do_move(delta)
@@ -111,4 +111,3 @@ func _on_Area2D_animal_exited(body):
 		detected_animals.erase(body)
 	elif body is Food_Crop:
 		detected_crops.erase(body)
-	

@@ -14,7 +14,6 @@ var ideal_temperature : float
 var ideal_temperature_range : float
 
 #Sexual
-var sex_cooldown : float # time until the animal can reproduce again
 var num_of_offspring : int
 
 #Senses
@@ -37,8 +36,6 @@ func generate_genes():
 	metabolic_rate = randf_range(0, 1)
 	offense = randf_range(0, 1)
 	
-	#NOTE : set sex_cooldown to an arbitrary value change later
-	sex_cooldown = 10
 	num_of_offspring = 1
 
 	sense_range = randf_range(80, 180)
@@ -59,7 +56,6 @@ func pass_down_genes(parent_1 : Animal_Genes, parent_2 : Animal_Genes):
 	metabolic_rate = World.extract_gene(parent_1.metabolic_rate, parent_2.metabolic_rate)
 	offense = World.extract_gene(parent_1.offense, parent_2.offense)
 
-	sex_cooldown = World.extract_gene(parent_1.sex_cooldown, parent_2.sex_cooldown)
 	num_of_offspring = parent_1.num_of_offspring
 
 	sense_range = World.extract_gene(parent_1.sense_range, parent_2.sense_range)
