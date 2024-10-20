@@ -181,8 +181,8 @@ func find_closest_mate(animals_of_same_type: Array[Animal]) -> Animal:
 				closest_animal = dist
 	return result
 		
-func fight(defender: Animal) -> void: # mb have a combat log -> combat instance with participants(many herbivores fighting off a carnivore etc.)
-	defender.health -= attack_damage
+func fight(defender: Animal) -> void: 
+	defender.kill_animal()
 
 func within_bounds(tile_index: Vector2) -> bool:
 	if tile_index.x > -World.width and tile_index.x < World.width and tile_index.y > -World.height and tile_index.y < World.height:
@@ -320,3 +320,4 @@ func _ready():
 
 	var detection_radius = get_node("Area_Detection").get_node("Detection_Radius")
 	detection_radius.shape.radius = genes.sense_range
+	print(detection_radius.shape.radius)

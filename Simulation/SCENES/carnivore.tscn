@@ -19,6 +19,7 @@ position = Vector2(0, -4)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_2ynyb")
+debug_color = Color(0.183531, 0.648942, 0.605771, 0.419608)
 
 [node name="Area_Detection" type="Area2D" parent="."]
 collision_layer = 0

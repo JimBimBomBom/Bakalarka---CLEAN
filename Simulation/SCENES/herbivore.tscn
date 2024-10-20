@@ -26,3 +26,4 @@ monitorable = false
 
 [node name="Detection_Radius" type="CollisionShape2D" parent="Area_Detection"]
 shape = SubResource("CircleShape2D_46fph")
+debug_color = Color(0.603922, 0, 0, 0.784314)

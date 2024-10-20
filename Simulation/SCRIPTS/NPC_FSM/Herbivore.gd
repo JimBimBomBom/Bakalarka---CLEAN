@@ -100,14 +100,35 @@ func _physics_process(delta: float):
 	herbivore_fsm(delta)
 	do_move(delta)
 
-func _on_Area2D_animal_entered(body):
-	if body is Animal and body.position != position:
-		detected_animals.append(body)
-	elif body is Food_Crop:
-		detected_crops.append(body)
+func _on_Area2D_food_crop_entered(body):
+	var body_parent = body.get_parent()
+	if body_parent is Food_Crop:
+		detected_crops.append(body_parent)
 
-func _on_Area2D_animal_exited(body):
-	if body is Animal:
-		detected_animals.erase(body)
-	elif body is Food_Crop:
-		detected_crops.erase(body)
+func _on_Area2D_food_crop_exited(body):
+	var body_parent = body.get_parent()
+	if body_parent is Food_Crop:
+		detected_crops.erase(body_parent)
+
+func _ready():
+	change_age_timer = SimulationTimer.new()
+	change_age_timer.trigger_time = change_age_period
+	change_age_timer.active = true
+	change_age_timer.timer_triggered.connect(_on_change_age_timer_timeout)
+
+	sex_cooldown_timer = SimulationTimer.new()
+	sex_cooldown_timer.trigger_time = sex_cooldown
+	sex_cooldown_timer.active = true
+	sex_cooldown_timer.timer_triggered.connect(_on_sex_cooldown_timeout)
+
+	var animal_detector = get_node("Area_Detection")
+	animal_detector.body_entered.connect(_on_Area2D_animal_entered)
+	animal_detector.body_exited.connect(_on_Area2D_animal_exited)
+
+	# Herbivores will detect food crops
+	animal_detector.area_entered.connect(_on_Area2D_food_crop_entered)
+	animal_detector.area_exited.connect(_on_Area2D_food_crop_exited)
+
+	var detection_radius = get_node("Area_Detection").get_node("Detection_Radius")
+	detection_radius.shape.radius = genes.sense_range
+	print(detection_radius.shape.radius)

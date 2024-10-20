@@ -10,7 +10,7 @@ func _ready():
 	generate_food_crops()
 	initialize_npcs()
 		
-	World.game_speed_controller.set_game_speed(128)
+	World.game_speed_controller.set_game_speed(8)
 
 	World.food_regrow_timer = SimulationTimer.new()
 	World.food_regrow_timer.trigger_time = World.food_regrow_time
@@ -137,7 +137,7 @@ func initialize_npcs():
 			if between(prob, 0.95, 0.956):
 				construct_npc(pos, World.Vore_Type.HERBIVORE)
 			elif between(prob, 0.957, 0.958):
-				construct_npc(pos, World.Vore_Type.CARNIVORE)
+				# construct_npc(pos, World.Vore_Type.CARNIVORE)
 				pass
 
 func construct_npc(pos, type):
