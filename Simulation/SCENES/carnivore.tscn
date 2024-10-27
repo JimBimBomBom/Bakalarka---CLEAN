@@ -23,7 +23,7 @@ debug_color = Color(0.183531, 0.648942, 0.605771, 0.419608)
 
 [node name="Area_Detection" type="Area2D" parent="."]
 collision_layer = 0
-collision_mask = 3
+collision_mask = 11
 monitorable = false
 
 [node name="Detection_Radius" type="CollisionShape2D" parent="Area_Detection"]

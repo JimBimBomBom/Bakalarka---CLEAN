@@ -1,0 +1,117 @@
+[gd_scene load_steps=2 format=3 uid="uid://8xxh43j1vekf"]
+
+[ext_resource type="Script" path="res://SCRIPTS/Global/SimulationGUI.gd" id="1_ufuxh"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ufuxh")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameSpeed" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+offset_right = 265.0
+offset_bottom = 31.0
+
+[node name="Label" type="Label" parent="Panel/GameSpeed"]
+layout_mode = 2
+text = "Game Speed:"
+
+[node name="SpinBox" type="SpinBox" parent="Panel/GameSpeed"]
+layout_mode = 2
+min_value = 1.0
+max_value = 10000.0
+value = 16.0
+
+[node name="MapSeed" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+offset_top = 35.0
+offset_right = 265.0
+offset_bottom = 66.0
+
+[node name="Label" type="Label" parent="Panel/MapSeed"]
+layout_mode = 2
+text = "Map Seed:"
+
+[node name="SpinBox" type="SpinBox" parent="Panel/MapSeed"]
+layout_mode = 2
+max_value = 9.22337e+16
+
+[node name="MapHeight" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+offset_top = 70.0
+offset_right = 265.0
+offset_bottom = 101.0
+
+[node name="Label" type="Label" parent="Panel/MapHeight"]
+layout_mode = 2
+text = "Map Height:"
+
+[node name="SpinBox" type="SpinBox" parent="Panel/MapHeight"]
+layout_mode = 2
+max_value = 9.22337e+16
+value = 12.0
+
+[node name="MapWidth" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+offset_top = 105.0
+offset_right = 265.0
+offset_bottom = 136.0
+
+[node name="Label" type="Label" parent="Panel/MapWidth"]
+layout_mode = 2
+text = "Map Width:"
+
+[node name="SpinBox" type="SpinBox" parent="Panel/MapWidth"]
+layout_mode = 2
+max_value = 9.22337e+16
+value = 12.0
+
+[node name="CarnivoresNum" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+offset_top = 140.0
+offset_right = 265.0
+offset_bottom = 171.0
+
+[node name="Label" type="Label" parent="Panel/CarnivoresNum"]
+layout_mode = 2
+text = "Number of Carnivores:"
+
+[node name="SpinBox" type="SpinBox" parent="Panel/CarnivoresNum"]
+layout_mode = 2
+value = 2.0
+
+[node name="HerbivoresNum" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+offset_top = 175.0
+offset_right = 265.0
+offset_bottom = 206.0
+
+[node name="Label" type="Label" parent="Panel/HerbivoresNum"]
+layout_mode = 2
+text = "Number of Herbivores:"
+horizontal_alignment = 1
+
+[node name="SpinBox" type="SpinBox" parent="Panel/HerbivoresNum"]
+layout_mode = 2
+value = 3.0
+
+[node name="StartSimulation" type="Button" parent="Panel"]
+layout_mode = 2
+offset_top = 210.0
+offset_right = 265.0
+offset_bottom = 241.0
+text = "Start Simulation"

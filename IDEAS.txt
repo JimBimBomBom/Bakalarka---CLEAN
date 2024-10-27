@@ -3,12 +3,29 @@ NEW:
 2. should hydration be used in the same way as nutrition? or should it not provide energy, and instead only give debuffs when lacking?
 11. for now change fights not to involve health, but rather when a predator is in range of prey, it dies. predator on predator will not be allowed
 
+14. Gene mutation only considers genes to be within interval <0, 1>
+    - right now sense_range is set at start to be between <80, 180> and if a mutation happens it gets clamped down to 1
+    - should genes always be in range <0, 1>, and them to then influence characteristics? probably yes
+
+15. Finalize animals genes, and their influence on characteristics
+
+16. create a GUI for crafting simulation runs
+    - animals   -> number of herbivores/carnivores
+    - map   -> average temperature, average moisture
+            -> average nutrients / total nutrients (with map point 1 and 2 are mutually exclusive)
+    - scenarios (part of the simulation will be about seeing creates evolve to a shifting climate)
+            -> ice age
+            -> radioactive fallout
+            -> droughts
+            -> immense food_regrow periods
+            -> etc.
+
+17. make it so that animals do not have to calculate closest water source/food crop every tick
 
 SPECULATIVE:
 9. handle consumption of vegetables/prey with a small "eat_radius" area instead of handling this manually? -> might increase performance?
     - possible downside is accidental consumption when for example running away from a predator
 
-10. animals seem to be confused when SATED, check their wander mechanics in this instance
 12. make water tiles into detectable objects?
 13. aggregate joined water tiles into water bodies? could help animals store info about water bodies, on big maps might be useful.. very speculative
 
@@ -20,6 +37,7 @@ DONE:
 5. export game in --headless
 7. try reducing physics updates relative to game speed per second
 8. enable physics interpolation -> godot 4.3
+10. animals seem to be confused when SATED, check their wander mechanics in this instance
 
 
 ABANDONED:
