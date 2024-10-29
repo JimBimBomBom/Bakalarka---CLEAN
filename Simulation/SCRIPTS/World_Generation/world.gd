@@ -26,24 +26,25 @@ func _regrow_food() -> void:
     generate_food_crops()
 
 func generate_food_crops():
-    var width = World.width
-    var height = World.height
-    for x in range(-width, width + 1):
-        for y in range(-height, height + 1):
-            var pos = Vector2i(x, y)
-            var moist = World.moisture[pos]
-            var temp = World.temperature[pos]
+    var placed_crop_count = 0
+    while placed_crop_count < World.food_crop_count:
+        var x = randi_range(-World.width, World.width)
+        var y = randi_range(-World.height, World.height)
+        var pos = Vector2i(x, y)
+        var moist = World.moisture[pos]
+        var temp = World.temperature[pos]
 
-            var tile = World.Map.tiles[pos] 
-            if tile.type == World.Tile_Type.WATER || tile.occupied:
-                continue
-            if moist + randf_range(0, 0.75) <= 1.0: # pretty random
-                continue
+        var tile = World.Map.tiles[pos] 
+        if tile.type == World.Tile_Type.WATER || tile.occupied:
+            continue
+        if moist + randf_range(0, 0.75) <= 1.0:# TODO : could this be made into something that makes sense? or is it just random, and that is fine?
+            continue
 
-            if between(moist, 0.4, 0.6) and between(temp, -0.3, 0.9):
-                place_food_crop(pos, World.Vegetation_Type.BUSH_1)
-            elif between(temp, -0.7, 0.2):
-                place_food_crop(pos, World.Vegetation_Type.BUSH_2)
+        if between(moist, 0.4, 0.6) and between(temp, -0.3, 0.9):
+            place_food_crop(pos, World.Vegetation_Type.BUSH_1)
+        elif between(temp, -0.7, 0.2):
+            place_food_crop(pos, World.Vegetation_Type.BUSH_2)
+        placed_crop_count += 1 # NOTE: we successfully placed a crop
 
 func place_food_crop(pos : Vector2i, type) -> void:
     var	scene = load("res://SCENES/FoodCrop.tscn")
@@ -76,10 +77,8 @@ func place_food_crop(pos : Vector2i, type) -> void:
     add_child(inst)
 
 func generate_vegetation():
-    var width = World.width
-    var height = World.height
-    for x in range(-width, width + 1):
-        for y in range(-height, height + 1):
+    for x in range(-World.width, World.width):
+        for y in range(-World.height, World.height):
             var pos = Vector2i(x, y)
             var alt = World.altitude[pos]
             var moist = World.moisture[pos]
@@ -88,7 +87,7 @@ func generate_vegetation():
             var tile = World.Map.tiles[pos]
             if tile.type == World.Tile_Type.WATER || tile.occupied:
                 continue
-            if randf_range(0, 1) <= 0.82:
+            if moist + randf_range(0, 0.70) <= 1.0:
                 continue
 
             if between(alt, -0.45, 0.4) and between(temp, -0.3, 0.8):
@@ -125,10 +124,10 @@ func place_vegetation(pos : Vector2i, type) -> void:
     add_child(inst)
 
 func initialize_npcs():
-    for i in range(World.herbivore_count):
+    for i in range(World.herbivore_count_spawn):
         var pos = Vector2i(randi_range(-World.width, World.width), randi_range(-World.height, World.height))
         construct_npc(pos, World.Vore_Type.HERBIVORE)
-    for i in range(World.carnivore_count):
+    for i in range(World.carnivore_count_spawn):
         var pos = Vector2i(randi_range(-World.width, World.width), randi_range(-World.height, World.height))
         construct_npc(pos, World.Vore_Type.CARNIVORE)
 
@@ -182,10 +181,6 @@ func between(val, start, end):
     if start <= val and val <= end:
         return true
     return false
-
-# func _process(delta):
-# 	if Input.is_action_just_pressed("toggle_camera"):
-# 		self.visible = not self.visible		
 
 func do_timers(delta):
     World.food_regrow_timer.do_timer(delta) # this timer will always be active

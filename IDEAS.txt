@@ -1,12 +1,4 @@
 NEW:
-1. give animals memory of water sources and food sources
-2. should hydration be used in the same way as nutrition? or should it not provide energy, and instead only give debuffs when lacking?
-11. for now change fights not to involve health, but rather when a predator is in range of prey, it dies. predator on predator will not be allowed
-
-14. Gene mutation only considers genes to be within interval <0, 1>
-    - right now sense_range is set at start to be between <80, 180> and if a mutation happens it gets clamped down to 1
-    - should genes always be in range <0, 1>, and them to then influence characteristics? probably yes
-
 15. Finalize animals genes, and their influence on characteristics
 
 16. create a GUI for crafting simulation runs
@@ -20,7 +12,37 @@ NEW:
             -> immense food_regrow periods
             -> etc.
 
-17. make it so that animals do not have to calculate closest water source/food crop every tick
+22. create a combat system that takes into account variables, and the result is based on randomness
+    - variables:
+        - size
+        - "offense" (mb just combat ability if it is to be taken into account on both sides)
+        - musculature?
+        -- carnivores should have a variable called "eligible_fighting_odds" that signify that
+        if their chance of victory is greater than it, they will attack, else continue on their way
+        
+        Speculative : (could be expanded with pack-hunting where we take into consideration the "added combat ability"
+        of all neighbouring carnivores of a species and compare that to "added combat ability" of their 
+        counterparts if applicable (mb not for non pack animals?))
+
+17. implement fat conversion, fat storage:
+    - resource calc should convert excess energy to fat_storage
+    - fat should slow animals down
+    - Speculative:
+        - fat provides some ammount of water resources
+        - How fat should work - mass comprises an animals "muscles and materials excluding fat", fat is an
+          addon onto an animals basic mass (because fat can be stored, and used up, "other resources" are static)
+
+18. animal size influences:
+    - combat effectiveness
+    - less of an impediment for carrying fat around
+    - heat efficient
+    - lifespan, maturation period?
+    - bigger size means the animal is slower than an equivalent animal of smaller size
+
+19. expand nutrition:
+    - types of nutrition an animal can have: "plant", "fat"(animal carcases - fat_storage), "protein"(animal carcases - mass)
+
+20. make characteristics less linear
 
 SPECULATIVE:
 9. handle consumption of vegetables/prey with a small "eat_radius" area instead of handling this manually? -> might increase performance?
@@ -31,6 +53,8 @@ SPECULATIVE:
 
 
 DONE:
+1. give animals memory of water sources and food sources
+2. should hydration be used in the same way as nutrition? or should it not provide energy, and instead only give debuffs when lacking?
 3. collision layers -> hunters collide with hunters and prey. prey collides with prey and vegetables
     - prey collides with hunter, prey and vegetables so that they can detect each other and reproduce
 4. export game in standalone executalbve
@@ -38,6 +62,10 @@ DONE:
 7. try reducing physics updates relative to game speed per second
 8. enable physics interpolation -> godot 4.3
 10. animals seem to be confused when SATED, check their wander mechanics in this instance
+11. for now change fights not to involve health, but rather when a predator is in range of prey, it dies. predator on predator will not be allowed
+21. for scenarios to be feasible, make spawning of crops fully moddable to spawn a set ammount of food, instead of a random value
+    as is utilized now within generate_food_crops.
+    - try random location on map, if successful decrement ammount of crops to be placed, else continue
 
 
 ABANDONED:

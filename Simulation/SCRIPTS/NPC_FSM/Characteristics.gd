@@ -6,7 +6,7 @@ var age: World.Age_Group
 
 # Timers
 var change_age_period: float
-var sex_cooldown: float = 80
+var sex_cooldown: float
 
 var can_have_sex: bool
 var vore_type: World.Vore_Type
@@ -20,64 +20,77 @@ var desired_velocity = Vector2(0, 0)
 var direction: Vector2
 
 #Locomotion - Wander variables
-var wander_jitter: float = 1
-var wander_radius: float = 10.0
-var wander_distance: float = 30.0
+var wander_jitter: float
+var wander_radius: float
+var wander_distance: float
 var wander_target: Vector2 # needs to be initialized
 
 var threat_range: float
 
 #Base stats
-var energy_drain: float
-var metabolic_rate: float
 
 var mass: float
-var max_health: float
-var health: float
-var health_norm: float
+var fat_storage: float
+var desired_fat_storage: float  # animals will not try to eat more if they were to have more fat storage than this value
 
-var max_resources: float # NOTE: maybe have a max_resource variable for each resource type
+# now needs to 
+var energy_threshold_to_allow_reproduction: float = World.reproduction_energy_cost * 1.4
+var max_energy: float
 var energy: float
-var energy_norm: float # NOTE: not used atm
+var energy_norm: float
+# how much energy the animal uses per UoT in "normal energy consumption state"
+var energy_drain: float
+# influences how much food the animal converts additionally to it's energy drain
+var metabolic_rate: float
+# how much water the animal loses per UoT. depends on metabolic_rate, size, insulation, etc.
+var water_loss : float
+# how much energy the animal loses per UoT due to weather - heat, cold. Costs energy to have a high insulation value
+var insulation : float # NOTE : not used atm
+
+# energy drain has multiple levels: base_drain, activity_drain, "hyper"_activity_drain, etc.
+# animals should have a modifiable value to control when to enter what energy drain state
+
+var max_resources: float
 
 var nutrition: float
+# var max_nutrition: float
 var nutrition_norm: float
 var seek_nutrition_norm: float = 0.4
-var nutrition_satisfied_norm: float = 0.95
+var nutrition_satisfied_norm: float = 0.8
 
 var hydration: float
+# var max_hydration: float
 var hydration_norm: float
 var seek_hydration_norm: float = 0.4
-var hydration_satisfied_norm: float = 0.95
+var hydration_satisfied_norm: float = 0.8
 
 func set_characteristics(genes: Animal_Genes):
-    age = World.Age_Group.JUVENILE # TODO option -> have age influence a variety of characteristics ... right now ignored
-    change_age_period = int(2 + 2 * genes.size - genes.metabolic_rate) * World.change_age_period_mult
+    age = World.Age_Group.JUVENILE
+    change_age_period = int(2 + 10 * genes.size + 5 * (1 - genes.metabolic_rate)) * World.change_age_period_mult
     can_have_sex = false
+    sex_cooldown = 150 + genes.size * 450
 
-    #Locomotion
-    max_velocity = (genes.agility + genes.musculature) / (genes.size + 1) + 3
-    direction = Vector2(randf(), randf()).normalized() # set starting orientation
+    max_velocity = 1 + 5*genes.musculature # will additionally influenced by for example: fat_storage relative to size, etc.
 
-    wander_jitter = genes.agility + 0.7
-    wander_radius = max_velocity
-    wander_distance = wander_radius
-    wander_target = direction * wander_radius # we want to start by moving forward
+    var lessen_drain = 80
+    energy_drain = (genes.size + genes.musculature + genes.metabolic_rate/3) / lessen_drain # + offense**2
+    metabolic_rate = (1 + genes.metabolic_rate) * energy_drain # animal always has to be able to make atleast as much energy as it uses during "normal energy consumption state"
+    water_loss = (genes.metabolic_rate + genes.size) / lessen_drain # + insulation + etc. 
 
+    mass = genes.size * 20
     threat_range = genes.sense_range # TODO
 
-    #Base stats
-    energy_drain = genes.agility + genes.musculature + genes.size / 2
-    metabolic_rate = genes.metabolic_rate
+    direction = Vector2(randf(), randf()).normalized() # set starting orientation
+    wander_jitter = 0.5 * max_velocity
+    wander_radius = max_velocity
+    wander_distance = max_velocity # NOTE: test value -> always go forward
+    wander_target = direction * wander_radius  # start moving in randomly assigned direction
 
-    mass = genes.size * 100
-    max_health = mass
-    health = max_health
-
-    max_resources = mass / genes.musculature # + World.resource_start_point)
-    energy = max_resources
+    max_resources = mass - (mass*(genes.musculature/2)) # NOTE: test value
+    max_energy = max_resources * 2
+    energy = max_energy
     nutrition = 0
-    hydration = 0
+    hydration = max_resources
 
 func get_tile_on_curr_pos() -> Vector2:
     var result: Vector2i = position / World.tile_size
@@ -114,7 +127,7 @@ func wander() -> Vector2:
     wander_target += Vector2(randf_range(-wander_jitter, wander_jitter), randf_range(-wander_jitter, wander_jitter))
     wander_target = wander_target.normalized() * wander_radius
 
-    var circle_pos = velocity.normalized() * wander_distance + position
+    var circle_pos = direction * wander_distance + position
     var target = circle_pos + wander_target
     return seek(target)
 

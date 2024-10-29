@@ -4,10 +4,7 @@ class_name Herbivore
 
 var detected_crops: Array[Food_Crop] = []
 
-func herbivore_fsm(delta: float):
-    # var animals_in_sight: Array[Animal] = get_animals_from_sight() #NOTE : not used atm
-    # var animals_in_hearing_range = detected_animals
-    # var animals_of_same_type: Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
+func herbivore_fsm(delta : float):
     var dangerous_animals: Array[Animal] = filter_animals_by_danger()
     set_base_state(dangerous_animals)
 
@@ -32,7 +29,7 @@ func herbivore_fsm(delta: float):
                 else:
                     set_next_move(wander())
         Animal_Base_States.SATED:
-            if can_have_sex and not detected_animals.is_empty():
+            if can_have_sex and energy_norm >= World.reproduction_energy_cost and not detected_animals.is_empty():
                 var potential_mates = select_potential_mates(detected_animals, animal_type)
                 if not potential_mates.is_empty():
                     var mate = select_mating_partner(potential_mates)
@@ -41,7 +38,7 @@ func herbivore_fsm(delta: float):
             set_next_move(wander())
 
 func set_base_state(dangerous_animals: Array[Animal]):
-    if energy <= 0 or health <= 0:
+    if energy <= 0: # or health <= 0:
         kill_animal()
     elif not dangerous_animals.is_empty():
         animal_state = Animal_Base_States.FLEEING
@@ -98,13 +95,9 @@ func construct_herbivore(pos):
     animal_type = Animal_Types.DEER
 
 func _physics_process(delta: float):
-    if animal_state == Animal_Base_States.DEAD:
-        cadaver_timer.do_timer(delta)
-        return
-    if velocity.length() < 0.1:
-        var x = 15
-        pass
     do_timers(delta) # each physics stedp -> only step we use, increment timers and execute if needed
+    if animal_state == Animal_Base_States.DEAD:
+        return
     update_animal_resources(delta)
     herbivore_fsm(delta)
     do_move(delta)

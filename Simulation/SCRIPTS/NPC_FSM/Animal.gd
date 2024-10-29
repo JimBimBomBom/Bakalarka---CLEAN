@@ -31,6 +31,8 @@ signal birth_request(pos, type, parent_1, parent_2)
 var change_age_timer: SimulationTimer
 var sex_cooldown_timer: SimulationTimer
 var cadaver_timer: SimulationTimer
+var update_animal_resources_timer: SimulationTimer
+var execute_fsm_timer: SimulationTimer
 
 var animal_state: Animal_Base_States = Animal_Base_States.SATED
 var consumption_state: Consumption_State = Consumption_State.SEEKING
@@ -69,6 +71,7 @@ func free_cadaver():
     queue_free()
 
 func kill_animal():
+    energy = 0
     animal_state = Animal_Base_States.DEAD
     cadaver_timer.active = true
     stop_animal()
@@ -77,6 +80,7 @@ func kill_animal():
         World.carnivore_count -= 1
     else:
         World.herbivore_count -= 1
+    print("Carnivores: ", World.carnivore_count, " Herbivores: ", World.herbivore_count)
 
 # should handle "consumption state"(which is also a bad name), where the base state "resets"
 # every other state not affiliated with our current base state -> HUNGRY sets drinking_state to SEEKING and vice versa
@@ -85,36 +89,31 @@ func stop_animal():
     velocity *= 0.01
     desired_velocity *= 0.01
 
-# TODO: refactor:
-    #metabolic rate tells us the largest ammount of a resource that can be converted to energy
+# NOTE : no need for delta, as the function is called by a timer -> delta could be removed, and World var be used directly instead
 func resource_calc(delta: float):
-    var resource_loss = metabolic_rate * delta
-    var energy_gain = 0
-    if nutrition >= resource_loss:
-        energy_gain += resource_loss
-        nutrition -= resource_loss
+    var energy_gain = metabolic_rate * delta
+    var curr_energy_drain = energy_drain * delta # * energy_state (high_energy, low_energy, conservation_of_energy, etc.)
+    if nutrition > metabolic_rate:
+        nutrition -= metabolic_rate
     else:
-        energy_gain += nutrition
+        energy_gain = nutrition * delta
         nutrition = 0
-        # TODO consequences
-
-    if hydration >= resource_loss:
-        energy_gain += resource_loss
-        hydration -= resource_loss
+    
+    var curr_water_loss = water_loss * delta
+    if hydration > curr_water_loss:
+        hydration -= curr_water_loss
     else:
-        energy_gain += hydration
         hydration = 0
-        # TODO consequences
+        # TODO : add consequences for not having any water
+        energy_gain *= 0.6 # NOTE : placeholder
+    
+    energy += (energy_gain - curr_energy_drain)
 
-    var energy_drain_delta = energy_drain * delta / 10 # drain is an animals' characteristic
-    energy += energy_gain - energy_drain_delta
-
-func update_animal_resources(delta: float):
+func update_animal_resources(delta : float):
     resource_calc(delta)
-    energy_norm = energy / max_resources
+    energy_norm = energy / max_energy
     nutrition_norm = nutrition / max_resources
     hydration_norm = hydration / max_resources
-    health_norm = health / max_health
 
 func can_see(pos) -> bool:
     if abs(position.distance_to(pos)) < genes.vision_range and abs(position.angle_to(pos)) < genes.field_of_view_half:
@@ -208,7 +207,7 @@ func select_hydration_tile(tiles: Array[World.Tile_Properties]) -> World.Tile_Pr
     return result
 
 func drink_at_tile(delta: float):
-    hydration += delta * 10 # NOTE: add some world variable to manage this
+    hydration += delta * 5 # NOTE: add some world variable to manage this
     #NOTE: drinking less per tick, means animals spend more time exposed etc.
 
 func animal_hydrate(water_tile, delta: float):
@@ -232,7 +231,7 @@ func select_potential_mates(animals: Array[Animal], animal_type: Animal_Types) -
     var result: Array[Animal]
     var animals_of_same_type = filter_animals_by_type(animals, animal_type)
     for animal in animals_of_same_type:
-        if animal.can_have_sex and animal.animal_state == Animal_Base_States.SATED:
+        if animal.can_have_sex and animal.animal_state == Animal_Base_States.SATED and animal.energy_norm >= World.reproduction_energy_cost:
             result.append(animal)
     return result
 
@@ -249,11 +248,11 @@ func select_mating_partner(potential_mates: Array[Animal]) -> Animal:
 func reproduce_with_animal(animal: Animal):
     can_have_sex = false
     sex_cooldown_timer.active = true
-    nutrition -= World.reproduction_nutrition_cost*max_resources
+    energy -= World.reproduction_energy_cost*max_energy
 
     animal.can_have_sex = false
     animal.sex_cooldown_timer.active = true
-    animal.nutrition -= World.reproduction_nutrition_cost*animal.max_resources
+    animal.energy -= World.reproduction_energy_cost*animal.max_energy
 
     birth_request.emit(position, vore_type, self, animal)
 
@@ -278,6 +277,9 @@ func _on_sex_cooldown_timeout():
     can_have_sex = true
 
 func do_timers(delta: float):
+    if cadaver_timer.active:
+        cadaver_timer.do_timer(delta)
+        return
     change_age_timer.do_timer(delta) 
     if sex_cooldown_timer.active:
         sex_cooldown_timer.do_timer(delta, true)

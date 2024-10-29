@@ -2,50 +2,55 @@ class_name Animal_Genes
 
 #Physical
 var size : float
-var musculature : float
-var agility : float
 var metabolic_rate : float
+var musculature : float
 var offense : float
 
 #Temperature
+# NOTE : should this be handled as an animal trait/gene, or rather the climate increases energy drain?
 # var ideal_temperature : float
 # var ideal_temperature_range : float
 
 #Senses
 var sense_range : float
-var sense_acuity : float
-var field_of_view_half : float
-var vision_range : float
+# var field_of_view_half : float
+# var vision_range : float
 
 #Behavioral
-var aggressiveness : float
-var separation_mult : float
-var cohesion_mult : float
-var alignment_mult : float
+var aggression : float
+var separation : float
+var cohesion : float
+var alignment : float
 
 func generate_genes():
     size = randf_range(0, 1)
-    musculature = randf_range(0, 1)
-    agility = randf_range(0, 1)
     metabolic_rate = randf_range(0, 1)
+    musculature = randf_range(0, 1)
     offense = randf_range(0, 1)
 
     sense_range = randf_range(80, 180)
-    sense_acuity = randf_range(0, 1)
-    field_of_view_half = randf_range(30, 70)
-    vision_range = randf_range(70, 140)
+    # field_of_view_half = randf_range(30, 120)
+    # vision_range = randf_range(40, 90)
+
+    aggression = randf_range(0, 1)
+    separation = randf_range(0, 1)
+    cohesion = randf_range(0, 1)
+    alignment = randf_range(0, 1)
 
 func pass_down_genes(parent_1 : Animal_Genes, parent_2 : Animal_Genes):
     size = extract_gene(parent_1.size, parent_2.size)
-    musculature = extract_gene(parent_1.musculature, parent_2.musculature)
-    agility = extract_gene(parent_1.agility, parent_2.agility)
     metabolic_rate = extract_gene(parent_1.metabolic_rate, parent_2.metabolic_rate)
+    musculature = extract_gene(parent_1.musculature, parent_2.musculature)
     offense = extract_gene(parent_1.offense, parent_2.offense)
 
     sense_range = extract_gene(parent_1.sense_range, parent_2.sense_range)
-    sense_acuity = extract_gene(parent_1.sense_acuity, parent_2.sense_acuity)
-    field_of_view_half = extract_gene(parent_1.field_of_view_half, parent_2.field_of_view_half)
-    vision_range = extract_gene(parent_1.vision_range, parent_2.vision_range)
+    # field_of_view_half = extract_gene(parent_1.field_of_view_half, parent_2.field_of_view_half)
+    # vision_range = extract_gene(parent_1.vision_range, parent_2.vision_range)
+
+    aggression = extract_gene(parent_1.aggression, parent_2.aggression)
+    separation = extract_gene(parent_1.separation, parent_2.separation)
+    cohesion = extract_gene(parent_1.cohesion, parent_2.cohesion)
+    alignment = extract_gene(parent_1.alignment, parent_2.alignment)
 
 func extract_gene(parent_1: float, parent_2: float) -> float: # only for float genes -> need new func for other types
     var from_parent = randi_range(0, 1) # 0 -> parent_1 || 1 -> parent_2

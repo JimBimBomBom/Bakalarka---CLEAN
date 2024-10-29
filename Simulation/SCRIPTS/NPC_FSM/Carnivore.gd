@@ -3,9 +3,6 @@ extends Animal
 class_name Carnivore
 
 func carnivore_fsm(delta : float):
-    # var animals_in_sight : Array[Animal] = get_animals_from_sight()
-    # var animals_in_hearing_range : Array[Animal] = detected_animals#get_animals_from_hearing()
-    # var animals_of_same_type : Array[Animal] = filter_animals_by_type(animals_in_sight, animal_type)
     var cadavers_in_range : Array[Animal] = get_cadavers()
     set_base_state(cadavers_in_range) # dangerous_animals
 
@@ -34,7 +31,7 @@ func carnivore_fsm(delta : float):
                 else:
                     set_next_move(wander()) 
         Animal_Base_States.SATED:
-            if can_have_sex and not detected_animals.is_empty():
+            if can_have_sex and energy_norm >= World.reproduction_energy_cost and not detected_animals.is_empty():
                 var potential_mates = select_potential_mates(detected_animals, animal_type)
                 if not potential_mates.is_empty():
                     var mate = select_mating_partner(potential_mates)
@@ -43,7 +40,7 @@ func carnivore_fsm(delta : float):
             set_next_move(wander())
 
 func set_base_state(cadavers_in_range : Array[Animal]):
-    if energy <= 0 or health <= 0:
+    if energy <= 0: # or health <= 0:
         kill_animal()
     elif not cadavers_in_range.is_empty() and nutrition_norm < nutrition_satisfied_norm: 
         animal_state = Animal_Base_States.EATING
@@ -72,7 +69,10 @@ func carnivore_seek_cadaver(target : Animal, delta : float):
         Consumption_State.CONSUMING: 
             if position.distance_to(target.position) >= 10:
                 consumption_state = Consumption_State.SEEKING
-            eat_cadaver(target, delta)
+            else:
+                stop_animal()
+                eat_cadaver(target, delta)
+                consumption_state = Consumption_State.SEEKING
 
 func hunt_animal(target : Animal, delta : float):
     if consumption_state == Consumption_State.CONSUMING: # after we eat a cadaver/cadaver disappears, we remain in CONSUMING state
@@ -88,11 +88,11 @@ func hunt_animal(target : Animal, delta : float):
             consumption_state = Consumption_State.SEEKING
 
 func eat_cadaver(target : Animal, delta : float):
-    stop_animal()
-    var food_gain = min(target.mass, max_resources - nutrition)
+    var food_gain = min(target.mass, delta * (genes.size * 10)) # NOTE : placeholder, but an idea is there. large animals eat faster
+    nutrition += food_gain
+    target.mass -= food_gain
     if target.mass == food_gain:
         target.free_cadaver()
-    nutrition += food_gain
 
 func is_target_in_range(target : Animal) -> bool:
     if position.distance_to(target.position) < 10: #TODO: this is a placeholder
@@ -131,13 +131,9 @@ func construct_carnivore(pos):
     animal_type = Animal_Types.WOLF
 
 func _physics_process(delta : float):
+    do_timers(delta) # each physics step -> increment timers and execute if needed
     if animal_state == Animal_Base_States.DEAD:
-        cadaver_timer.do_timer(delta)
         return
-    if velocity.length() < 0.1:
-        var x = 15
-        pass
-    do_timers(delta) # each physics step -> only step we use, increment timers and execute if needed
     update_animal_resources(delta)
     carnivore_fsm(delta)
     do_move(delta)
