@@ -71,7 +71,6 @@ func free_cadaver():
     queue_free()
 
 func kill_animal():
-    energy = 0
     animal_state = Animal_Base_States.DEAD
     cadaver_timer.active = true
     stop_animal()

@@ -19,6 +19,7 @@ var moisture_avg: float = 0
 
 # NOTE: default simulation settings, can be changed in the GUI at startup
 var game_time: float = 0
+var simulation_id: int = randi()
 
 var game_speed = 1
 var world_seed = 0
@@ -41,16 +42,21 @@ var map_edge_repulsion_threshold: int = min(width/10, height/10, 5) * tile_size_
 
 #World settings:
 var food_regrow_timer : SimulationTimer
+var get_data_snapshot_timer : SimulationTimer
+var get_data_snapshot_period: float = 10 # NOTE: number of steps between data snapshots
 
 #time is used as real seconds
 var food_regrow_time: float = 2000
 var corpse_time: float = 1500
 var change_age_period_mult: float = 2000
 
-var food_crop_yield = 20
+var food_crop_yield = 5
 var reproduction_energy_cost = 0.4 # NOTE: usage is 0.4 * Animal.max_energy.. could be based on an animals characteristics.
 
 var agility_modifier = 5
+
+#Groups
+var animal_group = "animal"
 
 #Mutation settings
 var mutation_prob = 0.01

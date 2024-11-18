@@ -22,6 +22,11 @@ func _ready():
     World.food_regrow_timer.active = true
     World.food_regrow_timer.timer_triggered.connect(_regrow_food)
 
+    World.get_data_snapshot_timer = SimulationTimer.new()
+    World.get_data_snapshot_timer.trigger_time = World.get_data_snapshot_period
+    World.get_data_snapshot_timer.active = true
+    World.get_data_snapshot_timer.timer_triggered.connect(_collect_and_log_data)
+
 func _regrow_food() -> void:
     generate_food_crops()
 
@@ -34,10 +39,10 @@ func generate_food_crops():
         var moist = World.moisture[pos]
         var temp = World.temperature[pos]
 
-        var tile = World.Map.tiles[pos] 
+        var tile = World.Map.tiles[pos]
         if tile.type == World.Tile_Type.WATER || tile.occupied:
             continue
-        if moist + randf_range(0, 0.75) <= 1.0:# TODO : could this be made into something that makes sense? or is it just random, and that is fine?
+        if moist + randf_range(0, 0.75) <= 1.0: # TODO : could this be made into something that makes sense? or is it just random, and that is fine?
             continue
 
         if between(moist, 0.4, 0.6) and between(temp, -0.3, 0.9):
@@ -46,8 +51,8 @@ func generate_food_crops():
             place_food_crop(pos, World.Vegetation_Type.BUSH_2)
         placed_crop_count += 1 # NOTE: we successfully placed a crop
 
-func place_food_crop(pos : Vector2i, type) -> void:
-    var	scene = load("res://SCENES/FoodCrop.tscn")
+func place_food_crop(pos: Vector2i, type) -> void:
+    var scene = load("res://SCENES/FoodCrop.tscn")
     var inst = scene.instantiate()
     var tile = World.Map.tiles[pos]
     match tile.biome:
@@ -58,13 +63,13 @@ func place_food_crop(pos : Vector2i, type) -> void:
                 World.Vegetation_Type.BUSH_2:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
         World.Temperature_Type.TEMPERATE_LAND:
-            match type:		
+            match type:
                 World.Vegetation_Type.BUSH_1: # Cut from here -> tropical in temperate
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
                 World.Vegetation_Type.BUSH_2:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_2.png")
         World.Temperature_Type.TROPICAL_LAND:
-            match type:		
+            match type:
                 World.Vegetation_Type.BUSH_1:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Bushes/Tropical_Bush_1.png")
                 World.Vegetation_Type.BUSH_2:
@@ -73,7 +78,7 @@ func place_food_crop(pos : Vector2i, type) -> void:
     World.Map.tiles[pos].occupied = true
     inst.tile_index = pos # used to set tile occupancy to false on be_eaten() ...
 
-    inst.position = Vector2(pos.x, pos.y)*World.tile_size
+    inst.position = Vector2(pos.x, pos.y) * World.tile_size
     add_child(inst)
 
 func generate_vegetation():
@@ -95,32 +100,32 @@ func generate_vegetation():
             elif between(alt, -0.15, 0.7) and between(temp, -0.7, 0.4):
                 place_vegetation(pos, World.Vegetation_Type.TREE_2)
 
-func place_vegetation(pos : Vector2i, type) -> void:
+func place_vegetation(pos: Vector2i, type) -> void:
     var scene = load("res://SCENES/Vegetation.tscn")
     var inst = scene.instantiate()
     var tile = World.Map.tiles[pos]
     match tile.biome:
         World.Temperature_Type.TAIGA:
-            match type:		
+            match type:
                 World.Vegetation_Type.TREE_1:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Trees/Taiga_Tree_1.png")
                 World.Vegetation_Type.TREE_2: # Cut from here -> tropical in taiga
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Trees/Tropical_Tree_2.png")
         World.Temperature_Type.TEMPERATE_LAND:
-            match type:		
+            match type:
                 World.Vegetation_Type.TREE_1:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Trees/Temperate_Tree_1.png")
                 World.Vegetation_Type.TREE_2:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Trees/Temperate_Tree_2.png")
         World.Temperature_Type.TROPICAL_LAND:
-            match type:		
+            match type:
                 World.Vegetation_Type.TREE_1:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Trees/Tropical_Tree_1.png")
                 World.Vegetation_Type.TREE_2:
                     inst.find_child("Sprite2D").texture = load("res://Sprites/assets/Trees/Tropical_Tree_2.png")
     
     World.Map.tiles[pos].occupied = true
-    inst.position = Vector2(pos.x, pos.y)*World.tile_size
+    inst.position = Vector2(pos.x, pos.y) * World.tile_size
     add_child(inst)
 
 func initialize_npcs():
@@ -138,6 +143,7 @@ func construct_npc(pos, type):
             var inst = scene.instantiate()
             var herbivore_script = load(World.herbivore_script)
             inst.set_script(herbivore_script)
+            inst.add_to_group("animals")
             inst.construct_herbivore(pos)
             inst.find_child("Sprite2D").texture = load("res://Sprites/Herbivore.png")
             inst.birth_request.connect(_on_animal_birth_request)
@@ -147,6 +153,7 @@ func construct_npc(pos, type):
             var inst = scene.instantiate()
             var carnivore_script = load(World.carnivore_script)
             inst.set_script(carnivore_script)
+            inst.add_to_group("animals")
             inst.construct_carnivore(pos)
             inst.find_child("Sprite2D").texture = load("res://Sprites/Carnivore.png")
             inst.birth_request.connect(_on_animal_birth_request)
@@ -182,9 +189,37 @@ func between(val, start, end):
         return true
     return false
 
+func _collect_and_log_data(): # NOTE: this is called by get_data_snapshot_timer
+    var animal_data = []
+    var tree = get_tree()
+    for animal in get_tree().get_nodes_in_group("animals"):
+        animal_data.append({
+            "id": animal.get_instance_id(),
+            "animal_type": animal.animal_type,
+            "age": animal.age,
+            "genes": animal.genes,
+
+        })
+    var world_data = {
+        "temperature_avg": World.temperature_avg,
+        "moisture_avg": World.moisture_avg,
+    }
+    var log_entry = {
+        "timestamp": World.game_time,
+        "animals": animal_data,
+        "world": world_data,
+    }
+    DataLogger.log_data(log_entry)
+
 func do_timers(delta):
-    World.food_regrow_timer.do_timer(delta) # this timer will always be active
+    World.food_regrow_timer.do_timer(delta)
+    World.get_data_snapshot_timer.do_timer(delta)
 
 func _physics_process(delta):
     do_timers(delta)
     World.game_time += delta
+    
+func _notification(what):
+    if what == NOTIFICATION_WM_CLOSE_REQUEST:
+        DataLogger.save_data_to_file()
+        get_tree().quit() # default behavior

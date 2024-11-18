@@ -72,8 +72,8 @@ func set_characteristics(genes: Animal_Genes):
 
     max_velocity = 1 + 5*genes.musculature # will additionally influenced by for example: fat_storage relative to size, etc.
 
-    var lessen_drain = 80
-    energy_drain = (genes.size + genes.musculature + genes.metabolic_rate/3) / lessen_drain # + offense**2
+    var lessen_drain = 200
+    energy_drain = (genes.size + genes.musculature + genes.metabolic_rate/3) / lessen_drain
     metabolic_rate = (1 + genes.metabolic_rate) * energy_drain # animal always has to be able to make atleast as much energy as it uses during "normal energy consumption state"
     water_loss = (genes.metabolic_rate + genes.size) / lessen_drain # + insulation + etc. 
 
