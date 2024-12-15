@@ -5,6 +5,4 @@ var occupied : bool
 var position : Vector2
 var index : Vector2i
 
-var biome : World.Temperature_Type
-
-# var movement_difficulty : float 
+var biome : World.Biome_Type

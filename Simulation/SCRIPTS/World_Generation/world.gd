@@ -1,31 +1,31 @@
 extends Node2D
 
 func _ready():
-    var map_scene = load("res://SCENES/tile_map.tscn")
+    var map_scene = load("res://SCENES/tile_map_layer.tscn")
     World.Map = map_scene.instantiate()
     add_child(World.Map)
     World.Map.generate_world()
 
-    World.x_edge_from_center = World.width * World.tile_size.x
-    World.y_edge_from_center = World.height * World.tile_size.y
+    # World.x_edge_from_center = World.width * World.tile_size.x
+    # World.y_edge_from_center = World.height * World.tile_size.y
 
-    add_child(World.Player)
+    # add_child(World.Player)
 
-    generate_vegetation()
-    generate_food_crops()
-    initialize_npcs()
+    # generate_vegetation()
+    # generate_food_crops()
+    # initialize_npcs()
         
     World.game_speed_controller.set_game_speed(World.game_speed)
 
-    World.food_regrow_timer = SimulationTimer.new()
-    World.food_regrow_timer.trigger_time = World.food_regrow_time
-    World.food_regrow_timer.active = true
-    World.food_regrow_timer.timer_triggered.connect(_regrow_food)
+    # World.food_regrow_timer = SimulationTimer.new()
+    # World.food_regrow_timer.trigger_time = World.food_regrow_time
+    # World.food_regrow_timer.active = true
+    # World.food_regrow_timer.timer_triggered.connect(_regrow_food)
 
-    World.get_data_snapshot_timer = SimulationTimer.new()
-    World.get_data_snapshot_timer.trigger_time = World.get_data_snapshot_period
-    World.get_data_snapshot_timer.active = true
-    World.get_data_snapshot_timer.timer_triggered.connect(_collect_and_log_data)
+    # World.get_data_snapshot_timer = SimulationTimer.new()
+    # World.get_data_snapshot_timer.trigger_time = World.get_data_snapshot_period
+    # World.get_data_snapshot_timer.active = true
+    # World.get_data_snapshot_timer.timer_triggered.connect(_collect_and_log_data)
 
 func _regrow_food() -> void:
     generate_food_crops()
@@ -216,7 +216,7 @@ func do_timers(delta):
     World.get_data_snapshot_timer.do_timer(delta)
 
 func _physics_process(delta):
-    do_timers(delta)
+    # do_timers(delta)
     World.game_time += delta
     
 func _notification(what):

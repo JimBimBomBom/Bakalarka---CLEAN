@@ -83,16 +83,19 @@ enum Vegetation_Type {
 enum Tile_Type {
     WATER,
     PLAIN,
-    MOUNTAIN,
 }
-enum Temperature_Type { # selects the tile_set
-    TUNDRA = 0,
-    TAIGA = 1,
-    TEMPERATE_LAND = 2,
-    TROPICAL_LAND = 3,
-    DESERT = 4,
+# Whittaker biome system
+enum Biome_Type {
+    Tundra,
+    Taiga,
+    Temperate_Rainforest,
+    Tropical_Rainforest,
+    Temperate_Forest,
+    Savanna,
+    Grassland,
+    Desert,
+    Water,
 }
-
 enum Age_Group {
     JUVENILE = 0,
     ADOLESCENT = 1,
