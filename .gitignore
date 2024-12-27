@@ -1,5 +1,5 @@
-.godot/
-*.exe
-*
-!*/
-!Simulation
+/*
+!/Simulation/
+!/Simulation/*
+/Simulation/.godot
+/Simulation/Build

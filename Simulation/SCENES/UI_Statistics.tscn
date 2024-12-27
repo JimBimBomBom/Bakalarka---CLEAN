@@ -1,0 +1,51 @@
+[gd_scene load_steps=5 format=3 uid="uid://wi24g3p3rx32"]
+
+[ext_resource type="Script" path="res://SCRIPTS/World_Generation/UI_statistics.gd" id="1_nj4mh"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_knhr3"]
+
+[sub_resource type="Theme" id="Theme_ao7m5"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_y4u21"]
+
+[node name="CanvasLayer" type="CanvasLayer"]
+
+[node name="Control" type="Control" parent="."]
+z_index = 1
+material = SubResource("CanvasItemMaterial_knhr3")
+layout_mode = 3
+anchor_right = 0.2
+anchor_bottom = 1.0
+grow_vertical = 2
+theme = SubResource("Theme_ao7m5")
+script = ExtResource("1_nj4mh")
+metadata/_edit_use_anchors_ = true
+
+[node name="PanelContainer" type="PanelContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/PanelContainer"]
+layout_mode = 2
+
+[node name="VBox_Statistics" type="VBoxContainer" parent="Control/PanelContainer/MarginContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="AnimalCount" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "test"
+label_settings = SubResource("LabelSettings_y4u21")
+
+[node name="SizeAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "ing"
+
+[node name="SizeRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "yeah"
