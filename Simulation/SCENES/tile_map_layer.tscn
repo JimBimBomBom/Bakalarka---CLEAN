@@ -1,27 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bd0vyh1bhg8m2"]
+[gd_scene load_steps=3 format=3 uid="uid://bd0vyh1bhg8m2"]
 
-[ext_resource type="Texture2D" uid="uid://0fegaihcdctw" path="res://Sprites/New Piskel (1).png" id="1_12nkb"]
+[ext_resource type="TileSet" uid="uid://5bd4a4jam3kb" path="res://SCENES/TileSets/TileMap.tres" id="1_7qx42"]
 [ext_resource type="Script" path="res://SCRIPTS/World_Generation/TileMap.gd" id="2_g10t1"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvmhq"]
-texture = ExtResource("1_12nkb")
-separation = Vector2i(1, 1)
-texture_region_size = Vector2i(32, 32)
-0:0/0 = 0
-1:0/0 = 0
-2:0/0 = 0
-0:1/0 = 0
-1:1/0 = 0
-2:1/0 = 0
-0:2/0 = 0
-1:2/0 = 0
-2:2/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_ln2i0"]
-tile_shape = 3
-tile_size = Vector2i(32, 32)
-sources/1 = SubResource("TileSetAtlasSource_gvmhq")
-
 [node name="TileMapLayer" type="TileMapLayer"]
-tile_set = SubResource("TileSet_ln2i0")
+tile_set = ExtResource("1_7qx42")
 script = ExtResource("2_g10t1")

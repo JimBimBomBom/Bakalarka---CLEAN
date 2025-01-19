@@ -9,6 +9,7 @@
 [sub_resource type="LabelSettings" id="LabelSettings_y4u21"]
 
 [node name="CanvasLayer" type="CanvasLayer"]
+script = ExtResource("1_nj4mh")
 
 [node name="Control" type="Control" parent="."]
 z_index = 1
@@ -18,7 +19,6 @@ anchor_right = 0.2
 anchor_bottom = 1.0
 grow_vertical = 2
 theme = SubResource("Theme_ao7m5")
-script = ExtResource("1_nj4mh")
 metadata/_edit_use_anchors_ = true
 
 [node name="PanelContainer" type="PanelContainer" parent="Control"]
@@ -37,15 +37,80 @@ clip_contents = true
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 
+[node name="WorldAge" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "World Age:"
+label_settings = SubResource("LabelSettings_y4u21")
+
 [node name="AnimalCount" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
 layout_mode = 2
-text = "test"
+text = "Animal Count:"
 label_settings = SubResource("LabelSettings_y4u21")
 
 [node name="SizeAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
 layout_mode = 2
-text = "ing"
+text = "Size Average:"
 
 [node name="SizeRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
 layout_mode = 2
-text = "yeah"
+text = "Size Range:"
+
+[node name="SpeedAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Speed Average:"
+
+[node name="SpeedRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Speed Range:"
+
+[node name="MatingRateAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "MatingRate Average:"
+
+[node name="MatingRateRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "MatingRate Range:"
+
+[node name="FoodPrefferenceAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "FoodPrefference Average:"
+
+[node name="FoodPrefferenceRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "FoodPrefference Range:"
+
+[node name="NutritionAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Nutrition Average:"
+
+[node name="HydrationAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Hydration Average: "
+
+[node name="LoveAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Love Average:"
+
+[node name="DeathsStarvation" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Deaths Starvation:"
+
+[node name="DeathsDehydration" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Deaths Dehydration:"
+
+[node name="DeathsAge" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Deaths Age:"
+
+[node name="DeathsPredation" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Deaths Predation:"
+
+[node name="NutritionFromMeat" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Deaths Predation:"
+
+[node name="NutritionFromPlants" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Deaths Predation:"

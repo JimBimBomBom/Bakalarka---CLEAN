@@ -1,0 +1,22 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://5bd4a4jam3kb"]
+
+[ext_resource type="Texture2D" uid="uid://0fegaihcdctw" path="res://Sprites/New Piskel (1).png" id="1_s61q5"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvmhq"]
+texture = ExtResource("1_s61q5")
+separation = Vector2i(1, 1)
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+
+[resource]
+tile_shape = 3
+tile_size = Vector2i(32, 32)
+sources/1 = SubResource("TileSetAtlasSource_gvmhq")
