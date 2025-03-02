@@ -11,9 +11,10 @@ func _ready():
     add_child(World.Map)
 
     # var unit_tests_scene = load("res://SCENES/unit_tests.tscn")
-    # var Unit_Tests : Node = unit_tests_scene.instantiate() #NOTE: when instantiated, it calls all the unit tests
+    # var Unit_Tests : Node = unit_tests_scene.instantiate() 
     # Unit_Tests.run_tests()
 
+var animals: Dictionary = {}
 
 # World variables
 var temperature = {}
@@ -30,6 +31,7 @@ var max_altitude_noise : float = 1
 # NOTE: default simulation settings, can be changed in the GUI at startup
 var run_simulation = true
 var game_steps: int = 0
+var data_collection_interval: int = 25
 var simulation_speed: float # NOTE: number of steps per second
 var world_initialized = false
 var simulation_id: int = randi()
@@ -38,13 +40,9 @@ var world_seed : int
 var width: int
 var height: int
 
-# var river_start_min_altitude = 0.5
-# var preffered_river_count : int = width/5 + height/5
-
-var spawn_animal_count: int = 3
+var spawn_animal_count: int = 0
 var spawn_animal_location_range_y : Vector2i = Vector2i(ceil(height/2.0) - 5, ceil(height/2.0) + 5)
 var spawn_animal_location_range_x : Vector2i = Vector2i(ceil(width/2.0) - 5, ceil(width/2.0) + 5)
-var animals: Dictionary = {}
 
 #Statistics
 var animal_deaths_starvation: int = 0
@@ -74,9 +72,6 @@ var ready_to_mate_max = 50.0
 #Mutation settings
 var mutation_prob = 0.05
 var mutation_half_range = 0.05
-
-# const Tile_Properties = preload("res://SCRIPTS/World_Generation/Tile_Properties.gd")
-# const Animal = preload("res://SCRIPTS/NPC_FSM/Animal.gd")
 
 enum Vore_Type {
     CARNIVORE,

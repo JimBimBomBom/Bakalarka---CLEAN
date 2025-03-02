@@ -40,7 +40,7 @@ text = "Game Speed:"
 layout_mode = 2
 min_value = 1.0
 max_value = 10000.0
-value = 1000.0
+value = 100.0
 
 [node name="MapSeed" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -63,7 +63,7 @@ text = "Map Height:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/MapHeight"]
 layout_mode = 2
 max_value = 9.22337e+16
-value = 32.0
+value = 8.0
 
 [node name="MapWidth" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -75,7 +75,7 @@ text = "Map Width:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/MapWidth"]
 layout_mode = 2
 max_value = 9.22337e+16
-value = 32.0
+value = 8.0
 
 [node name="AnimalSpawnCount" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2

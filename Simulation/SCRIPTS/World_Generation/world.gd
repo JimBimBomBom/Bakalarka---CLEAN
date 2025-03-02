@@ -57,9 +57,11 @@ func run_simulation():
 
             animal.process_animal()
             animal.update_animal_resources()
+        
+        World.Map.update_map_animal_count_labels() # NOTE: update the animal count labels on the map
 
         replenish_map()
-        if World.game_steps % 25 == 0:
+        if World.game_steps % World.data_collection_interval == 0:
             collect_and_log_data()
             World.UI_Statistics.update_stats(World.animals)
 
@@ -69,6 +71,11 @@ func run_simulation():
         await get_tree().create_timer(1.0 / World.simulation_speed).timeout
 
 func collect_and_log_data(): # NOTE: this is called by get_data_snapshot_timer
+    var world_data = {
+        "temperature_avg": World.temperature_avg,
+        "moisture_avg": World.moisture_avg,
+    }
+
     var animal_data = []
     for animal in World.animals.values():
         animal_data.append({
@@ -77,19 +84,27 @@ func collect_and_log_data(): # NOTE: this is called by get_data_snapshot_timer
             "age": animal.age,
             "genes": animal.genes,
         })
-    var world_data = {
-        "temperature_avg": World.temperature_avg,
-        "moisture_avg": World.moisture_avg,
-    }
+
     var log_entry = {
         "timestamp": World.game_steps,
-        "animals": animal_data,
         "world": world_data,
+        "animals": animal_data,
     }
+
     DataLogger.log_data(log_entry)
 
+func run_visualizer():
+    var python_executable = "python"  # NOTE: command to run Python3
+    var script_path = ProjectSettings.globalize_path("res://Processing/visualizer.py")  # Ensure correct path
+
+    # Execute the Python script
+    var error = OS.create_process(python_executable, [script_path, str(World.simulation_id)])
+    
+    if error != OK:
+        print("Failed to execute visualizer.py: Error Code", error)
+
 func _notification(what):
-    if what == NOTIFICATION_WM_CLOSE_REQUEST:
+    if what == NOTIFICATION_WM_CLOSE_REQUEST: # NOTE: this is called when the window is closed
         DataLogger.save_data_to_file()
-        print("Simulation id: ", World.simulation_id)
+        run_visualizer() # NOTE: run my Python script on simulation data
         get_tree().quit() # default behavior

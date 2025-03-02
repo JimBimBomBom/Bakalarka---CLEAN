@@ -9,27 +9,29 @@ enum Noise_Type {
 }
 
 var tiles = {}
+var tile_labels = {}
 
+# NOTE: I have a max values specified for each noise type to allow us to modify the noise values -> maybe add a minimum value as well?
 func generate_map(fast_noise, set_seed, freq, oct, oct_gain, max_value):
     fast_noise.noise_type = 1 # SIMPLEX SMOOTH
-    # fast_noise.fractal_type = 3
     fast_noise.fractal_type = 1 # FBM (Fractional Brownian Motion)
     fast_noise.frequency = freq
     fast_noise.fractal_octaves = oct
     fast_noise.fractal_gain = oct_gain
 
-    var grid_name = {}
+    var grid = {}
     for y in range(0, World.height):
         for x in range(0, World.width):
             var noise = World.map(fast_noise.get_noise_3d(x, y, set_seed), -1, 1, 0, max_value)
-            grid_name[Vector2i(x, y)] = noise
-    return grid_name
+            grid[Vector2i(x, y)] = noise
+    return grid
 
 func generate_world():
-    World.temperature = generate_map(World.fast_noise, World.world_seed, 0.07, 10, 0.4, World.max_temperature_noise)
+    World.temperature = generate_map(World.fast_noise, World.world_seed, 0.03, 10, 0.4, World.max_temperature_noise)
     World.moisture = generate_map(World.fast_noise, World.world_seed, 0.02, 15, 0.3, World.max_moisture_noise)
     World.altitude = generate_map(World.fast_noise, World.world_seed, 0.007, 12, 0.5, World.max_altitude_noise)
     initialize_tile_values()
+    initialize_tile_labels()
     # temperature_map()
     # generate_rivers()
     # modify_moisture_based_on_river_proximity()
@@ -126,3 +128,50 @@ func set_current_cell(pos, tile):
     else:
         print("Biome not found")
     set_cell(pos, 1, sprite_coord)
+
+func initialize_tile_labels():
+    for y in range(0, World.height):
+        for x in range(0, World.width):
+            var pos = Vector2i(x, y)
+
+            # Create a new label
+            var label = Label.new()
+            label.text = str(10)
+            label.add_theme_font_size_override("font", 16)
+            label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
+            label.visible = true
+
+            # Set alignment properties to center the text
+            label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+            label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+            
+            # Enable autowrap and minimum size to avoid clipping
+            label.custom_minimum_size = Vector2(32, 32)  # Adjust for hex size
+            
+            # Center the label anchor
+            label.anchor_top = 0.5
+            label.anchor_bottom = 0.5
+            label.anchor_left = 0.5
+            label.anchor_right = 0.5
+
+            # Set the label position
+            # NOTE: tile position + tile offset for interlocking hex grid + distance between tiles (x, y) and (x, y + 2) is only half the size of a tile
+            var world_position =    Vector2i(pos.x * World.tile_size_i.x, pos.y * World.tile_size_i.y) \
+                                    + (pos.y % 2) * Vector2i(World.tile_size_i.x / 2, -World.tile_size_i.y / 4) \
+                                    - (pos.y / 2) * Vector2i(0, World.tile_size_i.y / 2)
+            label.position = world_position
+
+            tile_labels[pos] = label
+            World.Map.add_child(label)
+
+func update_map_animal_count_labels():
+    for y in range(0, World.height):
+        for x in range(0, World.width):
+            var pos = Vector2i(x, y)
+            var label = tile_labels[pos]
+            var animal_count = tiles[pos].animal_ids.size()
+            if animal_count > 0:
+                label.text = str(animal_count)
+                label.visible = true
+            else:
+                label.visible = false
