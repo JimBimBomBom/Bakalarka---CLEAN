@@ -14,25 +14,34 @@ var food_prefference : float # <0, 1> where 0 -> pure herbivore, 1 -> pure carni
 var mating_rate : float     # <0, 1> where 0 -> never mates, 1 -> always mates
 
 #Senses
-# TODO: stealth vs detection, fight vs flight, etc.
+var stealth : float
+var detection : float
+
+var intimidation : float
 
 func generate_genes():
     size = randf_range(0, 1)
     speed = randf_range(0, 1)
     food_prefference = randf_range(0, 1)
     mating_rate = randf_range(0, 1)
+    stealth = randf_range(0, 1)
+    detection = randf_range(0, 1)
 
-func set_genes(set_size : float, set_speed : float, set_food_prefference : float, set_mating_rate : float):
+func set_genes(set_size : float, set_speed : float, set_food_prefference : float, set_mating_rate : float, set_stealth : float, set_detection : float):
     self.size = set_size
     self.speed = set_speed
     self.food_prefference = set_food_prefference
     self.mating_rate = set_mating_rate
+    self.stealth = set_stealth
+    self.detection = set_detection
 
 func pass_down_genes(parent_1 : Animal_Genes, parent_2 : Animal_Genes):
     size = extract_gene(parent_1.size, parent_2.size)
     speed = extract_gene(parent_1.speed, parent_2.speed)
     food_prefference = extract_gene(parent_1.food_prefference, parent_2.food_prefference)
     mating_rate = extract_gene(parent_1.mating_rate, parent_2.mating_rate)
+    stealth = extract_gene(parent_1.stealth, parent_2.stealth)
+    detection = extract_gene(parent_1.detection, parent_2.detection)
 
 func extract_gene(parent_1: float, parent_2: float) -> float: # only for float genes -> need new func for other types
     var from_parent = randi_range(0, 1) # 0 -> parent_1 || 1 -> parent_2

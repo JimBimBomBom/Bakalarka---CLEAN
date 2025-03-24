@@ -9,8 +9,11 @@ func _ready():
 func initialize_npcs():
     var spawn_count = 0
     while spawn_count < World.spawn_animal_count:
-        var x_index = max(World.width - 1, min(0, randi_range(World.spawn_animal_location_range_x.x, World.spawn_animal_location_range_x.y)))
-        var y_index = max(World.height - 1, min(0, randi_range(World.spawn_animal_location_range_y.x, World.spawn_animal_location_range_y.y)))
+        # var x_index = min(World.width - 1, max(0, randi_range(World.spawn_animal_location_range_x.x, World.spawn_animal_location_range_x.y)))
+        # var y_index = min(World.height - 1, max(0, randi_range(World.spawn_animal_location_range_y.x, World.spawn_animal_location_range_y.y)))
+        var x_index = randi_range(0, World.width - 1)
+        var y_index = randi_range(0, World.height - 1)
+
         var index = Vector2i(x_index, y_index)
         if World.Map.tiles[index].biome != World.Biome_Type.Water:
             World.construct_predetermined_npc(index)
@@ -106,5 +109,6 @@ func run_visualizer():
 func _notification(what):
     if what == NOTIFICATION_WM_CLOSE_REQUEST: # NOTE: this is called when the window is closed
         DataLogger.save_data_to_file()
-        run_visualizer() # NOTE: run my Python script on simulation data
+        if World.generate_graphs:
+            run_visualizer() # NOTE: run my Python script on simulation data
         get_tree().quit() # default behavior

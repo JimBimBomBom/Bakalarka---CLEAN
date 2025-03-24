@@ -56,7 +56,7 @@ func initialize_tile_values():
             tile.plant_matter_gain = tile.max_plant_matter / 8.0
 
             tile.total_meat = 0.0
-            tile.meat_spoil_rate = 1.0 / tile.temperature
+            tile.meat_spoil_rate = 1.0 / (tile.temperature * 7)
             tile.meat_in_rounds = Array()
 
             tile.animal_ids = Array()
@@ -139,7 +139,7 @@ func initialize_tile_labels():
             label.text = str(10)
             label.add_theme_font_size_override("font", 16)
             label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
-            label.visible = true
+            label.visible = false
 
             # Set alignment properties to center the text
             label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

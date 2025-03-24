@@ -5,6 +5,7 @@ var seed_input
 var height_input
 var width_input
 var animal_spawn_count
+var generate_graphs_input
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -14,6 +15,7 @@ func _ready():
     height_input = $Control/PanelContainer/Panel/VBoxContainer/MapHeight/SpinBox
     width_input = $Control/PanelContainer/Panel/VBoxContainer/MapWidth/SpinBox
     animal_spawn_count = $Control/PanelContainer/Panel/VBoxContainer/AnimalSpawnCount/SpinBox
+    generate_graphs_input = $Control/PanelContainer/Panel/VBoxContainer/GenerateGraphs/SpinBox
 
     var Start_Simulation_Button = $Control/PanelContainer/Panel/VBoxContainer/StartSimulation
     Start_Simulation_Button.pressed.connect(_on_Start_Simulation_Button_pressed)
@@ -32,6 +34,8 @@ func _on_Generate_World_Button_pressed():
 
     World.Map.generate_world()
     World.world_initialized = true
+
+    World.generate_graphs = generate_graphs_input.value
 
 func _on_Start_Simulation_Button_pressed():
     if World.world_initialized == false:

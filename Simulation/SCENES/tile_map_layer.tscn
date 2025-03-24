@@ -5,4 +5,6 @@
 
 [node name="TileMapLayer" type="TileMapLayer"]
 tile_set = ExtResource("1_7qx42")
+collision_enabled = false
+navigation_enabled = false
 script = ExtResource("2_g10t1")

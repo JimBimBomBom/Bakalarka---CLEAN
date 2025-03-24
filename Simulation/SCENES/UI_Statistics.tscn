@@ -63,6 +63,22 @@ text = "Speed Average:"
 layout_mode = 2
 text = "Speed Range:"
 
+[node name="StealthAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Stealth Average:"
+
+[node name="StealthRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Stealth Range:"
+
+[node name="DetectionAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Detection Average:"
+
+[node name="DetectionRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+layout_mode = 2
+text = "Detection Range:"
+
 [node name="MatingRateAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
 layout_mode = 2
 text = "MatingRate Average:"

@@ -39,8 +39,8 @@ text = "Game Speed:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/GameSpeed"]
 layout_mode = 2
 min_value = 1.0
-max_value = 10000.0
-value = 100.0
+max_value = 100000.0
+value = 100000.0
 
 [node name="MapSeed" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -87,7 +87,18 @@ text = "Animal Spawn Count:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/AnimalSpawnCount"]
 layout_mode = 2
 max_value = 9.22337e+16
-value = 20.0
+value = 120.0
+
+[node name="GenerateGraphs" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/PanelContainer/Panel/VBoxContainer/GenerateGraphs"]
+layout_mode = 2
+text = "Generate Graphs:"
+
+[node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/GenerateGraphs"]
+layout_mode = 2
+max_value = 1.0
 
 [node name="StartSimulation" type="Button" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2

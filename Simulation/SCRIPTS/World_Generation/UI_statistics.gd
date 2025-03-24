@@ -15,6 +15,12 @@ extends CanvasLayer
 @onready var animal_food_prefference_avg_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/FoodPrefferenceAverage
 @onready var animal_food_prefference_range_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/FoodPrefferenceRange
 
+@onready var animal_stealth_avg_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/StealthAverage
+@onready var animal_stealth_range_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/StealthRange
+
+@onready var animal_detection_avg_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/DetectionAverage
+@onready var animal_detection_range_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/DetectionRange
+
 @onready var animal_nutrition_avg_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/NutritionAverage
 @onready var animal_hydration_avg_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/HydrationAverage
 @onready var animal_love_avg_label : Label = $Control/PanelContainer/MarginContainer/VBox_Statistics/LoveAverage
@@ -50,6 +56,14 @@ func update_stats(animals):
     animal_food_prefference_avg_label.text = "FoodPreff Average: %.2f" % get_avg_food_prefference(World.animals)
     var food_prefference_range = get_food_prefference_range(World.animals)
     animal_food_prefference_range_label.text = "FoodPreff Range: %.2f - %.2f" % [food_prefference_range.x, food_prefference_range.y]
+
+    animal_stealth_avg_label.text = "Stealth Average: %.2f" % get_avg_stealth(World.animals)
+    var stealth_range = get_stealth_range(World.animals)
+    animal_stealth_range_label.text = "Stealth Range: %.2f - %.2f" % [stealth_range.x, stealth_range.y]
+
+    animal_detection_avg_label.text = "Detection Average: %.2f" % get_avg_detection(World.animals)
+    var detection_range = get_detection_range(World.animals)
+    animal_detection_range_label.text = "Detection Range: %.2f - %.2f" % [detection_range.x, detection_range.y]
 
     animal_nutrition_avg_label.text = "Nutrition Average: %.2f" % get_nutrition_avg(World.animals)
     animal_hydration_avg_label.text = "Hydration Average: %.2f" % get_hydration_avg(World.animals)
@@ -142,6 +156,40 @@ func get_size_range(animals):
         if size > max_size:
             max_size = size
     return Vector2(min_size, max_size)
+
+func get_avg_stealth(animals):
+    var total_stealth = 0
+    for animal in animals.values():
+        total_stealth += animal.genes.stealth
+    return total_stealth / animals.size()
+
+func get_stealth_range(animals):
+    var min_stealth : float = 1
+    var max_stealth : float = 0
+    for animal in animals.values():
+        var stealth = animal.genes.stealth
+        if stealth < min_stealth:
+            min_stealth = stealth
+        if stealth > max_stealth:
+            max_stealth = stealth
+    return Vector2(min_stealth, max_stealth)
+
+func get_avg_detection(animals):
+    var total_detection = 0
+    for animal in animals.values():
+        total_detection += animal.genes.detection
+    return total_detection / animals.size()
+
+func get_detection_range(animals):
+    var min_detection : float = 1
+    var max_detection : float = 0
+    for animal in animals.values():
+        var detection = animal.genes.detection
+        if detection < min_detection:
+            min_detection = detection
+        if detection > max_detection:
+            max_detection = detection
+    return Vector2(min_detection, max_detection)
 
 func get_nutrition_avg(animals):
     var total_nutrition = 0

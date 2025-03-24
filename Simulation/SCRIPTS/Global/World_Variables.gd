@@ -53,6 +53,8 @@ var animal_deaths_predation: int = 0
 var nutrition_from_meat: float = 0
 var nutrition_from_plants: float = 0
 
+var generate_graphs: int = 1
+
 #Map settings
 var tile_size_i: Vector2i = Vector2i(32, 32) # NOTE: gets set in world -> this is just initialization
 var zero_pos = Vector2i(0, 0)
@@ -64,14 +66,17 @@ var get_data_snapshot_period: float = 10 # NOTE: number of steps between data sn
 
 #Reproduction settings
 #(size + speed 2*food_prefference + mating_rate)
-var max_genetic_distance = 1 + 1 + 2*1 + 1
-var min_allowed_genetic_distance = 0.9
+var max_genetic_distance = 1 + 1 + 3*1 + 1 + 1 + 1
+var min_allowed_genetic_distance = 0.8 # NOTE: atleast 90% similar
 
 var ready_to_mate_max = 50.0
 
 #Mutation settings
 var mutation_prob = 0.05
 var mutation_half_range = 0.05
+
+#Scent settings
+var scent_duration = 20
 
 enum Vore_Type {
     CARNIVORE,
