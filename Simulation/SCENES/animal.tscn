@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://ci5r656yudgjl"]
 
-[ext_resource type="Script" path="res://SCRIPTS/NPC_FSM/Animal.gd" id="1_6qram"]
+[ext_resource type="Script" path="res://Godot/NPC_FSM/Animal.gd" id="1_6qram"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_2ynyb"]
 radius = 4.0

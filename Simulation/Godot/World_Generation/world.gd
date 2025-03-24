@@ -98,7 +98,7 @@ func collect_and_log_data(): # NOTE: this is called by get_data_snapshot_timer
 
 func run_visualizer():
     var python_executable = "python"  # NOTE: command to run Python3
-    var script_path = ProjectSettings.globalize_path("res://Processing/visualizer.py")  # Ensure correct path
+    var script_path = ProjectSettings.globalize_path("res://Visualization/visualizer.py")  # Ensure correct path
 
     # Execute the Python script
     var error = OS.create_process(python_executable, [script_path, str(World.simulation_id)])

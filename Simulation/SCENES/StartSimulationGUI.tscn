@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://8xxh43j1vekf"]
 
-[ext_resource type="Script" path="res://SCRIPTS/Global/SimulationGUI.gd" id="1_ufuxh"]
+[ext_resource type="Script" path="res://Godot/Global/SimulationGUI.gd" id="1_ufuxh"]
 
 [node name="CanvasLayer" type="CanvasLayer"]
 script = ExtResource("1_ufuxh")

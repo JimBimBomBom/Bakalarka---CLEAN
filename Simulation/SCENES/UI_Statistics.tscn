@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://wi24g3p3rx32"]
 
-[ext_resource type="Script" path="res://SCRIPTS/World_Generation/UI_statistics.gd" id="1_nj4mh"]
+[ext_resource type="Script" path="res://Godot/World_Generation/UI_statistics.gd" id="1_nj4mh"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_knhr3"]
 
