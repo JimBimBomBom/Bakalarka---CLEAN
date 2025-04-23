@@ -5,13 +5,13 @@ var data = []
 
 func log_data(entry):
     data.append(entry)
-    if data.size() > 1:
+    if data.size() > 100:
         save_data_to_file()
         data.clear()
 
 func create_new_file_add_header(file_name):
     var file = FileAccess.open(file_name, FileAccess.WRITE) # NOTE: WRITE mode creates a new file or truncates an existing file
-    var header = "timestamp,animal_id,vore_type,age,size,speed,food_prefference,mating_rate"
+    var header = "timestamp,animal_id,vore_type,age,size,speed,food_prefference,mating_rate,stealth,detection"
     file.store_line(header)
     file.close()
 
@@ -28,7 +28,7 @@ func save_data_to_file():
     for entry in data:
         var timestamp = entry["timestamp"]
         for animal in entry['animals']:
-            var line = "%d,%d,%d,%d,%f,%f,%f,%f" % [
+            var line = "%d,%d,%d,%d,%f,%f,%f,%f,%f,%f," % [
                 timestamp,
                 animal['id'],
                 animal['vore_type'],
@@ -37,6 +37,8 @@ func save_data_to_file():
                 animal['genes']['speed'],
                 animal['genes']['food_prefference'],
                 animal['genes']['mating_rate'],
+                animal['genes']['stealth'],
+                animal['genes']['detection'],
             ]
             file.store_line(line)
     file.close()

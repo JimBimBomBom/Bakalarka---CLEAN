@@ -7,6 +7,11 @@ var Camera: Camera2D = camera_scene.instantiate()
 var ui_statistics_scene = load("res://SCENES/UI_statistics.tscn")
 var UI_Statistics: CanvasLayer = ui_statistics_scene.instantiate()
 
+var simulation_parameters_file = ""
+var simulation # NOTE: is initialized when creating a simulation in Rust
+
+var sim_params = Simulation_Parameters.new()
+
 func _ready():
     add_child(World.Map)
 
@@ -14,7 +19,15 @@ func _ready():
     # var Unit_Tests : Node = unit_tests_scene.instantiate() 
     # Unit_Tests.run_tests()
 
-var animals: Dictionary = {}
+func create_rust_simulation():
+    simulation = Simulation.new()
+    print("Godot simulation parameters: ", sim_params.width, sim_params.height)
+    simulation.set_simulation_parameters(sim_params) # NOTE : Rust gets information about the simulation parameters
+    simulation.set_map_for_rust(Map.tiles) # NOTE: Rust copies the initial map to its own data structure
+
+    # simulation.spawn_predetermined_animals(spawn_animal_count) # NOTE: spawn animals in the world
+    simulation.spawn_random_animals(spawn_animal_count) # NOTE: spawn animals in the world
+
 
 # World variables
 var temperature = {}
@@ -35,14 +48,7 @@ var data_collection_interval: int = 25
 var simulation_speed: float # NOTE: number of steps per second
 var world_initialized = false
 var simulation_id: int = randi()
-
-var world_seed : int
-var width: int
-var height: int
-
 var spawn_animal_count: int = 0
-var spawn_animal_location_range_y : Vector2i = Vector2i(ceil(height/2.0) - 5, ceil(height/2.0) + 5)
-var spawn_animal_location_range_x : Vector2i = Vector2i(ceil(width/2.0) - 5, ceil(width/2.0) + 5)
 
 #Statistics
 var animal_deaths_starvation: int = 0
@@ -63,26 +69,9 @@ var padding_margin = 0.1 # NOTE: 10% of the screen width/height
 
 #World settings:
 var get_data_snapshot_period: float = 10 # NOTE: number of steps between data snapshots
+var replenish_map_interval: int = 2
 
-#Reproduction settings
-#(size + speed 2*food_prefference + mating_rate)
-var max_genetic_distance = 1 + 1 + 3*1 + 1 + 1 + 1
-var min_allowed_genetic_distance = 0.8 # NOTE: atleast 90% similar
-
-var ready_to_mate_max = 50.0
-
-#Mutation settings
-var mutation_prob = 0.05
-var mutation_half_range = 0.05
-
-#Scent settings
-var scent_duration = 20
-
-enum Vore_Type {
-    CARNIVORE,
-    HERBIVORE,
-    OMNIVORE,
-}
+var world_seed : int
 
 # Whittaker biome system
 enum Biome_Type {
@@ -96,6 +85,14 @@ enum Biome_Type {
     Grassland,
     Desert,
     Water,
+}
+
+# TODO remove after Rust implementation all below
+
+enum Vore_Type {
+    CARNIVORE,
+    HERBIVORE,
+    OMNIVORE,
 }
 
 enum Age_Group {
@@ -132,35 +129,13 @@ func get_neighbouring_tiles_in_range(tile_pos : Vector2i, tile_range : int) -> A
     for x in range(-tile_range, tile_range + 1):
         for y in range(-tile_range, tile_range + 1):
             var pos = Vector2i(tile_pos.x + x, tile_pos.y + y)
-            if between(pos.x, 0, World.width - 1) and between(pos.y, 0, World.height - 1) and offset_distance(tile_pos, pos) <= tile_range:
+            if between(pos.x, 0, sim_params.width - 1) and between(pos.y, 0, sim_params.height - 1) and offset_distance(tile_pos, pos) <= tile_range:
                 neighbours.append(pos)
     neighbours.erase(tile_pos) # NOTE: remove the current tile from the list of neighbours
     return neighbours
 
 func get_neighbouring_tiles(tile_pos: Vector2i):
     return get_neighbouring_tiles_in_range(tile_pos, 1)
-
-func on_animal_birth_request(index, parent_1, parent_2):
-    var animal = Animal.new()
-    animal.spawn_animal(parent_1, parent_2)
-    set_animal_to_world(animal, index)
-    World.animals[animal.animal_id] = animal
-
-func set_animal_to_world(animal, index):
-    animal.map_position = index
-    World.Map.tiles[index].animal_ids.append(animal.animal_id)
-
-func construct_npc(index):
-    var animal = Animal.new()
-    animal.construct_animal()
-    set_animal_to_world(animal, index)
-    World.animals[animal.animal_id] = animal
-
-func construct_predetermined_npc(index):
-    var animal = Animal.new()
-    animal.construct_predetermined_animal()
-    set_animal_to_world(animal, index)
-    World.animals[animal.animal_id] = animal
 
 func map(value, in_min, in_max, out_min, out_max):
     return (value - in_min) * ((out_max - out_min) / (in_max - in_min)) + out_min

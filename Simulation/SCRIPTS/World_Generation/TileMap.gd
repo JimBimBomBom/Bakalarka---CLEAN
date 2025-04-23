@@ -20,8 +20,8 @@ func generate_map(fast_noise, set_seed, freq, oct, oct_gain, max_value):
     fast_noise.fractal_gain = oct_gain
 
     var grid = {}
-    for y in range(0, World.height):
-        for x in range(0, World.width):
+    for y in range(0, World.sim_params.height):
+        for x in range(0, World.sim_params.width):
             var noise = World.map(fast_noise.get_noise_3d(x, y, set_seed), -1, 1, 0, max_value)
             grid[Vector2i(x, y)] = noise
     return grid
@@ -38,8 +38,8 @@ func generate_world():
     set_tiles()
 
 func initialize_tile_values():
-    for y in range(0, World.height):
-        for x in range(0, World.width):
+    for y in range(0, World.sim_params.height):
+        for x in range(0, World.sim_params.width):
             # var alt = World.altitude[Vector2i(x, y)]
             var pos = Vector2i(x, y)
             var tile = Tile_Properties.new()
@@ -64,8 +64,8 @@ func initialize_tile_values():
             tiles[pos] = tile
             
 func set_tiles():
-    for y in range(0, World.height):
-        for x in range(0, World.width):
+    for y in range(0, World.sim_params.height):
+        for x in range(0, World.sim_params.width):
             var pos = Vector2i(x, y)
             var tile = tiles[pos]
             if tile.biome == World.Biome_Type.Uninitialized:
@@ -130,8 +130,8 @@ func set_current_cell(pos, tile):
     set_cell(pos, 1, sprite_coord)
 
 func initialize_tile_labels():
-    for y in range(0, World.height):
-        for x in range(0, World.width):
+    for y in range(0, World.sim_params.height):
+        for x in range(0, World.sim_params.width):
             var pos = Vector2i(x, y)
 
             # Create a new label
@@ -165,13 +165,12 @@ func initialize_tile_labels():
             World.Map.add_child(label)
 
 func update_map_animal_count_labels():
-    for y in range(0, World.height):
-        for x in range(0, World.width):
-            var pos = Vector2i(x, y)
-            var label = tile_labels[pos]
-            var animal_count = tiles[pos].animal_ids.size()
-            if animal_count > 0:
-                label.text = str(animal_count)
-                label.visible = true
-            else:
-                label.visible = false
+    var tile_data = World.simulation.get_tile_animal_counts()
+    for pos in tile_data.keys():
+        var animal_count = tile_data[pos]
+        var label = tile_labels[pos]
+        if animal_count > 0:
+            label.text = str(animal_count)
+            label.visible = true
+        else:
+            label.visible = false

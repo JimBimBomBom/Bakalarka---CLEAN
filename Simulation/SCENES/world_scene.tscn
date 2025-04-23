@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://hue1fo338p6u"]
 
-[ext_resource type="Script" path="res://Godot/World_Generation/world.gd" id="1_hhtrv"]
+[ext_resource type="Script" path="res://SCRIPTS/World_Generation/world.gd" id="1_hhtrv"]
 
 [node name="World" type="Node"]
 script = ExtResource("1_hhtrv")

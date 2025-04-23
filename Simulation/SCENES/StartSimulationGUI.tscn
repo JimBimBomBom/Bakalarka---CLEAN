@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://8xxh43j1vekf"]
 
-[ext_resource type="Script" path="res://Godot/Global/SimulationGUI.gd" id="1_ufuxh"]
+[ext_resource type="Script" path="res://SCRIPTS/Global/SimulationGUI.gd" id="1_ufuxh"]
 
 [node name="CanvasLayer" type="CanvasLayer"]
 script = ExtResource("1_ufuxh")
@@ -38,9 +38,8 @@ text = "Game Speed:"
 
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/GameSpeed"]
 layout_mode = 2
-min_value = 1.0
 max_value = 100000.0
-value = 100000.0
+value = 1000.0
 
 [node name="MapSeed" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -63,7 +62,6 @@ text = "Map Height:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/MapHeight"]
 layout_mode = 2
 max_value = 9.22337e+16
-value = 8.0
 
 [node name="MapWidth" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -75,7 +73,6 @@ text = "Map Width:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/MapWidth"]
 layout_mode = 2
 max_value = 9.22337e+16
-value = 8.0
 
 [node name="AnimalSpawnCount" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -99,6 +96,7 @@ text = "Generate Graphs:"
 [node name="SpinBox" type="SpinBox" parent="Control/PanelContainer/Panel/VBoxContainer/GenerateGraphs"]
 layout_mode = 2
 max_value = 1.0
+value = 1.0
 
 [node name="StartSimulation" type="Button" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -107,3 +105,13 @@ text = "Start Simulation"
 [node name="GenerateWorld" type="Button" parent="Control/PanelContainer/Panel/VBoxContainer"]
 layout_mode = 2
 text = "Generate World"
+
+[node name="SimulationParametersFile" type="HBoxContainer" parent="Control/PanelContainer/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/PanelContainer/Panel/VBoxContainer/SimulationParametersFile"]
+layout_mode = 2
+text = "Path to simulation parameters (if empty default values are used):"
+
+[node name="LineEdit" type="LineEdit" parent="Control/PanelContainer/Panel/VBoxContainer/SimulationParametersFile"]
+layout_mode = 2

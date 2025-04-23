@@ -17,8 +17,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-World="*res://Godot/Global/World_Variables.gd"
-DataLogger="*res://Godot/Global/DataLogger.gd"
+World="*res://SCRIPTS/Global/World_Variables.gd"
+DataLogger="*res://SCRIPTS/Global/DataLogger.gd"
+Sim_Params="*res://SCRIPTS/Global/Simulation_Parameters.gd"
 
 [input]
 

@@ -1,0 +1,8 @@
+width,20
+height,20
+max_genetic_distance,8.0
+min_allowed_genetic_distance,0.8
+mutation_prob,0.05
+mutation_half_range,0.05
+scent_duration,20
+normaliser,250

@@ -1,0 +1,13 @@
+[package]
+name = "rust_project" # Part of dynamic library name; we use simulation placeholder.
+version = "0.1.0"     # You can leave version and edition as-is for now.
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]  # Compile this crate to a dynamic C library.
+
+[dependencies]
+# API for Godot 4.3
+godot = { git = "https://github.com/godot-rust/gdext", features = ["api-4-3"] }
+rand = "0.8"
+rayon = "1.10"

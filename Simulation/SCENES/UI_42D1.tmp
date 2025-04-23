@@ -87,11 +87,11 @@ text = "MatingRate Average:"
 layout_mode = 2
 text = "MatingRate Range:"
 
-[node name="FoodPreferenceAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+[node name="FoodPrefferenceAverage" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
 layout_mode = 2
 text = "FoodPrefference Average:"
 
-[node name="FoodPreferenceRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
+[node name="FoodPrefferenceRange" type="Label" parent="Control/PanelContainer/MarginContainer/VBox_Statistics"]
 layout_mode = 2
 text = "FoodPrefference Range:"
 

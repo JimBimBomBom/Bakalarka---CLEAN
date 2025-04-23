@@ -3,3 +3,6 @@
 !/Simulation/*
 /Simulation/.godot
 /Simulation/Build
+
+!/rust
+/rust/target
