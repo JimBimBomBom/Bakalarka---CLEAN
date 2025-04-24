@@ -4,5 +4,6 @@
 /Simulation/.godot
 /Simulation/Build
 
-!/rust
-/rust/target
+# !/rust
+# /rust/simulation/
+# /rust/simulation/target/*
