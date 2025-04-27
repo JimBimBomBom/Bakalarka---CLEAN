@@ -3,7 +3,10 @@
 !/Simulation/*
 /Simulation/.godot
 /Simulation/Build
-
-# !/rust
-# /rust/simulation/
-# /rust/simulation/target/*
+/rust/simulation/
+/rust/simulation/*
+/rust/simulation/target/
+/rust/simulation/target/*
+!/rust/simulation/.cargo.lock
+!/rust/simulation/src/
+!/rust/simulation/src/*
