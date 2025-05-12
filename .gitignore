@@ -1,9 +1,10 @@
 /*
 !Simulation/
 Simulation/.godot
-Simulation/EXPORT
-Simulation/PARAMS
 Simulation/PLOTS
 
 !rust/simulation/.cargo.lock
 !rust/simulation/src/
+
+!README.md
+!FILE_STRUCTURE.md
