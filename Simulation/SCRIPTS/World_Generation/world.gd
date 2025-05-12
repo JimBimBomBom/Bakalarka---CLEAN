@@ -10,7 +10,6 @@ func _ready():
 func initialize_simulation():
     World.game_steps = 0
     World.run_simulation = true
-    # World.simulation_id = OS.get_unix_time() # NOTE: this is used to identify the simulation in the database
     World.simulation_id = Time.get_unix_time_from_system()
 
     # Create map
@@ -21,12 +20,18 @@ func initialize_simulation():
 
 func run_simulation():
     while (World.run_simulation):
+        if World.sim_params.max_simulation_step_count != 0 and World.game_steps >= World.sim_params.max_simulation_step_count:
+            World.run_simulation = false
+            collect_and_log_data() # NOTE: collect data and log it to a file
+            _exit_simulation()
+            break
+
         World.simulation.process_turn_for_all_animals() # NOTE: RUST function that handles 1 simulation turn
 
-        if World.game_steps % World.replenish_map_interval:
+        if World.game_steps % 5 == 0:
             World.simulation.replenish_map() # NOTE: RUST function that handles map resources replenishment
 
-        if World.game_steps % World.data_collection_interval == 0:
+        if World.game_steps % World.sim_params.data_collection_interval == 0:
             World.Map.update_map_animal_count_labels() # NOTE: update the animal count labels on the map
             collect_and_log_data() # NOTE: collect data and log it to a file
             World.UI_Statistics.update_stats() # NOTE: update UI animal statistics on screen
@@ -34,7 +39,7 @@ func run_simulation():
         World.game_steps += 1
 
         # Set timer between frames
-        if World.simulation_speed != 0:
+        if World.sim_params.simulation_speed != 0:
             await get_tree().create_timer(1.0 / World.simulation_speed).timeout
 
 func collect_and_log_data(): # NOTE: this is called by get_data_snapshot_timer
@@ -63,9 +68,16 @@ func run_visualizer():
     if error != OK:
         print("Failed to execute visualizer.py: Error Code", error)
 
+func _exit_simulation():
+    DataLogger.save_data_to_file()
+    if World.sim_params.generate_graphs:
+        run_visualizer() # NOTE: run my Python script on simulation data
+    get_tree().quit() # default behavior
+
 func _notification(what):
     if what == NOTIFICATION_WM_CLOSE_REQUEST: # NOTE: this is called when the window is closed
-        DataLogger.save_data_to_file()
-        if World.generate_graphs:
-            run_visualizer() # NOTE: run my Python script on simulation data
-        get_tree().quit() # default behavior
+        _exit_simulation()
+        # DataLogger.save_data_to_file()
+        # if World.generate_graphs:
+        #     run_visualizer() # NOTE: run my Python script on simulation data
+        # get_tree().quit() # default behavior

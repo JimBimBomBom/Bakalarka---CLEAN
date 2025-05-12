@@ -9,13 +9,20 @@ use godot::builtin::Vector2;
 pub struct SimulationParameters {
     pub width: i32,
     pub height: i32,
-    pub max_genetic_distance: f64,
-    pub min_allowed_genetic_similarity: f64, // Renamed for clarity based on usage
-    pub mutation_prob: f64,
-    pub mutation_half_range: f64,
     pub scent_duration: i32,
     // Add any other global parameters needed from 'World'
     pub normaliser: f64, // From Animal_Characteristics
+
+    pub max_genetic_distance: f64,
+    pub min_allowed_genetic_similarity: f64, // Renamed for clarity based on usage
+
+    pub mutation_prob: f64,
+    pub mutation_half_range: f64,
+
+    pub speed_cost: f64,
+    pub mating_rate_cost: f64,
+    pub stealth_cost: f64,
+    pub detection_cost: f64,
 }
 
 // --- Statistics ---

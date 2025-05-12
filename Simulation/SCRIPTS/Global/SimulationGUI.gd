@@ -27,16 +27,13 @@ func _ready():
     var Generate_World_Button = $Control/PanelContainer/Panel/VBoxContainer/GenerateWorld
     Generate_World_Button.pressed.connect(_on_Generate_World_Button_pressed)
 
-    if sim_param_file_input.text == "":
-        World.simulation_parameters_file = "res://PARAMS/test"
-    else:
+    if sim_param_file_input.text != "":
         World.simulation_parameters_file = "res://PARAMS/" + sim_param_file_input.text
-    
-    # Load simulation parameters from file and use them as default values
-    World.sim_params.load_from_file(World.simulation_parameters_file)
+        World.sim_params.load_from_file(World.simulation_parameters_file)
+        # update the GUI with loaded parameters
+        width_input.value = World.sim_params.width
+        height_input.value = World.sim_params.height
 
-    width_input.value = World.sim_params.width
-    height_input.value = World.sim_params.height
 
 func _on_Generate_World_Button_pressed():
     if seed_input.value == 0:
@@ -49,6 +46,16 @@ func _on_Generate_World_Button_pressed():
     if width_input.value != 0:
         World.sim_params.width = width_input.value
 
+    if sim_param_file_input.text != "":
+        World.simulation_parameters_file = "res://PARAMS/" + sim_param_file_input.text
+        World.sim_params.load_from_file(World.simulation_parameters_file)
+        # update the GUI with loaded parameters
+        width_input.value = World.sim_params.width
+        height_input.value = World.sim_params.height
+        animal_spawn_count.value = World.sim_params.spawn_animal_count
+        game_speed_input.value = World.sim_params.simulation_speed
+        generate_graphs_input.value = World.sim_params.generate_graphs
+
     World.Map.generate_world()
     World.world_initialized = true
 
@@ -59,7 +66,8 @@ func _on_Start_Simulation_Button_pressed():
         return
 
     World.simulation_speed = game_speed_input.value
-    World.spawn_animal_count = animal_spawn_count.value
+    if animal_spawn_count.value != 0:
+        World.sim_params.spawn_animal_count = animal_spawn_count.value
     remove_child(World.Camera)
 
     get_tree().change_scene_to_file("res://SCENES/world_scene.tscn")

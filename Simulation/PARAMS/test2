@@ -1,0 +1,17 @@
+width,50
+height,50
+spawn_animal_count,600
+max_genetic_distance,8.0
+min_allowed_genetic_distance,1.2
+mutation_prob,0.05
+mutation_half_range,0.25
+scent_duration,20
+normaliser,200.0
+speed_cost,1.7
+mating_rate_cost,1.8
+stealth_cost,1.5
+detection_cost,1.2
+max_temperature_noise,1.0
+max_moisture_noise,1.0
+max_simulation_step_count,200000
+replenish_map_interval,5

@@ -90,7 +90,7 @@ impl Simulation {
             let mut genes_dict = Dictionary::new();
             genes_dict.set("size", Variant::from(animal.genes.size));
             genes_dict.set("speed", Variant::from(animal.genes.speed));
-            genes_dict.set("food_prefference", Variant::from(animal.genes.food_preference)); // Match GDScript spelling if needed for logger consistency
+            genes_dict.set("food_preference", Variant::from(animal.genes.food_preference)); // Match GDScript spelling if needed for logger consistency
             genes_dict.set("mating_rate", Variant::from(animal.genes.mating_rate));
             genes_dict.set("stealth", Variant::from(animal.genes.stealth));
             genes_dict.set("detection", Variant::from(animal.genes.detection));
@@ -273,6 +273,9 @@ impl Simulation {
         if let Ok(obj) = Gd::<RefCounted>::try_from_variant(&params_variant) {
             params.width = obj.get("width").try_to::<i64>().unwrap_or(0) as i32;
             params.height = obj.get("height").try_to::<i64>().unwrap_or(0) as i32;
+            params.scent_duration = obj.get("scent_duration").try_to::<i64>().unwrap_or(10) as i32;
+            params.normaliser = 200.0; // TODO: Make this configurable via parameters?
+
             params.max_genetic_distance = obj
                 .get("max_genetic_distance")
                 .try_to::<f64>()
@@ -281,16 +284,19 @@ impl Simulation {
                 .get("min_allowed_genetic_distance")
                 .try_to::<f64>()
                 .unwrap_or(0.5);
-            // Clamp lower bound of similarity to 0.0
             params.min_allowed_genetic_similarity =
                 (1.0 - (min_dist / params.max_genetic_distance.max(0.01))).max(0.0);
+
             params.mutation_prob = obj.get("mutation_prob").try_to::<f64>().unwrap_or(0.05);
             params.mutation_half_range = obj
                 .get("mutation_half_range")
                 .try_to::<f64>()
                 .unwrap_or(0.05);
-            params.scent_duration = obj.get("scent_duration").try_to::<i64>().unwrap_or(10) as i32;
-            params.normaliser = 200.0; // TODO: Make this configurable via parameters?
+
+            params.speed_cost = obj.get("speed_cost").try_to::<f64>().unwrap_or(0.0);
+            params.mating_rate_cost = obj.get("mating_rate_cost").try_to::<f64>().unwrap_or(0.0);
+            params.stealth_cost = obj.get("stealth_cost").try_to::<f64>().unwrap_or(0.0);
+            params.detection_cost = obj.get("detection_cost").try_to::<f64>().unwrap_or(0.0);
         }
         // Fallback to parsing as Dictionary
         else if let Ok(dict) = Dictionary::try_from_variant(&params_variant) {
@@ -302,6 +308,12 @@ impl Simulation {
                 .get("height")
                 .and_then(|v| i64::try_from_variant(&v).ok())
                 .unwrap_or(0) as i32;
+            params.scent_duration = dict
+                .get("scent_duration")
+                .and_then(|v| i64::try_from_variant(&v).ok())
+                .unwrap_or(10) as i32;
+            params.normaliser = 200.0; // TODO: Make this configurable via parameters?
+
             params.max_genetic_distance = dict
                 .get("max_genetic_distance")
                 .and_then(|v| f64::try_from_variant(&v).ok())
@@ -320,11 +332,23 @@ impl Simulation {
                 .get("mutation_half_range")
                 .and_then(|v| f64::try_from_variant(&v).ok())
                 .unwrap_or(0.05);
-            params.scent_duration = dict
-                .get("scent_duration")
-                .and_then(|v| i64::try_from_variant(&v).ok())
-                .unwrap_or(10) as i32;
-            params.normaliser = 200.0; // TODO: Make this configurable via parameters?
+
+            params.speed_cost = dict
+                .get("speed_cost")
+                .and_then(|v| f64::try_from_variant(&v).ok())
+                .unwrap_or(0.0);
+            params.mating_rate_cost = dict
+                .get("mating_rate_cost")
+                .and_then(|v| f64::try_from_variant(&v).ok())
+                .unwrap_or(0.0);
+            params.stealth_cost = dict
+                .get("stealth_cost")
+                .and_then(|v| f64::try_from_variant(&v).ok())
+                .unwrap_or(0.0);
+            params.detection_cost = dict
+                .get("detection_cost")
+                .and_then(|v| f64::try_from_variant(&v).ok())
+                .unwrap_or(0.0);
         } else {
             godot_error!(
                 "set_simulation_parameters: Input is not a recognized Object or Dictionary."
@@ -357,9 +381,6 @@ impl Simulation {
         current_stats.stealth_range = Vector2::new(f32::MAX, f32::MIN);
         current_stats.detection_avg = 0.0;
         current_stats.detection_range = Vector2::new(f32::MAX, f32::MIN);
-        current_stats.animal_nutrition_avg = 0.0;
-        current_stats.animal_hydration_avg = 0.0;
-        current_stats.animal_ready_to_mate_avg = 0.0;
 
         // Helper to update range
         fn update_range(range: &mut Vector2, value: f64) {
@@ -523,16 +544,11 @@ impl Simulation {
         let start_time = Instant::now();
 
         // --- Reset Turn Stats ---
-        // <-- FIX: Use correct field name from AnimalStatistics
-        self.stats.nutrition_from_meat = 0.0;
-        self.stats.nutrition_from_plants = 0.0;
         for animal in self.animals.values_mut() {
-            // <-- FIX: Use correct field names from Animal struct
             animal.nutrition_gain_meat_this_turn = 0.0;
             animal.nutrition_gain_plant_this_turn = 0.0;
         }
 
-        // NOTE: Stage 1 could be made to run in parallel -> only non mutable access
         // --- Stage 1: Animal Decisions & Action Planning ---
         let animal_ids: Vec<i64> = self.animals.keys().cloned().collect();
         let mut actions: HashMap<i64, Action> = HashMap::with_capacity(animal_ids.len());
@@ -837,18 +853,11 @@ impl Simulation {
         }
 
         // --- Stage 5: Update Map Tiles (Parallelized) ---
-        // Use Rayon for parallel iteration if enabled and beneficial
-        // Ensure replenish_tile doesn't need mutable access to params
         // self.world_map.par_iter_mut().for_each(|(_pos, tile)| {
         //     replenish_tile(tile, params);
         // });
 
-        let duration = Instant::now() - start_time; // Correct way to get elapsed time
-        // godot_print!(
-        //     "Rust: Turn processed in {:?}. Animals: {}",
-        //     duration,
-        //     self.animals.len()
-        // );
+        // let duration = Instant::now() - start_time; 
     }
 
     #[func]
@@ -862,7 +871,7 @@ impl Simulation {
             replenish_tile(tile, params);
         });
     }
-} // end impl Simulation
+}
 
 #[gdextension]
 unsafe impl ExtensionLibrary for Simulation {}

@@ -2,7 +2,5 @@
 !Simulation/
 Simulation/.godot
 Simulation/Build
-rust/simulation/
-rust/simulation/target/
 !rust/simulation/.cargo.lock
 !rust/simulation/src/

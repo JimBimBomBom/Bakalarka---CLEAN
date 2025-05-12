@@ -3,15 +3,16 @@ use crate::structs::*;
 // Function to update tile state per turn (plants, hydration, spoilage, scents)
 pub fn replenish_tile(tile: &mut RustTileProperties, params: &SimulationParameters) {
     // Replenish plants
-    tile.plant_matter = (tile.plant_matter + tile.plant_matter_gain).min(tile.max_plant_matter);
+    tile.plant_matter = (tile.plant_matter + 1.0*tile.plant_matter_gain).min(tile.max_plant_matter);
 
     // Replenish hydration
-    tile.hydration = tile.max_hydration; // Full replenish per GDScript
+    tile.hydration = tile.max_hydration; 
 
-    // Better logic: Iterate and remove expired, then sum.
+    // Iterate and remove expired, then sum.
     let mut meat_sum = 0.0;
     tile.meat_in_rounds.retain_mut(|meat| {
-         meat.spoils_in -= 1;
+        //  meat.spoils_in -= 1;
+         meat.spoils_in -= 5;
          if meat.spoils_in > 0 {
              meat_sum += meat.amount;
              true // Keep
@@ -23,12 +24,13 @@ pub fn replenish_tile(tile: &mut RustTileProperties, params: &SimulationParamete
 
     // Age scents
     tile.scent_trails.retain_mut(|scent| {
-        scent.scent_duration_left -= 1;
+        scent.scent_duration_left -= 5;
+        // scent.scent_duration_left -= 1;
         scent.scent_duration_left > 0 // Keep if duration > 0
     });
 }
 
- // Helper to convert Rust BiomeType to Godot integer if needed (e.g., for saving)
+ // Helper to convert Rust BiomeType to Godot integer if needed 
 pub fn biome_to_int(biome: BiomeType) -> i32 {
     match biome {
         BiomeType::Uninitialized => -1,
@@ -64,7 +66,7 @@ pub fn add_meat_to_tile_piles(tile: &mut RustTileProperties, amount: f64) {
     if amount <= 0.0 { return; }
     tile.total_meat += amount;
 
-    let spoil_turns = (1.0 / (tile.temperature * 7.0).max(0.01)).round().max(1.0) as i32;
+    let spoil_turns = (tile.temperature * 9.0 + tile.moisture * 7.0) as i32;
     if let Some(last_meat) = tile.meat_in_rounds.last_mut() {
         // GD used !=, implying merge only if exact match
         if last_meat.spoils_in == spoil_turns {

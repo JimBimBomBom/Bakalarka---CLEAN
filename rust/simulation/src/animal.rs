@@ -12,7 +12,7 @@ use crate::map::{remove_meat_from_tile_piles}; // Import helper functions
 impl Animal {
     // --- Characteristic Calculations (from Animal_Characteristics.gd) ---
     fn get_diet_modifier(&self) -> f64 {
-         1.0 + self.genes.food_preference.powf(1.5)
+         1.0 + self.genes.food_preference.powf(0.8)
     }
 
     fn get_turns_to_change_tile(&self) -> i32 {
@@ -28,17 +28,17 @@ impl Animal {
         self.mass = self.genes.size; // Direct mapping in GDScript
         self.turns_to_change_tile = self.get_turns_to_change_tile();
 
-        let base_activity_level = self.genes.speed.powf(1.3)
-            + self.genes.mating_rate.powf(0.5)
-            + self.genes.stealth.powf(0.6)
-            + self.genes.detection.powf(0.9);
+        let base_activity_level = self.genes.speed.powf(params.speed_cost)
+            + self.genes.mating_rate.powf(params.mating_rate_cost)
+            + self.genes.stealth.powf(params.stealth_cost)
+            + self.genes.detection.powf(params.detection_cost);
         let base_metabolic_rate = self.mass.powf(0.75); // Kleiber's Law
 
         let metabolic_rate = (base_metabolic_rate * base_activity_level) / params.normaliser;
 
-        let diet_modifier = self.get_diet_modifier();
-        self.food_consumption = metabolic_rate / diet_modifier.max(0.01); // Avoid div by zero
-        self.water_consumption = self.food_consumption * 3.0;
+        let diet_modifier = self.get_diet_modifier() as f64;
+        self.food_consumption = metabolic_rate / diet_modifier.max(0.01) as f64; // Avoid div by zero
+        self.water_consumption = self.food_consumption * 2.0;
 
         self.max_resources = (self.mass.powf(1.5)) / 2.0;
 
@@ -196,13 +196,8 @@ impl Animal {
     pub fn update_animal_resources(&mut self) {
         self.resource_calc();
         self.update_resource_norms();
-        // Accumulate readiness, capped at 1.0
         self.ready_to_mate = (self.ready_to_mate + self.genes.mating_rate / 125.0).min(1.0);
     }
-
-    // remove_animal_from_world: Handled by the main simulation loop in lib.rs
-
-    // kill_animal: Logic integrated into main simulation loop (death handling)
 
     pub fn fight<R: Rng> (
         &self, // Attacker
@@ -210,8 +205,8 @@ impl Animal {
         rng: &mut R,
     ) -> Result<bool, ()>
     {
-        let attacker_power = self.genes.size * self.genes.food_preference.sqrt();
-        let defender_power = defender.genes.size * defender.genes.food_preference.sqrt();
+        let attacker_power = self.genes.size + self.genes.food_preference;
+        let defender_power = defender.genes.size + defender.genes.food_preference;
 
         let stealth_roll = rng.gen_range(0.0..=(self.genes.stealth + defender.genes.detection)); // Inclusive range
 
@@ -220,8 +215,8 @@ impl Animal {
         if stealth_roll < self.genes.stealth { // Attacker not detected
             final_attacker_power *= 2.0; // Stealth bonus
         } else { // Attacker detected
-            let speed_roll = rng.gen_range(0.0..=(self.genes.speed.powi(2) + defender.genes.speed.powi(2)));
-            if speed_roll > self.genes.speed.powi(2) { // Prey got away
+            let speed_roll = rng.gen_range(0.0..=(self.genes.speed + defender.genes.speed));
+            if speed_roll > self.genes.speed { // Prey got away
                 return Ok(false); // Attacker effectively "lost" chase
             }
         }
@@ -236,46 +231,6 @@ impl Animal {
         }
     }
 
-    // // Returns Ok(true) if attacker wins, Ok(false) if defender wins/escapes, Err if defender doesn't exist
-    // pub fn fight<R: Rng>(
-    //     &mut self, // Attacker
-    //     defender_id: i64,
-    //     animals: &HashMap<i64, Animal>, // Read-only access usually sufficient here
-    //     rng: &mut R,
-    // ) -> Result<bool, &'static str> {
-    //     let Some(defender) = animals.get(&defender_id) else {
-    //         return Err("Defender not found");
-    //     };
-
-    //     let attacker_power = self.genes.size * self.genes.food_preference.sqrt();
-    //     let defender_power = defender.genes.size * defender.genes.food_preference.sqrt();
-
-    //     let stealth_roll = rng.gen_range(0.0..=(self.genes.stealth + defender.genes.detection)); // Inclusive range
-
-    //     let mut final_attacker_power = attacker_power;
-
-    //     if stealth_roll < self.genes.stealth { // Attacker not detected
-    //         final_attacker_power *= 2.0; // Stealth bonus
-    //     } else { // Attacker detected
-    //         let speed_roll = rng.gen_range(0.0..=(self.genes.speed.powi(2) + defender.genes.speed.powi(2)));
-    //         if speed_roll > self.genes.speed.powi(2) { // Prey got away
-    //             return Ok(false); // Attacker effectively "lost" chase
-    //         }
-    //     }
-
-    //     let total_power = final_attacker_power + defender_power;
-    //     let attack_roll = rng.gen_range(0.0..=total_power.max(0.01)); // Avoid 0 range if total_power is 0
-
-    //     if attack_roll < final_attacker_power { // Attacker wins
-    //         // Death/meat handled by caller
-    //         Ok(true)
-    //     } else { // Defender wins/survives
-    //         self.nutrition -= 0.05 * self.max_resources; // Consequence for attacker losing
-    //         Ok(false)
-    //     }
-    // }
-
-    // Find IDs of animals on the current tile that can be hunted
     pub fn get_huntable_prey_ids<R: Rng>(
         &self,
         tile: &RustTileProperties,
@@ -291,11 +246,8 @@ impl Animal {
                     return None;
                 };
 
-                // Detection check
                 let detection_roll = rng.gen_range(0.0..=(self.genes.detection + prey_animal.genes.stealth));
                 if detection_roll < self.genes.detection { // Detected prey
-                // Add size check? fight() handles mismatch, but could filter early
-                // if prey_animal.genes.size < self.genes.size * 1.5 { Some(prey_id) } else { None }
                 Some(prey_id)
                 } else {
                 None // Not detected
@@ -304,7 +256,6 @@ impl Animal {
             .collect()
     }
 
-    // Selects one huntable prey ID randomly
     pub fn get_random_huntable_prey_id<R: Rng>(
         &self,
         tile: &RustTileProperties,
@@ -315,24 +266,19 @@ impl Animal {
         potential_prey.choose(rng).copied() // Choose random ID from Vec
     }
 
-    // Get huntable scents on the current tile
     pub fn get_huntable_scents<'a>(
         &self,
         tile: &'a RustTileProperties,
-        animals: &HashMap<i64, Animal>, // To check if scent owner is smaller/exists
+        animals: &HashMap<i64, Animal>, 
     ) -> Vec<&'a AnimalScent> {
         tile.scent_trails.iter()
             .filter(|scent| {
                 if scent.animal_id == self.animal_id { return false; } // Skip own scent
-                // Check if animal exists and is smaller
-                // TODO: change available hunting params from simple size comparison
-                animals.get(&scent.animal_id)
-                    .map_or(false, |animal| animal.genes.size < self.genes.size)
+                animals.contains_key(&scent.animal_id)
             })
             .collect()
     }
 
-    // Selects one huntable scent randomly
     pub fn get_random_huntable_scent<'a, R: Rng>(
         &self,
         tile: &'a RustTileProperties,
@@ -343,14 +289,12 @@ impl Animal {
         potential_scents.choose(rng).copied()
     }
 
-    // Eat meat logic, returns amount of meat resource consumed
     pub fn eat_meat(&mut self, tile: &mut RustTileProperties) {
         let meat_amount = tile.total_meat;
         let nutrition_needed = self.max_resources - self.nutrition;
 
         let meat_to_eat = meat_amount.min(nutrition_needed);
-        // Call helper to actually remove meat from tile piles
-        let meat_eaten = remove_meat_from_tile_piles(tile, meat_to_eat); // Assumes helper exists
+        let meat_eaten = remove_meat_from_tile_piles(tile, meat_to_eat);
 
         // update nutrition based on amount of food eaten and food type efficiency
         let food_type_efficiency = self.genes.food_preference.sqrt();
@@ -359,7 +303,6 @@ impl Animal {
         self.nutrition_gain_meat_this_turn += nutrition_gained; // Track for stats
     }
 
-    // Eat plant matter logic
     pub fn eat_plant_matter(&mut self, tile: &mut RustTileProperties) {
         let plant_matter = tile.plant_matter;
         let nutrition_needed = self.max_resources - self.nutrition;
@@ -367,14 +310,12 @@ impl Animal {
         let plant_eaten = plant_matter.min(nutrition_needed);
         tile.plant_matter -= plant_eaten;
 
-        // update nutrition based on amount of food eaten and food type efficiency
         let food_type_efficiency = (1.0 - self.genes.food_preference).sqrt();
         let nutrition_gained = plant_eaten * food_type_efficiency;
         self.nutrition = (self.nutrition + nutrition_gained).min(self.max_resources);
         self.nutrition_gain_plant_this_turn += nutrition_gained; // Track for stats
     }
 
-    // drink logic
     pub fn drink(&mut self, tile: &mut RustTileProperties) {
         if tile.hydration > 0.0 {
             let water_needed = self.max_resources - self.hydration;
@@ -384,9 +325,7 @@ impl Animal {
         }
     }
 
-    // --- Mating Logic ---
     pub fn determine_genetic_distance(&self, other_genes: &AnimalGenes) -> f64 {
-        // (Same implementation as before)
         let mut similarity_sq_sum = 0.0;
         similarity_sq_sum += (self.genes.size - other_genes.size).powi(2);
         similarity_sq_sum += (self.genes.speed - other_genes.speed).powi(2);
@@ -435,7 +374,6 @@ impl Animal {
         potential_mates.choose(rng).copied()
     }
 
-     // Gets potential mate scents on the current tile
     pub fn get_potential_mate_scents<'a>(
         &self,
         tile: &'a RustTileProperties,
@@ -454,7 +392,6 @@ impl Animal {
             .collect()
     }
 
-    // Selects one mate scent randomly
     pub fn get_random_potential_mate_scent<'a, R: Rng>(
         &self,
         tile: &'a RustTileProperties,
@@ -467,17 +404,12 @@ impl Animal {
     }
 
 
-    // --- Movement ---
     pub fn begin_move_to_tile(&mut self, destination: Vector2i) {
-        // TODO: Add bounds check using params.width/height if necessary? Assumed valid for now.
         self.moving_to_tile_turns_remaining = self.turns_to_change_tile.max(1); // Ensure min 1 turn
         self.is_moving = true;
         self.destination = destination;
     }
 
-    // perform_move: Logic moved to main simulation loop in lib.rs
-
-    // move_random: Needs context (map dimensions, Rng)
     pub fn move_random<R: Rng>(&mut self, params: &SimulationParameters, rng: &mut R) {
          let neighbours = get_neighbouring_tiles(self.map_position, params.width, params.height);
          if let Some(destination) = neighbours.choose(rng) {
@@ -485,14 +417,11 @@ impl Animal {
          }
     }
 
-    // --- Death Check ---
     pub fn animal_starved_of_resources(&self) -> bool {
         self.nutrition <= 0.0 || self.hydration <= 0.0
     }
 
-     // --- Main Decision Logic for a single animal's turn ---
      // Returns an enum indicating the chosen action (Eat, Drink, Mate, Move, Hunt, FollowScent...)
-     // This helps structure the main loop in lib.rs
     pub fn decide_action<R: Rng>(
         &self,
         tile: &RustTileProperties,
@@ -500,7 +429,6 @@ impl Animal {
         params: &SimulationParameters,
         rng: &mut R,
     ) -> Action {
-        // Prioritize needs based on thresholds
         if self.nutrition_norm < self.seek_nutrition_norm && self.nutrition_norm <= self.hydration_norm {
             // Seek Food
             let mut chosen_strategy = VoreType::Omnivore; // Placeholder strategic choice
@@ -512,10 +440,10 @@ impl Animal {
                 };
             }
             else if self.vore_type == VoreType::Carnivore {
-                chosen_strategy = VoreType::Carnivore; // Stick to carnivore
+                chosen_strategy = VoreType::Carnivore;
             }
             else {
-                chosen_strategy = VoreType::Herbivore; // Stick to herbivore
+                chosen_strategy = VoreType::Herbivore;
             }
 
             match chosen_strategy {
@@ -533,7 +461,6 @@ impl Animal {
                 }
             }
 
-            // If no action taken, move randomly
             return Action::MoveRandom;
 
         } else if self.hydration_norm < self.seek_hydration_norm {
@@ -541,7 +468,6 @@ impl Animal {
             if tile.hydration > 0.0 {
                 return Action::Drink;
             } else {
-                // TODO: Implement searching for water tile/scent? For now, move randomly.
                 return Action::MoveRandom;
             }
         } else if self.ready_to_mate >= 1.0 {
@@ -552,10 +478,9 @@ impl Animal {
             if let Some(scent) = self.get_random_potential_mate_scent(tile, animals, params, rng) {
                 return Action::FollowScent(scent.scent_direction);
             }
-            // No mate/scent found, move randomly
+
             return Action::MoveRandom;
         } else {
-            // Default Behavior: Move randomly
             return Action::MoveRandom;
         }
     }
@@ -571,5 +496,4 @@ pub enum Action {
     Mate(i64), // Target mate ID
     FollowScent(Vector2i), // Target tile
     MoveRandom,
-    // TODO: Could add Idle action
 }

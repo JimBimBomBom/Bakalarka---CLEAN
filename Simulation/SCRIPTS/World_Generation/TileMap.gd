@@ -11,7 +11,6 @@ enum Noise_Type {
 var tiles = {}
 var tile_labels = {}
 
-# NOTE: I have a max values specified for each noise type to allow us to modify the noise values -> maybe add a minimum value as well?
 func generate_map(fast_noise, set_seed, freq, oct, oct_gain, max_value):
     fast_noise.noise_type = 1 # SIMPLEX SMOOTH
     fast_noise.fractal_type = 1 # FBM (Fractional Brownian Motion)
@@ -27,20 +26,18 @@ func generate_map(fast_noise, set_seed, freq, oct, oct_gain, max_value):
     return grid
 
 func generate_world():
-    World.temperature = generate_map(World.fast_noise, World.world_seed, 0.03, 10, 0.4, World.max_temperature_noise)
-    World.moisture = generate_map(World.fast_noise, World.world_seed, 0.02, 15, 0.3, World.max_moisture_noise)
-    World.altitude = generate_map(World.fast_noise, World.world_seed, 0.007, 12, 0.5, World.max_altitude_noise)
+    # Clear TileMapLayer before generating a new world
+    clear()
+
+    World.temperature = generate_map(World.fast_noise, World.world_seed, 0.03, 10, 0.4, World.sim_params.max_temperature_noise)
+    World.moisture = generate_map(World.fast_noise, World.world_seed, 0.02, 15, 0.3, World.sim_params.max_moisture_noise)
     initialize_tile_values()
     initialize_tile_labels()
-    # temperature_map()
-    # generate_rivers()
-    # modify_moisture_based_on_river_proximity()
     set_tiles()
 
 func initialize_tile_values():
     for y in range(0, World.sim_params.height):
         for x in range(0, World.sim_params.width):
-            # var alt = World.altitude[Vector2i(x, y)]
             var pos = Vector2i(x, y)
             var tile = Tile_Properties.new()
             tile.index = pos
@@ -48,12 +45,12 @@ func initialize_tile_values():
             tile.temperature = World.temperature[pos]
             tile.moisture = World.moisture[pos]
 
-            tile.max_hydration = tile.moisture / 2.0
+            tile.max_hydration = tile.moisture
             tile.hydration = tile.max_hydration
 
             tile.max_plant_matter = min(tile.moisture, tile.temperature) / 4.0
             tile.plant_matter = tile.max_plant_matter / 2.0
-            tile.plant_matter_gain = tile.max_plant_matter / 8.0
+            tile.plant_matter_gain = tile.max_plant_matter / 12.0
 
             tile.total_meat = 0.0
             tile.meat_spoil_rate = 1.0 / (tile.temperature * 7)
