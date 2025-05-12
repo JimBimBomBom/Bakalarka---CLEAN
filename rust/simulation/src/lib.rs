@@ -274,24 +274,15 @@ impl Simulation {
             params.width = obj.get("width").try_to::<i64>().unwrap_or(0) as i32;
             params.height = obj.get("height").try_to::<i64>().unwrap_or(0) as i32;
             params.scent_duration = obj.get("scent_duration").try_to::<i64>().unwrap_or(10) as i32;
-            params.normaliser = 200.0; // TODO: Make this configurable via parameters?
 
-            params.max_genetic_distance = obj
-                .get("max_genetic_distance")
-                .try_to::<f64>()
-                .unwrap_or(1.0);
-            let min_dist = obj
-                .get("min_allowed_genetic_distance")
-                .try_to::<f64>()
-                .unwrap_or(0.5);
+            params.normaliser = obj.get("normaliser").try_to::<f64>().unwrap_or(200.0); // TODO: Make this configurable via parameters?
+            params.max_genetic_distance = obj.get("max_genetic_distance").try_to::<f64>().unwrap_or(1.0);
+            let min_dist = obj.get("min_allowed_genetic_distance").try_to::<f64>().unwrap_or(0.5);
             params.min_allowed_genetic_similarity =
                 (1.0 - (min_dist / params.max_genetic_distance.max(0.01))).max(0.0);
 
             params.mutation_prob = obj.get("mutation_prob").try_to::<f64>().unwrap_or(0.05);
-            params.mutation_half_range = obj
-                .get("mutation_half_range")
-                .try_to::<f64>()
-                .unwrap_or(0.05);
+            params.mutation_half_range = obj.get("mutation_half_range").try_to::<f64>().unwrap_or(0.05);
 
             params.speed_cost = obj.get("speed_cost").try_to::<f64>().unwrap_or(0.0);
             params.mating_rate_cost = obj.get("mating_rate_cost").try_to::<f64>().unwrap_or(0.0);
@@ -312,7 +303,12 @@ impl Simulation {
                 .get("scent_duration")
                 .and_then(|v| i64::try_from_variant(&v).ok())
                 .unwrap_or(10) as i32;
-            params.normaliser = 200.0; // TODO: Make this configurable via parameters?
+            params.normaliser = dict
+                .get("normaliser")
+                .and_then(|v| f64::try_from_variant(&v).ok())
+                .unwrap_or(11.0); // TODO: Make this configurable via parameters?
+
+            godot_print!("Normaliser: {}", params.normaliser);  
 
             params.max_genetic_distance = dict
                 .get("max_genetic_distance")

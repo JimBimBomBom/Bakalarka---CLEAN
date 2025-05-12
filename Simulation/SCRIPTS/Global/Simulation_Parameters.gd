@@ -10,8 +10,8 @@ var normaliser: float = 0.0
 var mutation_prob : float = 0.0
 var mutation_half_range : float = 0.0
 
-var max_genetic_distance : float = 0.0
 var min_allowed_genetic_distance : float = 0.0
+var max_genetic_distance : float = 0.0
 
 var speed_cost : float = 0.0
 var mating_rate_cost : float = 0.0
@@ -28,6 +28,8 @@ var simulation_speed: int = 0
 
 var generate_graphs: int = 0
 var replenish_map_interval: int = 0
+
+var world_seed: int = 0
 
 func load_from_file(path : String) -> void:
     var file = FileAccess.open(path, FileAccess.READ)
@@ -46,7 +48,9 @@ func load_from_file(path : String) -> void:
 
 # Get key-value pairs specified in file safely
 func _apply_key_value(key: String, value: String) -> void:
-    for property in World.sim_params.get_property_list():
+    var property_list = World.sim_params.get_property_list()
+    for property in property_list:
+        var miss_count = 0
         if key in property.name:
             var current_value = get(key)
             if typeof(current_value) == TYPE_INT:
@@ -58,16 +62,18 @@ func _apply_key_value(key: String, value: String) -> void:
             else:
                 push_warning("Unsupported type for key: " + key)
         else:
-            push_warning("Unknown parameter: " + key)
+            miss_count += 1
+        if miss_count == property_list.size():
+            push_warning("Key not found in property list: " + key)
 
 func _init():
     # Default values
     width = 100
     height = 100
     scent_duration = 20
-    normaliser = 200.0 # TODO: set this to a proper value based on the simulation requirements
+    normaliser = 200.0 
 
-    max_genetic_distance = 1 + 1 + 3*1 + 1 + 1 + 1
+    max_genetic_distance = 1 + 1 + 2*1 + 1 + 1 + 1
     min_allowed_genetic_distance = 0.8
 
     mutation_prob = 0.05
@@ -88,3 +94,4 @@ func _init():
     generate_graphs = 1
 
     replenish_map_interval = 5
+    world_seed = randi()

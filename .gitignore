@@ -1,6 +1,9 @@
 /*
 !Simulation/
 Simulation/.godot
-Simulation/Build
+Simulation/EXPORT
+Simulation/PARAMS
+Simulation/PLOTS
+
 !rust/simulation/.cargo.lock
 !rust/simulation/src/

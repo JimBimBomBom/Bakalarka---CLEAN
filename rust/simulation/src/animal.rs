@@ -12,7 +12,7 @@ use crate::map::{remove_meat_from_tile_piles}; // Import helper functions
 impl Animal {
     // --- Characteristic Calculations (from Animal_Characteristics.gd) ---
     fn get_diet_modifier(&self) -> f64 {
-         1.0 + self.genes.food_preference.powf(0.8)
+         1.0 + self.genes.food_preference.powf(1.3)
     }
 
     fn get_turns_to_change_tile(&self) -> i32 {
@@ -329,7 +329,7 @@ impl Animal {
         let mut similarity_sq_sum = 0.0;
         similarity_sq_sum += (self.genes.size - other_genes.size).powi(2);
         similarity_sq_sum += (self.genes.speed - other_genes.speed).powi(2);
-        similarity_sq_sum += (3.0 * (self.genes.food_preference - other_genes.food_preference)).powi(2);
+        similarity_sq_sum += (2.0 * (self.genes.food_preference - other_genes.food_preference)).powi(2);
         similarity_sq_sum += (self.genes.mating_rate - other_genes.mating_rate).powi(2);
         similarity_sq_sum += (self.genes.stealth - other_genes.stealth).powi(2);
         similarity_sq_sum += (self.genes.detection - other_genes.detection).powi(2);
@@ -433,7 +433,7 @@ impl Animal {
             // Seek Food
             let mut chosen_strategy = VoreType::Omnivore; // Placeholder strategic choice
             if self.vore_type == VoreType::Omnivore { // Randomly choose strategy based on food preference
-                chosen_strategy = if self.genes.food_preference < rng.gen_range(0.0..=1.0) {
+                chosen_strategy = if self.genes.food_preference.powf(2.0) < rng.gen_range(0.0..=1.0) {
                     VoreType::Carnivore
                 } else {
                     VoreType::Herbivore

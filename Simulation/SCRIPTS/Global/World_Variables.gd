@@ -61,10 +61,6 @@ var zero_pos = Vector2i(0, 0)
 var x_margin_for_statistics = 0.2 # NOTE: 20% of the screen width
 var padding_margin = 0.1 # NOTE: 10% of the screen width/height
 
-#World settings:
-
-var world_seed : int
-
 # Whittaker biome system
 enum Biome_Type {
     Uninitialized,

@@ -29,8 +29,8 @@ func generate_world():
     # Clear TileMapLayer before generating a new world
     clear()
 
-    World.temperature = generate_map(World.fast_noise, World.world_seed, 0.03, 10, 0.4, World.sim_params.max_temperature_noise)
-    World.moisture = generate_map(World.fast_noise, World.world_seed, 0.02, 15, 0.3, World.sim_params.max_moisture_noise)
+    World.temperature = generate_map(World.fast_noise, World.sim_params.world_seed, 0.03, 10, 0.4, World.sim_params.max_temperature_noise)
+    World.moisture = generate_map(World.fast_noise, World.sim_params.world_seed, 0.02, 15, 0.3, World.sim_params.max_moisture_noise)
     initialize_tile_values()
     initialize_tile_labels()
     set_tiles()

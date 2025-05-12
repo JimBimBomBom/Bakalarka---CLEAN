@@ -27,19 +27,20 @@ func _ready():
     var Generate_World_Button = $Control/PanelContainer/Panel/VBoxContainer/GenerateWorld
     Generate_World_Button.pressed.connect(_on_Generate_World_Button_pressed)
 
-    if sim_param_file_input.text != "":
-        World.simulation_parameters_file = "res://PARAMS/" + sim_param_file_input.text
-        World.sim_params.load_from_file(World.simulation_parameters_file)
+    # if sim_param_file_input.text != "":
+    #     World.simulation_parameters_file = "res://PARAMS/" + sim_param_file_input.text
+    #     World.sim_params.load_from_file(World.simulation_parameters_file)
         # update the GUI with loaded parameters
-        width_input.value = World.sim_params.width
-        height_input.value = World.sim_params.height
+        # set_simulation_parameters() 
+        # width_input.value = World.sim_params.width
+        # height_input.value = World.sim_params.height
 
 
 func _on_Generate_World_Button_pressed():
     if seed_input.value == 0:
-        World.world_seed = randi_range(1, 10000)
+        World.sim_params.world_seed = randi_range(1, 10000)
     else:
-        World.world_seed = seed_input.value
+        World.sim_params.world_seed = seed_input.value
 
     if height_input.value != 0:
         World.sim_params.height = height_input.value
@@ -50,16 +51,25 @@ func _on_Generate_World_Button_pressed():
         World.simulation_parameters_file = "res://PARAMS/" + sim_param_file_input.text
         World.sim_params.load_from_file(World.simulation_parameters_file)
         # update the GUI with loaded parameters
-        width_input.value = World.sim_params.width
-        height_input.value = World.sim_params.height
-        animal_spawn_count.value = World.sim_params.spawn_animal_count
-        game_speed_input.value = World.sim_params.simulation_speed
-        generate_graphs_input.value = World.sim_params.generate_graphs
+        set_simulation_parameters() 
+        # width_input.value = World.sim_params.width
+        # height_input.value = World.sim_params.height
+        # animal_spawn_count.value = World.sim_params.spawn_animal_count
+        # game_speed_input.value = World.sim_params.simulation_speed
+        # generate_graphs_input.value = World.sim_params.generate_graphs
 
     World.Map.generate_world()
     World.world_initialized = true
 
     World.generate_graphs = generate_graphs_input.value
+
+func set_simulation_parameters():
+    width_input.value = World.sim_params.width
+    height_input.value = World.sim_params.height
+    animal_spawn_count.value = World.sim_params.spawn_animal_count
+    game_speed_input.value = World.sim_params.simulation_speed
+    generate_graphs_input.value = World.sim_params.generate_graphs
+    seed_input.value = World.sim_params.world_seed
 
 func _on_Start_Simulation_Button_pressed():
     if World.world_initialized == false:
