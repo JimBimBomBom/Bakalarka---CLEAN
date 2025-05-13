@@ -50,7 +50,7 @@ func initialize_tile_values():
 
             tile.max_plant_matter = min(tile.moisture, tile.temperature) / 4.0
             tile.plant_matter = tile.max_plant_matter / 2.0
-            tile.plant_matter_gain = tile.max_plant_matter / 12.0
+            tile.plant_matter_gain = tile.max_plant_matter / 30.0
 
             tile.total_meat = 0.0
             tile.meat_spoil_rate = 1.0 / (tile.temperature * 7)

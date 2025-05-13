@@ -849,9 +849,9 @@ impl Simulation {
         }
 
         // --- Stage 5: Update Map Tiles (Parallelized) ---
-        // self.world_map.par_iter_mut().for_each(|(_pos, tile)| {
-        //     replenish_tile(tile, params);
-        // });
+        self.world_map.par_iter_mut().for_each(|(_pos, tile)| {
+            replenish_tile(tile, params);
+        });
 
         // let duration = Instant::now() - start_time; 
     }

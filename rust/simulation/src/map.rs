@@ -3,7 +3,7 @@ use crate::structs::*;
 // Function to update tile state per turn (plants, hydration, spoilage, scents)
 pub fn replenish_tile(tile: &mut RustTileProperties, params: &SimulationParameters) {
     // Replenish plants
-    tile.plant_matter = (tile.plant_matter + 1.0*tile.plant_matter_gain).min(tile.max_plant_matter);
+    tile.plant_matter = (tile.plant_matter + tile.plant_matter_gain).min(tile.max_plant_matter);
 
     // Replenish hydration
     tile.hydration = tile.max_hydration; 
@@ -12,7 +12,7 @@ pub fn replenish_tile(tile: &mut RustTileProperties, params: &SimulationParamete
     let mut meat_sum = 0.0;
     tile.meat_in_rounds.retain_mut(|meat| {
         //  meat.spoils_in -= 1;
-         meat.spoils_in -= 5;
+         meat.spoils_in -= 1;
          if meat.spoils_in > 0 {
              meat_sum += meat.amount;
              true // Keep
@@ -24,7 +24,7 @@ pub fn replenish_tile(tile: &mut RustTileProperties, params: &SimulationParamete
 
     // Age scents
     tile.scent_trails.retain_mut(|scent| {
-        scent.scent_duration_left -= 5;
+        scent.scent_duration_left -= 1;
         // scent.scent_duration_left -= 1;
         scent.scent_duration_left > 0 // Keep if duration > 0
     });

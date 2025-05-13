@@ -28,9 +28,6 @@ func run_simulation():
 
         World.simulation.process_turn_for_all_animals() # NOTE: RUST function that handles 1 simulation turn
 
-        if World.game_steps % 5 == 0:
-            World.simulation.replenish_map() # NOTE: RUST function that handles map resources replenishment
-
         if World.game_steps % World.sim_params.data_collection_interval == 0:
             World.Map.update_map_animal_count_labels() # NOTE: update the animal count labels on the map
             collect_and_log_data() # NOTE: collect data and log it to a file
@@ -60,7 +57,7 @@ func collect_and_log_data(): # NOTE: this is called by get_data_snapshot_timer
 
 func run_visualizer():
     var python_executable = "python"  # NOTE: command to run Python3
-    var script_path = ProjectSettings.globalize_path("res://Visualization/visualizer.py")  # Ensure correct path
+    var script_path = ProjectSettings.globalize_path("res://../Visualization/visualizer.py")  # Ensure correct path
 
     # Execute the Python script
     var error = OS.create_process(python_executable, [script_path, str(World.simulation_id)])

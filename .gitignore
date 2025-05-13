@@ -6,5 +6,8 @@ Simulation/PLOTS
 !rust/simulation/.cargo.lock
 !rust/simulation/src/
 
+!Visualization/
+!THESIS/
+
 !README.md
 !FILE_STRUCTURE.md
