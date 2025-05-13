@@ -2,9 +2,8 @@
 !Simulation/
 Simulation/.godot
 Simulation/PLOTS
+Simulation/rust/simulation/target/
 
-!rust/simulation/.cargo.lock
-!rust/simulation/src/
 
 !Visualization/
 !THESIS/
